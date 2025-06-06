@@ -1,0 +1,38 @@
+<?php
+require_once __DIR__ . '/../src/bootstrap.php';
+
+if (isset($_SESSION['user'])) {
+    // Redirect to dashboard or home
+    header("Location: dashboard.php");
+    exit();
+}
+$title = "Login";
+ob_start();
+?>
+<div class="w-50 m-auto">
+
+    <h2>Login</h2>
+
+    <?php
+    if (isset($_SESSION['login_error'])) {
+        echo '<div class="alert alert-danger">' . $_SESSION['login_error'] . '</div>';
+        unset($_SESSION['login_error']);
+    }
+    ?>
+
+    <form method="post" action="process_login.php" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="email" class="form-label">Student Email</label>
+            <input type="email" class="form-control" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+<?php
+$content = ob_get_clean();
+include '_layout.php';
+?>

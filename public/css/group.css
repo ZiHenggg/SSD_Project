@@ -1,0 +1,66 @@
+.form-wrapper {
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.form-wrapper label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    color: #333;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.form-check-input {
+    accent-color: #7a5cff; /* purple */
+}
+
+.form-check-label {
+    margin-right: 20px;
+    font-weight: 500;
+}
+
+.btn-cancel {
+    background: #fff;
+    border: 2px solid #7a5cff;
+    color: #7a5cff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #f0f0ff;
+}
+
+.btn-submit {
+    background: #7a5cff;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.btn-submit:hover {
+    background: #6944ff;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -1,0 +1,11 @@
+{
+    "name": "ngmin/ict2216_g5",
+    "autoload": {
+        "psr-4": {
+            "Ngmin\\Ict2216G5\\": "src/"
+        }
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

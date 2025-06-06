@@ -1,0 +1,147 @@
+.content-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.group-container, .info-container {
+    width: 50%;
+}
+
+.group-wrapper, .info-wrapper {
+    width: 80%;
+    margin: 5% auto;
+}
+
+.group-container .title, .info-container .title {
+    margin-bottom: 5%;
+    padding: 0 5%;
+    
+}
+
+.group-container {
+    border-right: 4px solid var(--secondary);
+}
+
+.group-item {
+    cursor: pointer;
+}
+
+.group-item, .info-item {
+    position: relative;
+    background-color: var(--secondary-25);
+    padding: 3%;
+    padding-left: 5%;
+    border-radius: 25px;
+    margin-bottom: 5%;
+}
+
+.group-item.selected {
+    background-color: var(--accent-25);
+}
+
+.group-item > span, .info-item > span {
+    display: block;
+}
+
+.group-item > .header, .info-item > .header {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.info-item {
+    display: none;
+}
+
+.info-item.showing {
+    display: block;
+}
+
+.member-count, .leader {
+    position: absolute;
+    right: 4%;
+}
+
+.member-count {
+    bottom: 8%;
+    font-weight: bold;
+}
+
+.leader {
+    width: 20px;
+    top: 8%;
+}
+
+.name-list > li {
+    padding: 3% 0;
+    position: relative;
+    font-weight: bold;
+}
+
+.name-list > li::after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    left: -5%;
+    bottom: 0;
+    border-bottom: 3px solid var(--secondary);
+}
+
+.request-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+}
+
+.pending-form {
+    width: 15%;
+    display: flex;
+    gap: 15%;
+}
+
+.accept-btn, .reject-btn {
+    padding: 0;
+    width: 32px;
+}
+
+.pending-request > li::marker, .pending-request > li a {
+    color: var(--primary);
+}
+
+.current-members > li::marker, .current-members > li a {
+    color: var(--text);
+}
+
+.current-members > li.user > a, .current-members > li.user::marker {
+    color: var(--accent);
+}
+
+/* group admin */
+.admin .leader {
+    top: 50%;
+    right: 11%;
+    transform: translateY(-50%);
+}
+
+@media screen and (max-width: 1280px) {
+    .content-container {
+        flex-direction: column;
+    }
+    
+    .group-container, .info-container {
+        width: 100%;
+    }
+    
+    .group-container .title, .info-container .title, .group-item {
+        margin-bottom: 2%;
+    }
+
+    .group-wrapper, .info-wrapper {
+        width: 90%;
+    }
+    
+    .group-container {
+        border-right: none;
+        border-bottom: 4px solid var(--secondary);
+    }    
+}

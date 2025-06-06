@@ -1,0 +1,117 @@
+<?php
+namespace Ngmin\Ict2216G5\Control;
+use Ngmin\Ict2216G5\Entity\Student;
+use Ngmin\Ict2216G5\Repository\StudentRepository;
+
+class StudentControl
+{
+    private StudentRepository $studentRepo;
+
+    public function __construct(StudentRepository $studentRepo)
+    {
+        $this->studentRepo = $studentRepo;
+    }
+
+    public function getStudentById(string $studentId): ?Student
+    {
+        // Retrieve the student by ID
+        $student = $this->studentRepo->getStudentById($studentId);
+
+        // If student does not exist, return null
+        if (!$student) {
+            return null;
+        }
+
+        // Return the student object
+        return $student;
+    }
+
+    public function getStudentByEmail(string $email): ?Student
+    {
+        // Retrieve the student by email
+        $student = $this->studentRepo->getStudentByEmail($email);
+
+        // If student does not exist, return null
+        if (!$student) {
+            return null;
+        }
+
+        // Return the student object
+        return $student;
+    }
+
+    public function checkStudentExist(string $identifier): bool
+    {
+        return $this->studentRepo->isStudentExists($identifier);
+    }
+
+    public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
+    {
+        // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        // $student = new Student($studentId, $studentName, $email, $hashedPassword);
+
+        // Create a new student object
+        $student = new Student($studentId, $studentName, $email, $password);
+
+        // Add the student to the repository
+        $this->studentRepo->createStudentAccount($student);
+    }
+
+    public function loginStudent(string $email, string $password): array
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+
+        // if (!$student || !password_verify($password, $student->getPassword())) {
+        //     return ['success' => false, 'message' => 'Invalid email or password.'];
+        // }
+
+        if (!$student || $password !== $student->getPassword()) {
+            return ['success' => false, 'message' => 'Invalid email or password.'];
+        }
+
+        $_SESSION['user'] = [
+            'id' => $student->getStudentId(),
+            'email' => $student->getEmail(),
+            'name' => $student->getStudentName()
+        ];
+
+        return ['success' => true, 'user' => $student];
+    }
+
+    public function deleteStudent(string $studentId): void
+    {
+        // Check if the student exists before attempting to remove
+        if ($this->studentRepo->isStudentExists($studentId)) {
+            // $this->studentRepo->removeStudent($studentId);
+        } else {
+            throw new \Exception("Student with ID $studentId does not exist.");
+        }
+    }
+
+    // Update student profile?
+
+    // Send Reset Token
+    public function sendResetToken(string $email): void
+    {
+        // Check if the student exists by email
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student) {
+            throw new \Exception("No student found with email $email.");
+        }
+
+        // TODO: Implement logic to send reset token to the student's email
+    }
+
+    // Reset Password
+    public function resetPassword(string $email, string $oldPassword, string $newPassword): void
+    {
+        // Check if the student exists by email
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student) {
+            throw new \Exception("No student found with email $email.");
+        }
+
+        // TODO: Implement logic to verify old password and update to new password
+    }
+}
+?>
