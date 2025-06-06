@@ -3,7 +3,7 @@
 $isLoggedIn = isset($_SESSION['user']);
 ?>
 
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
         <a class="navbar-brand logo-wrapper" href="index.php">
             <img class="logo" src="img/logo.svg" alt="Logo" />

@@ -1,0 +1,76 @@
+.profile {
+    width: 90%;
+    margin: auto;
+}
+
+.profile .info-pending-wrapper, .profile .review-wrapper {
+    width: 45%;
+}
+
+.profile .average-wrapper {
+    gap: 30px;
+}
+
+.profile .average-rating {
+    line-height: 0;
+}
+
+.profile .average-wrapper .rating-stars {
+    gap: 5px;
+}
+
+.profile .average-wrapper .rating-stars > img {
+    height: 30px;
+    width: 30px;
+}
+
+.profile .review-item {
+    border-radius: 8px;
+    border: 2px solid #CCC;
+    padding: 15px 20px;
+}
+
+.profile .review-item .rating-stars {
+    gap: 5px;
+}
+
+.profile .review-item .rating-stars > img {
+    height: 20px;
+    width: 20px;
+}
+
+.profile .top-wrapper {
+    gap: 10px;
+}
+
+.profile .reply-button {
+    width: 100px;
+    height: 40px;
+    color: var(--background);
+    background-color: var(--primary);
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    padding: 25px 10px;
+    transition: all 0.3s ease;
+}
+
+.profile .reply-button:hover {
+    background-color: var(--accent);
+}
+
+.profile .reply-section.borderline {
+    border-left: 4px solid #cccccc90;
+    padding: 5px 0 5px 10px;
+    font-size: 0.9em;
+}
+
+@media screen and (max-width: 1280px) {
+    .profile .info-pending-wrapper, .profile .review-wrapper {
+        width: 100%;
+    }
+
+    .profile .review-wrapper {
+        margin-top: 3%;
+    }
+}

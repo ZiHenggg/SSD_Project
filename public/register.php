@@ -25,7 +25,7 @@ ob_start();
 ?>
 
 <div class="w-50 m-auto">
-    <h2>Register</h2>
+    <h2 class="mb-4">Register</h2>
 
     <?php
     $isSuccess = str_starts_with($message ?? '', $successText);

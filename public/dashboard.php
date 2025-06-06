@@ -19,7 +19,7 @@ ob_start(); // Capture the page content
         <div class="group-wrapper">
             <div class="title d-flex justify-content-between">
                 <h2 class="m-0">My Current Groups (3)</h2>
-                <a href="#" class="text-decoration-none d-flex">
+                <a href="group_create.php" class="text-decoration-none d-flex">
                     <img src="img/plus.svg" alt="Add Group" class="w-100 add-group" />
                 </a>
             </div>

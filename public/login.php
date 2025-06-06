@@ -11,7 +11,7 @@ ob_start();
 ?>
 <div class="w-50 m-auto">
 
-    <h2>Login</h2>
+    <h2 class="mb-4">Login</h2>
 
     <?php
     if (isset($_SESSION['login_error'])) {
