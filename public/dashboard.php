@@ -47,7 +47,7 @@ ob_start(); // Capture the page content
                     <img class="leader-icon w-100" src="img/crown.svg" alt="Leader" />
                 </div>
             </div>
-            </div>
+        </div>
     </div>
     <div class="info-container">
         <div class="info-wrapper">

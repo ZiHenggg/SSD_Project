@@ -3,20 +3,44 @@ namespace Ngmin\Ict2216G5\Control;
 
 use Ngmin\Ict2216G5\Entity\Group;
 use Ngmin\Ict2216G5\Repository\GroupRepository;
+use Ngmin\Ict2216G5\Repository\GroupMembershipRepository;
 
-class GroupControl {
-    private Group $group;
+class GroupControl
+{
     private GroupRepository $groupRepo;
-    public function createGroup(string $acadYear, string $trimester, string $moduleCode, int $labGroup, int $maxMembers, string $adminId): Group {
+    private GroupMembershipRepository $groupMembershipRepo;
+
+    public function __construct(
+        GroupRepository $groupRepo,
+        GroupMembershipRepository $groupMembershipRepo
+    ) {
+        $this->groupRepo = $groupRepo;
+        $this->groupMembershipRepo = $groupMembershipRepo;
+    }
+
+    public function createGroup(string $acadYear, string $trimester, string $moduleCode, int $maxMembers, string $adminId, string $labGroup = ''): Group
+    {
         // Get the last group number for that config
-        $lastGroup = $this->groupRepo->getLastGroupByParams($acadYear, $trimester, $moduleCode, $labGroup);
-    
-        $nextGroupNumber = $lastGroup ? $lastGroup->getGroupNumber() + 1 : 1;
-    
-        // Create group
-        $group = new Group($acadYear, $trimester, $moduleCode, $labGroup, $nextGroupNumber, 'active', 0, $maxMembers);
+        $lastGroupNumber = $this->groupRepo->getLastGroupNumberByParams($acadYear, $trimester, $moduleCode, $labGroup);
+
+        $nextGroupNumber = $lastGroupNumber + 1; // Increment the last group number to get the next group number
+
+        $group = new Group(
+            $acadYear,
+            $trimester,
+            $moduleCode,
+            $labGroup,
+            $nextGroupNumber,
+            $maxMembers
+        );
         $group->generateGroupName();
-    
+
+        $this->groupRepo->addGroup($group);
+
+        $this->groupMembershipRepo->addMember($group->getGroupId(), $adminId, "admin");
+
+        $group->addMember(); // Increment the member count for the group
+        $this->groupRepo->updateGroup($group); // Update the group in the repository
         return $group;
     }
 }
