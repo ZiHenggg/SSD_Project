@@ -1,44 +1,125 @@
-version: '3.8'
-
 services:
-
-  web:                                # PHP Web Server Container
-    container_name: php-webapp        # Name of the container
-    build: .                          # Build the dockerfile in the current directory 
+  # Nginx Reverse Proxy (acts as firewall/request filtering)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy
     ports:
-      - "8080:80"                     # Map host port 8080 to container port 80 (Apache)
+      - "80:80"
+      # - "443:443"
+      - "9000:9000"  # For reverse proxy
     volumes:
-      # - ./src:/var/www/html           # Mount local 'src' folder into Apache web root
-      - .:/var/www                    # Project root (PHP sees everything)
-      - ./public:/var/www/html        # Apache serves only public files
-    restart: unless-stopped           # Restart unless you manually stop it
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl  # For SSL certificates if needed
     depends_on:
-      - db                            # Wait for the 'db' service to start (listed below) before this one
-    environment:                      # Environment variables for use inside your PHP app
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-    
-  db:                                   # This is the MySQL database container
-      image: mysql:8.0                  # Use the official MySQL 8.0 image
-      container_name: mysql-ssd-db      # Name the database container
-      restart: always                   # Always restart if the container stops
-      environment:                      # Environment variables used to set up MySQL
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: ssddb
-        MYSQL_USER: ssduser
-        MYSQL_PASSWORD: ssdpass
+      - php-app
+      - splunk
+    networks:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  # PHP Application (Business Logic & Session Management)
+  php-app:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: php_business_logic
       ports:
-        - "3308:3306"                   # Map host port 3306 to container port 3306 (MySQL)
-      volumes:
-        - ./mysql-data:/var/lib/mysql   # Store DB data in project folder
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      command: --default-authentication-plugin=mysql_native_password
+        - "3306:3306"  # Exposed port as shown in diagram
+      working_dir: /var/www/html
+      depends_on:
+        - mysql
+      networks:
+        - backend
+      restart: unless-stopped
+      environment:
+        - PHP_FPM_USER=www-data
+        - PHP_FPM_GROUP=www-data
 
+  # MySQL Database (Data Storage & Retrieval + Encryption)
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_database
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
 
-  adminer:                              # GUI access like MySQL Workbench, but via web browser. Visit: http://localhost:8081
-    image: adminer
-    restart: always
+  # Splunk Enterprise (SIEM - Centralized Logs & Security Management)
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk_siem
     ports:
-      - 8081:8080
+      - "8000:8000"  # Splunk Web UI
+      - "8088:8088"  # HEC port
+      - "9997:9997"  # Splunk forwarder port as shown in diagram
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: ${SPLUNK_PASSWORD}
+    volumes:
+      - splunk_data:/opt/splunk/var
+      # - ./splunk-config:/tmp/defaults
+    networks:
+      - backend
+      - monitoring
+    restart: unless-stopped
+
+  # Network Traffic Analyzer with Threat Detection (Snort 3)
+  # snort3:
+  #   image: ciscotalos/snort3:latest
+  #   container_name: network_analyzer
+  #   network_mode: host
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - SYS_NICE
+  #     - NET_RAW
+  #   volumes:
+  #     - ./snort3/snort.lua:/usr/local/etc/snort/snort.lua
+  #     - ./snort3/rules:/usr/local/etc/rules
+  #     - ./snort3/so_rules:/usr/local/etc/so_rules
+  #     - snort3_logs:/var/log/snort
+  #     - ./snort3/hec-config.lua:/usr/local/etc/snort/hec-config.lua
+  #   environment:
+  #     - SNORT_INTERFACE=eth0
+  #     - SPLUNK_HEC_URL=http://splunk:8088/services/collector
+  #     - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - splunk
+
+  # Cloudflare Tunnel (for DDoS Protection - alternative to actual Cloudflare)
+  # Note: This would typically be handled by actual Cloudflare service
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: cloudflare_tunnel
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+  #   networks:
+  #     - frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - nginx
+
+
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  monitoring:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  splunk_data:
+  # snort3_logs:

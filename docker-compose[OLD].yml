@@ -1,0 +1,305 @@
+# # =========================================================================================
+# # Docker Compose for a Full-Stack PHP Application with Integrated Splunk SIEM
+# # Author: Gemini
+# # Last Updated: June 7, 2025
+# # Description:
+# # - Aligns with the logical architecture where all services run on a single Docker host.
+# # - Nginx serves a public directory, while PHP has access to the full application code.
+# # - All container logs are sent directly to the Splunk container via the HEC driver.
+# # - Includes a healthcheck for Splunk to resolve startup race conditions.
+# # =========================================================================================
+
+# services:
+#   # 1. NGINX: Public-facing Reverse Proxy
+#   nginx:
+#     image: nginx:latest
+#     container_name: nginx
+#     restart: unless-stopped
+#     ports:
+#       - "80:80"
+#       # - "443:443"
+#     volumes:
+#       # Mounts only the public directory as the web root for security.
+#       - ./php/public:/var/www/html/public
+#       - ./php/src:/var/www/html
+#       # Mounts for Nginx config and SSL certs (read-only).
+#       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#       # - ./nginx/ssl:/etc/nginx/ssl:ro
+#     networks:
+#       - app-network
+#     depends_on:
+#       php:
+#         condition: service_started
+#       splunk:
+#         condition: service_healthy
+#     logging: # Forwards this container's logs (stdout/stderr) to Splunk.
+#       driver: splunk
+#       options:
+#         splunk-token: "${SPLUNK_HEC_TOKEN}"
+#         splunk-url: "http://localhost:8088"
+#         splunk-insecureskipverify: "true"
+#         splunk-sourcetype: "nginx:access"
+#         splunk-index: "web"
+
+#   # 2. PHP: Application Backend
+#   php:
+#     # Builds the PHP image from the local Dockerfile, including composer dependencies.
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: php
+#     restart: unless-stopped
+#     volumes:
+#       # Mounts the entire project directory to give PHP access to /src, /public, /vendor, etc.
+#       - .:/var/www/html
+#     networks:
+#       - app-network
+#     environment:
+#       # Variables for your PHP application to connect to the database.
+#       DB_HOST: "localhost"
+#       DB_PORT: 3306
+#       DB_DATABASE: ${DB_NAME}
+#       DB_USERNAME: ${DB_USER}
+#       DB_PASSWORD: ${DB_PASS}
+#     depends_on:
+#       db:
+#         condition: service_started
+#       splunk:
+#         condition: service_healthy
+#     logging: # Forwards PHP-FPM and application error logs to Splunk.
+#       driver: splunk
+#       options:
+#         splunk-token: "${SPLUNK_HEC_TOKEN}"
+#         splunk-url: "http://localhost:8088"
+#         splunk-insecureskipverify: "true"
+#         splunk-sourcetype: "php:fpm"
+#         splunk-index: "web"
+
+#   # 3. MYSQL: Database Server
+#   db:
+#     image: mysql:8.0
+#     container_name: mysql-db
+#     restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+#       MYSQL_DATABASE: ${DB_NAME}
+#       MYSQL_USER: ${DB_USER}
+#       MYSQL_PASSWORD: ${DB_PASS}
+#     volumes:
+#       - db_data:/var/lib/mysql
+#       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+#     command: --default-authentication-plugin=mysql_native_password
+#     networks:
+#       - app-network
+#     logging: # Forwards MySQL logs to Splunk.
+#       driver: splunk
+#       options:
+#         splunk-token: "${SPLUNK_HEC_TOKEN}"
+#         splunk-url: "http://localhost:8088"
+#         splunk-insecureskipverify: "true"
+#         splunk-sourcetype: "mysql:error"
+#         splunk-index: "db"
+#     depends_on:
+#       splunk:
+#         condition: service_healthy
+
+#   # 4. SNORT: Intrusion Detection System
+#   snort:
+#     image: ciscotalos/snort3:latest
+#     container_name: snort
+#     restart: unless-stopped
+#     # Monitors the Nginx container's network directly.
+#     network_mode: "service:nginx"
+#     cap_add: [ "NET_ADMIN", "NET_RAW" ]
+#     volumes:
+#       - ./snort/local.rules:/etc/snort/rules/local.rules:ro
+#     logging: # Forwards Snort's logs to Splunk.
+#       driver: splunk
+#       options:
+#         splunk-token: "${SPLUNK_HEC_TOKEN}"
+#         splunk-url: "http://localhost:8088"
+#         splunk-insecureskipverify: "true"
+#         splunk-sourcetype: "snort:ids"
+#         splunk-index: "ids"
+#     depends_on:
+#       splunk:
+#         condition: service_healthy
+
+#   # 5. SPLUNK: SIEM and Log Analysis Platform
+#   splunk:
+#     image: splunk/splunk:latest
+#     container_name: splunk
+#     hostname: splunk
+#     restart: unless-stopped
+#     environment:
+#       SPLUNK_START_ARGS: --accept-license
+#       SPLUNK_HEC_TOKEN: ${SPLUNK_HEC_TOKEN}
+#       SPLUNK_PASSWORD: ${SPLUNK_PASS}
+#     ports:
+#       # Exposes the Splunk Web UI (for your browser) and the HEC (for Docker logs).
+#       - "8000:8000"
+#       - "8088:8088"
+#     volumes:
+#       # Adds persistent volumes for Splunk data and configuration.
+#       - splunk_data:/opt/splunk/etc
+#       - splunk_logs:/opt/splunk/var
+#     networks:
+#       - app-network
+#     healthcheck: # Ensures HEC is ready before other services start logging.
+#       test: ["CMD", "curl", "-f", "http://localhost:8088/services/collector/health"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 20
+
+# networks:
+#   app-network:
+#     driver: bridge
+
+# volumes:
+#   db_data:
+#   splunk_data:
+#   splunk_logs:
+
+# =========================================================================================
+# Docker Compose for a Full-Stack PHP Application with Integrated Splunk SIEM
+# Author: Gemini
+# Last Updated: June 7, 2025
+# Description:
+# - WARNING: All healthchecks and service dependencies have been removed as requested.
+#   This may cause startup race conditions.
+# - CORRECTED: Fixed incorrect volume mounts, service names, and environment variables.
+# =========================================================================================
+services:
+  # 1. NGINX: Public-facing Reverse Proxy
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # CORRECTED: Maps only the public directory to the web root.
+      - ./php/public:/var/www/html/public
+      - ./php/src:/var/www/html/src
+      # Mounts for Nginx config and SSL certs (read-only).
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - app-network
+    # logging: # Forwards this container's logs (stdout/stderr) to Splunk.
+    #   driver: splunk
+    #   options:
+    #     splunk-token: "${SPLUNK_HEC_TOKEN}"
+    #     splunk-url: "http://localhost:8088"
+    #     splunk-insecureskipverify: "true"
+    #     splunk-sourcetype: "nginx:access"
+    #     splunk-index: "web"
+
+  # 2. PHP: Application Backend
+  php:
+    # Builds the PHP image from the local Dockerfile.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    restart: unless-stopped
+    volumes:
+      # Mounts the entire project directory to give PHP access to all its code.
+      - .:/var/www/html
+    networks:
+      - app-network
+    environment:
+      # CORRECTED: DB_HOST must be the service name 'db'.
+      DB_HOST: "db"
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+    # logging: # Forwards PHP-FPM and application error logs to Splunk.
+    #   driver: splunk
+    #   options:
+    #     splunk-token: "${SPLUNK_HEC_TOKEN}"
+    #     splunk-url: "http://localhost:8088"
+    #     splunk-insecureskipverify: "true"
+    #     splunk-sourcetype: "php:fpm"
+    #     splunk-index: "web"
+
+  # 3. MYSQL: Database Server
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      # CORRECTED: Standardized variable names to match previous .env examples.
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - app-network
+    # logging: # Forwards MySQL logs to Splunk.
+    #   driver: splunk
+    #   options:
+    #     splunk-token: "${SPLUNK_HEC_TOKEN}"
+    #     splunk-url: "http://localhost:8088"
+    #     splunk-insecureskipverify: "true"
+    #     splunk-sourcetype: "mysql:error"
+    #     splunk-index: "db"
+
+  # 4. SNORT: Intrusion Detection System
+  snort:
+    image: ciscotalos/snort3:latest
+    container_name: snort
+    restart: unless-stopped
+    # Monitors the Nginx container's network directly.
+    network_mode: "service:nginx"
+    cap_add: [ "NET_ADMIN", "NET_RAW" ]
+    volumes:
+      - ./snort/local.rules:/etc/snort/rules/local.rules:ro
+      - snort_logs:/var/log/snort
+    # logging: # Forwards Snort's logs to Splunk.
+    #   driver: splunk
+    #   options:
+    #     splunk-token: "${SPLUNK_HEC_TOKEN}"
+    #     splunk-url: "http://localhost:8088"
+    #     splunk-insecureskipverify: "true"
+    #     splunk-sourcetype: "snort:ids"
+    #     splunk-index: "ids"
+
+  # # 5. SPLUNK: SIEM and Log Analysis Platform
+  # splunk:
+  #   image: splunk/splunk:latest
+  #   container_name: splunk
+  #   hostname: splunk
+  #   restart: unless-stopped
+  #   environment:
+  #     SPLUNK_START_ARGS: --accept-license
+  #     SPLUNK_HEC_TOKEN: ${SPLUNK_HEC_TOKEN}
+  #     # CORRECTED: Standardized variable name.
+  #     SPLUNK_PASSWORD: ${SPLUNK_PASSWORD}
+  #   ports:
+  #     - "8000:8000"
+  #     - "8088:8088"
+  #   volumes:
+  #     - splunk_data:/opt/splunk/etc
+  #     - splunk_logs:/opt/splunk/var
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+# CORRECTED: Added the missing named volumes.
+volumes:
+  db_data:
+  nginx_logs:
+  snort_logs:
+  # splunk_data:
+  # splunk_logs:
