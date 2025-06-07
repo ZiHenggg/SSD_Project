@@ -13,7 +13,7 @@ $isLoggedIn = isset($_SESSION['user']);
         <?php if ($isLoggedIn): ?>
             <div class="nav-group">
                 <a class="nav-link" href="#">Past Groups</a>
-                <form class="search-wrapper d-flex" role="search">
+                <form class="search-wrapper d-flex m-0" role="search">
                     <input class="search form-control me-2" type="search" placeholder="Search for groups"
                         aria-label="Search" />
                     <button type="submit"><img class="w-100" src="img/search.svg" /></button>

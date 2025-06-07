@@ -32,25 +32,35 @@ class Review {
         return $this->reviewDate;
     }
 
-    // Setters
-    private function setReviewId(int $reviewId): void {
+    // Constructor
+    public function __construct(int $reviewId, int $reviewerId, int $revieweeId, int $rating, string $reviewDescription, string $reviewDate) {
         $this->reviewId = $reviewId;
-    }
-    private function setReviewerId(int $reviewerId): void {
         $this->reviewerId = $reviewerId;
-    }
-    private function setRevieweeId(int $revieweeId): void {
         $this->revieweeId = $revieweeId;
-    }
-    private function setRating(int $rating): void {
         $this->rating = $rating;
-    }
-    private function setReviewDescription(string $reviewDescription): void {
         $this->reviewDescription = $reviewDescription;
+        $this->reviewDate = new DateTime($reviewDate);  // Convert to DateTime object
     }
-    private function setReviewDate(DateTime $reviewDate): void {
-        $this->reviewDate = $reviewDate;
-    }
+
+    // // Setters
+    // private function setReviewId(int $reviewId): void {
+    //     $this->reviewId = $reviewId;
+    // }
+    // private function setReviewerId(int $reviewerId): void {
+    //     $this->reviewerId = $reviewerId;
+    // }
+    // private function setRevieweeId(int $revieweeId): void {
+    //     $this->revieweeId = $revieweeId;
+    // }
+    // private function setRating(int $rating): void {
+    //     $this->rating = $rating;
+    // }
+    // private function setReviewDescription(string $reviewDescription): void {
+    //     $this->reviewDescription = $reviewDescription;
+    // }
+    // private function setReviewDate(DateTime $reviewDate): void {
+    //     $this->reviewDate = $reviewDate;
+    // }
 }
 
 ?>

@@ -63,6 +63,7 @@
     border-left: 4px solid #cccccc90;
     padding: 5px 0 5px 10px;
     font-size: 0.9em;
+    margin-left: 3%;
 }
 
 @media screen and (max-width: 1280px) {
