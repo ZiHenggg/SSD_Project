@@ -2,17 +2,26 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use Ngmin\Ict2216G5\Concrete\ReviewRepoImpl;
-use Ngmin\Ict2216G5\Concrete\ReplyRepoImpl;
+use Ngmin\Ict2216G5\Mapper\StudentMapper;
+use Ngmin\Ict2216G5\Mapper\ReviewMapper;
+use Ngmin\Ict2216G5\Mapper\ReplyMapper;
+use Ngmin\Ict2216G5\Mapper\GroupMapper;
+use Ngmin\Ict2216G5\Mapper\GroupJoinRequestsMapper;
 
-// Initialize ReviewRepository
-$reviewRepo = new ReviewRepoImpl($pdo);
+// Initialize Repositories
+$studentRepo = new StudentMapper($pdo);
+$reviewRepo = new ReviewMapper($pdo);
+$groupRepo = new GroupMapper($pdo);
+$replyRepo = new ReplyMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 
-// Initialize ReplyRepository
-$ReplyRepo = new ReplyRepoImpl($pdo);
+// !!!!!!!!!!!!!!!!!!!!!!!!
+// Fetch info for the logged-in user (update when we implement viewing of other profiles)
+$student = $studentRepo->getStudentById($_SESSION['user']['id']);
+// !!!!!!!!!!!!!!!!!!!!!!!!
 
-// Fetch all reviews for the logged-in user
-$reviews = $reviewRepo->getReviewsForReviewee($_SESSION['user']['id']);
+$reviews = $reviewRepo->getReviewsForReviewee($student->getStudentId());
+$groupJoinRequests = $groupJoinRequestsRepo->getRequestsByStudent($student->getStudentId());
 
 $totalRating = 0;
 $reviewCount = count($reviews);
@@ -37,25 +46,29 @@ ob_start();
         <div class="info-pending-wrapper">
             <div class="profile-info">
                 <h3>Info</h3>
-                <p><strong>Full Name:</strong> <?= htmlspecialchars($_SESSION['user']['name']) ?></p>
-                <p><strong>Student ID:</strong> <?= htmlspecialchars($_SESSION['user']['id']) ?></p>
-                <p><strong>Email:</strong> <?= htmlspecialchars($_SESSION['user']['email']) ?></p>
+                <p><strong>Full Name:</strong> <?= htmlspecialchars($student->getStudentName()) ?></p>
+                <p><strong>Student ID:</strong> <?= htmlspecialchars($student->getStudentId()) ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($student->getEmail()) ?></p>
             </div>
 
             <div class="mt-5 pending-requests">
                 <h3>Pending Requests</h3>
-                <div class="mt-3 group-item">
-                    <span class="group-name header">[24/25 T3]-ICT2216-P1-G4</span>
-                    <span class="module">ICT2116, Secure Software Development</span>
-                    <span class="acad-term">[24/25 T3]</span>
-                    <span class="member-count">3/7</span>
-                </div>
-                <div class="mt-3 group-item">
-                    <span class="group-name header">[24/25 T3]-ICT2216-P1-G4</span>
-                    <span class="module">ICT2116, Secure Software Development</span>
-                    <span class="acad-term">[24/25 T3]</span>
-                    <span class="member-count">3/7</span>
-                </div>
+
+                <?php if (count($groupJoinRequests) > 0): ?>
+                    <?php foreach ($groupJoinRequests as $request): ?>
+                        <?php
+                            $group = $groupRepo->getGroup($request->getGroupId());
+                        ?>
+                        <div class="mt-3 group-item">
+                            <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
+                            <span class="module"><?= htmlspecialchars($group->getModuleCode())?>, TODO: ADD MODULE NAME</span>
+                            <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear())?> <?= htmlspecialchars($group->getTrimester())?>]</span>
+                            <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers())?>/<?= htmlspecialchars($group->getMaxMembers())?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No pending reviews.</p>
+                <?php endif; ?>                   
             </div>
         </div>
             
@@ -110,22 +123,28 @@ ob_start();
                             </div>
                             <div class="review-content">
                                 <div class="review-group-name mt-2">
-                                    <p class="mb-0"><strong>group still hardcoded [24/25 T3]-ICT2216-P1-G4</strong></p>
+                                    <p class="mb-0"><strong>still hardcoded [24/25 T3]-ICT2216-P1-G4</strong></p>
                                 </div>
                                 <div class="review-text mt-2">
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
                                 </div>
-                                <div class="reply-section borderline mt-3">
-                                    <div class="reply-title"><strong>You replied:</strong></div>
-                                    <div class="reply-text">
-                                        <p class="mb-0">reply still hardcoded Thank you for the kind words! I enjoyed working with you as well.</p>
+                                <?php 
+                                    $reply = $replyRepo->getReplyByReviewId($review->getReviewId());
+                                    if ($reply):
+                                ?> 
+                                    <div class="reply-section borderline mt-3">
+                                        <div class="reply-title"><strong>Reply:</strong></div>
+                                        <div class="reply-text">
+                                            <p class="mb-0"><?= htmlspecialchars($reply->getJustification()) ?></p>
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- <div class="reply-section mt-3">
+                                <?php else: ?>
+                                <div class="reply-section mt-3">
                                     <a href="#" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
                                         Reply
                                     </a>
-                                </div> -->
+                                </div>
+                                <?php endif; ?>                
                             </div>
                         </div>
                     <?php endforeach; ?>

@@ -36,5 +36,13 @@ class Reply {
     private function setReplyDate(DateTime $replyDate): void {
         $this->replyDate = $replyDate;
     }
+
+    // Constructor
+    public function __construct(int $replyId, int $reviewId, string $justification, string $replyDate) {
+        $this->replyId = $replyId;
+        $this->reviewId = $reviewId;
+        $this->justification = $justification;
+        $this->replyDate = new DateTime($replyDate);  // Convert string to DateTime object
+    }
 }
 ?>

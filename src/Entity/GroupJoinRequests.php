@@ -5,7 +5,7 @@ use DateTime;
 class GroupJoinRequests {
     private int $requestId;
     private int $groupId;
-    private int $studentId;
+    private int $requesterId;
     private string $joinStatus; // e.g., 'pending', 'accepted', 'rejected'
     private DateTime $requestAt;
     private DateTime $reviewedAt;
@@ -17,8 +17,8 @@ class GroupJoinRequests {
     public function getGroupId(): int {
         return $this->groupId;
     }
-    public function getStudentId(): int {
-        return $this->studentId;
+    public function getRequesterId(): int {
+        return $this->requesterId;
     }
     public function getJoinStatus(): string {
         return $this->joinStatus;
@@ -37,8 +37,8 @@ class GroupJoinRequests {
     private function setGroupId(int $groupId): void {
         $this->groupId = $groupId;
     }
-    private function setStudentId(int $studentId): void {
-        $this->studentId = $studentId;
+    private function setrequesterId(int $requesterId): void {
+        $this->requesterId = $requesterId;
     }
     private function setJoinStatus(string $joinStatus): void {
         $this->joinStatus = $joinStatus;
@@ -48,6 +48,23 @@ class GroupJoinRequests {
     }
     private function setReviewedAt(DateTime $reviewedAt): void {
         $this->reviewedAt = $reviewedAt;
+    }
+
+    // Constructor
+    public function __construct(
+        int $requestId, 
+        int $groupId, 
+        int $requesterId, 
+        string $joinStatus, 
+        DateTime $requestAt, 
+        // DateTime $reviewedAt
+    ) {
+        $this->setRequestId($requestId);
+        $this->setGroupId($groupId);
+        $this->setRequesterId($requesterId);
+        $this->setJoinStatus($joinStatus);
+        $this->setRequestAt($requestAt); 
+        // $this->setReviewedAt($reviewedAt); 
     }
 }
 ?>

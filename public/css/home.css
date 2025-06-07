@@ -72,11 +72,14 @@
     top: 8%;
 }
 
-.name-list > li {
-    /* padding: 3% 0; */
+.name-list > li, .current-members.name-list > li.user {
     padding: 18px 0;
     position: relative;
     font-weight: bold;
+}
+
+.current-members.name-list > li {
+    padding: 0;
 }
 
 .name-list > li::after {
@@ -88,11 +91,73 @@
     border-bottom: 3px solid var(--secondary);
 }
 
-.request-wrapper {
+.name-list > li > div > a {
+    margin-left: 5px;
+}
+
+.request-wrapper, .member-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 90%;
+}
+
+.home .reply-button, .home .delete-button {
+    padding: 8px 14px;
+    color: var(--background);
+    background-color: var(--primary);
+    border-radius: 8px;
+    border: none;
+    font-size: 0.8em;
+    transition: all 0.3s ease;
+}
+
+.home .reply-button:hover {
+    background-color: var(--accent);
+}
+
+.delete-section {
+    width: 120px;
+}
+
+.grayscreen {
+    position: fixed;
+    content: '';
+    width: 100vw;
+    height: 100vh;
+    background: #000000cc;
+    z-index: 99;
+    top: 0;
+    display: none;
+}
+
+.delete-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    width: 40%;
+    background: var(--background);
+    padding: 24px;
+    border-radius: 20px;
+}
+
+.home .delete-button {
+    font-weight: bold;
+    color: var(--text);
+    background-color: var(--danger);
+    cursor: pointer;
+}
+
+.home .delete-button:hover {
+    filter: brightness(0.8);
+}
+
+.cancel-section:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .pending-form {
@@ -110,12 +175,29 @@
     color: var(--primary);
 }
 
-.current-members > li::marker, .current-members > li a {
+.current-members > li::marker, .current-members > li > div > a {
     color: var(--text);
 }
 
-.current-members > li.user > a, .current-members > li.user::marker {
+.current-members > li.user > div > a, .current-members > li.user::marker {
     color: var(--accent);
+}
+
+ol li.admin:first-child::marker {
+    content: "";
+}
+
+ol li.admin:first-child::before {
+    content: "";
+    position: absolute;
+    left: -24px;
+    width: 20px; 
+    height: 20px; 
+    background-image: url('../img/crown.svg'); 
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    top: 50%;
+    transform: translateY(-62%);
 }
 
 /* group admin */

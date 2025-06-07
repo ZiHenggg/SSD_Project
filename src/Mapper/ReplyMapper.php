@@ -1,11 +1,11 @@
 <?php
-namespace Ngmin\Ict2216G5\Concrete;
+namespace Ngmin\Ict2216G5\Mapper;
 
 use Ngmin\Ict2216G5\Entity\Reply;
 use Ngmin\Ict2216G5\Repository\ReplyRepository;
 use PDO;
 
-class ReplyRepoImpl implements ReplyRepository {
+class ReplyMapper implements ReplyRepository {
 
     private PDO $dbConnection;
 
@@ -14,24 +14,22 @@ class ReplyRepoImpl implements ReplyRepository {
     }
 
     public function getReplyByReviewId(int $reviewId): ?Reply {
-        $stmt = $this->dbConnection->prepare("SELECT replyId, responderId, justification FROM reply WHERE reviewId = :reviewId");
+        $stmt = $this->dbConnection->prepare("SELECT replyId, responderId, justification, replyDate FROM reply WHERE reviewId = :reviewId");
         $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
         $stmt->execute();
 
-        // Fetch the reply as an associative array
         $replyData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($replyData) {
-            // Create and return a Reply object
+        if ($replyData) {            
             return new Reply(
                 $replyData['replyId'],
-                $replyData['responderId'],
                 $reviewId,
-                $replyData['justification']
+                $replyData['justification'],
+                $replyData['replyDate']
             );
         }
 
-        return null; // No reply found for the given review ID
+        return null; // No reply found
     }
     
 } 

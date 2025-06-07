@@ -8,6 +8,7 @@ class Review {
     private int $reviewId;
     private int $reviewerId;
     private int $revieweeId;
+    private int $groupMembersId;
     private int $rating;
     private string $reviewDescription;
     private DateTime $reviewDate;
@@ -32,6 +33,26 @@ class Review {
         return $this->reviewDate;
     }
 
+        // Setters
+    private function setReviewId(int $reviewId): void {
+        $this->reviewId = $reviewId;
+    }
+    private function setReviewerId(int $reviewerId): void {
+        $this->reviewerId = $reviewerId;
+    }
+    private function setRevieweeId(int $revieweeId): void {
+        $this->revieweeId = $revieweeId;
+    }
+    private function setRating(int $rating): void {
+        $this->rating = $rating;
+    }
+    private function setReviewDescription(string $reviewDescription): void {
+        $this->reviewDescription = $reviewDescription;
+    }
+    private function setReviewDate(DateTime $reviewDate): void {
+        $this->reviewDate = $reviewDate;
+    }
+
     // Constructor
     public function __construct(int $reviewId, int $reviewerId, int $revieweeId, int $rating, string $reviewDescription, string $reviewDate) {
         $this->reviewId = $reviewId;
@@ -41,26 +62,6 @@ class Review {
         $this->reviewDescription = $reviewDescription;
         $this->reviewDate = new DateTime($reviewDate);  // Convert to DateTime object
     }
-
-    // // Setters
-    // private function setReviewId(int $reviewId): void {
-    //     $this->reviewId = $reviewId;
-    // }
-    // private function setReviewerId(int $reviewerId): void {
-    //     $this->reviewerId = $reviewerId;
-    // }
-    // private function setRevieweeId(int $revieweeId): void {
-    //     $this->revieweeId = $revieweeId;
-    // }
-    // private function setRating(int $rating): void {
-    //     $this->rating = $rating;
-    // }
-    // private function setReviewDescription(string $reviewDescription): void {
-    //     $this->reviewDescription = $reviewDescription;
-    // }
-    // private function setReviewDate(DateTime $reviewDate): void {
-    //     $this->reviewDate = $reviewDate;
-    // }
 }
 
 ?>
