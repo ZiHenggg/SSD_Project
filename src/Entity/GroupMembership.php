@@ -1,10 +1,11 @@
 <?php
-namespace Ngmin\Ict2216G5\Entity;
+namespace App\Entity;
 
 class GroupMembership
 {
     private int $groupMembershipId;
     private int $studentId;
+    private ?string $studentName = null;
     private int $groupId;
     private string $role; // e.g., 'member', 'leader'
 
@@ -16,6 +17,10 @@ class GroupMembership
     public function getStudentId(): int
     {
         return $this->studentId;
+    }
+    public function getStudentName(): ?string
+    {
+        return $this->studentName;
     }
     public function getGroupId(): int
     {
@@ -34,6 +39,10 @@ class GroupMembership
     private function setStudentId(int $studentId): void
     {
         $this->studentId = $studentId;
+    }
+    private function setStudentName(?string $studentName): void
+    {
+        $this->studentName = $studentName;
     }
     private function setGroupId(int $groupId): void
     {
@@ -62,6 +71,14 @@ class GroupMembership
             throw new \LogicException("ID already set");
         }
         $this->setGroupMembershipId($id);
+    }
+
+    public function assignStudentName(string $name): void
+    {
+        if (isset($this->studentName)) {
+            throw new \LogicException("Student name already set");
+        }
+        $this->setStudentName($name);
     }
 }
 ?>

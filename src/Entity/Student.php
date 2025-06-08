@@ -1,6 +1,6 @@
 <?php
 
-namespace Ngmin\Ict2216G5\Entity;
+namespace App\Entity;
 
 class Student {
     private int $studentId;

@@ -1,7 +1,7 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
-use Ngmin\Ict2216G5\Entity\Student;
-use Ngmin\Ict2216G5\Repository\StudentRepository;
+namespace App\Mapper;
+use App\Entity\Student;
+use App\Repository\StudentRepository;
 use PDO;
 
 class StudentMapper implements StudentRepository

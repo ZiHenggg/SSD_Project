@@ -1,7 +1,7 @@
 <?php
-namespace Ngmin\Ict2216G5\Repository;
+namespace App\Repository;
 
-use Ngmin\Ict2216G5\Entity\Student; // Assuming Student is an entity class representing a student
+use App\Entity\Student; // Assuming Student is an entity class representing a student
 
 interface StudentRepository
 {

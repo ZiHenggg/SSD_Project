@@ -2,13 +2,20 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use Ngmin\Ict2216G5\Mapper\GroupMapper;
+use App\Mapper\GroupMapper;
+use App\Mapper\GroupMembershipMapper;
+use App\Control\GroupControl;
+use App\Control\GroupMembershipControl;
+use App\Boundary\GroupPageController;
 
-// Initialize GroupRepository
 $groupRepo = new GroupMapper($pdo);
+$groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$controller = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 
 // Fetch all active groups
-$groups = $groupRepo->getAllActiveGroups();
+$groups = $controller->listAllActiveGroups();
 
 $title = "Groups";
 ob_start();

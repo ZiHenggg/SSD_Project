@@ -1,8 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Control;
+namespace App\Control;
 
-use Ngmin\Ict2216G5\Repository\GroupMembershipRepository;
-use Ngmin\Ict2216G5\Repository\GroupRepository;
+use App\Repository\GroupMembershipRepository;
+use App\Repository\GroupRepository;
 
 class GroupMembershipControl
 {
@@ -45,6 +45,11 @@ class GroupMembershipControl
 
         // Update the group in the repository
         $this->groupRepo->updateGroup($group);
+    }
+
+    public function getUserRole(int $groupId, int $studentId): ?string
+    {
+        return $this->groupMembershipRepo->getRoleForUser($groupId, $studentId);
     }
 }
 ?>

@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-use Ngmin\Ict2216G5\Mapper\StudentMapper;
-use Ngmin\Ict2216G5\Control\StudentControl;
-use Ngmin\Ict2216G5\Boundary\StudentPageController;
+use App\Mapper\StudentMapper;
+use App\Control\StudentControl;
+use App\Boundary\StudentPageController;
 
 $repo = new StudentMapper($pdo);
 $control = new StudentControl($repo);

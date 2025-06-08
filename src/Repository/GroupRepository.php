@@ -1,6 +1,6 @@
 <?php
-namespace Ngmin\Ict2216G5\Repository;
-use Ngmin\Ict2216G5\Entity\Group;
+namespace App\Repository;
+use App\Entity\Group;
 
 interface GroupRepository
 {
@@ -9,7 +9,9 @@ interface GroupRepository
     public function addGroup(Group $group): void;
 
     public function getGroup(int $groupId): ?Group;
-    public function getGroupsByUser(string $studentId): array;
+    public function getGroupsByUser(int $studentId): array;
     public function updateGroup(Group $group): void;
+
+    public function getAllActiveGroups(): array;
 }
 ?>

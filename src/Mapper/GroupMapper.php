@@ -1,8 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
+namespace App\Mapper;
 
-use Ngmin\Ict2216G5\Entity\Group;
-use Ngmin\Ict2216G5\Repository\GroupRepository;
+use App\Entity\Group;
+use App\Repository\GroupRepository;
 use PDO;
 
 class GroupMapper implements GroupRepository
@@ -158,13 +158,13 @@ class GroupMapper implements GroupRepository
         return null; // Return null if no group found
     }
 
-    public function getGroupsByUser(string $studentId): array
+    public function getGroupsByUser(int $studentId): array
     {
         // TODO: implement actual DB query here
         $stmt = $this->dbConnection->prepare("
             SELECT g.*
-            FROM groups g
-            INNER JOIN group_memberships gm ON g.groupId = gm.groupId
+            FROM `groups` g
+            INNER JOIN groupMembers gm ON g.groupId = gm.groupId
             WHERE gm.studentId = :studentId
         ");
         $stmt->bindParam(':studentId', $studentId);

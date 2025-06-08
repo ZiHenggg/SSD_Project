@@ -1,9 +1,9 @@
 <?php
-namespace Ngmin\Ict2216G5\Control;
+namespace App\Control;
 
-use Ngmin\Ict2216G5\Entity\Group;
-use Ngmin\Ict2216G5\Repository\GroupRepository;
-use Ngmin\Ict2216G5\Repository\GroupMembershipRepository;
+use App\Entity\Group;
+use App\Repository\GroupRepository;
+use App\Repository\GroupMembershipRepository;
 
 class GroupControl
 {
@@ -42,6 +42,21 @@ class GroupControl
         $group->addMember(); // Increment the member count for the group
         $this->groupRepo->updateGroup($group); // Update the group in the repository
         return $group;
+    }
+
+    public function isMember(int $groupId, int $studentId): bool
+    {
+        return $this->groupMembershipRepo->isMember($groupId, $studentId);
+    }
+
+    public function getGroupsByUser(int $studentId): array
+    {
+        return $this->groupRepo->getGroupsByUser($studentId);
+    }
+
+    public function getAllActiveGroups(): array
+    {
+        return $this->groupRepo->getAllActiveGroups();
     }
 }
 ?>

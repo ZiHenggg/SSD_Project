@@ -1,7 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
+namespace App\Mapper;
 
-use Ngmin\Ict2216G5\Repository\GroupMembershipRepository;
+use App\Entity\GroupMembership;
+use App\Repository\GroupMembershipRepository;
 use PDO;
 
 class GroupMembershipMapper implements GroupMembershipRepository
@@ -25,6 +26,50 @@ class GroupMembershipMapper implements GroupMembershipRepository
             ':studentId' => $studentId
         ]);
         return $stmt->fetchColumn() > 0;
+    }
+
+    public function getRoleForUser(int $groupId, int $studentId): ?string
+    {
+        $stmt = $this->db->prepare("
+        SELECT role 
+        FROM groupMembers 
+        WHERE groupId = :groupId AND studentId = :studentId
+    ");
+        $stmt->execute([
+            ':groupId' => $groupId,
+            ':studentId' => $studentId
+        ]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ? $result['role'] : null;
+    }
+    public function getMembers(int $groupId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT gm.*, s.name
+            FROM groupMembers gm
+            JOIN students s ON gm.studentId = s.studentId
+            WHERE gm.groupId = :groupId
+            ORDER BY gm.role ASC, gm.studentId ASC
+        ");
+        $stmt->execute([':groupId' => $groupId]);
+
+        $groupMembers = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $membership = new GroupMembership(
+                (int) $row['groupId'],
+                (int) $row['studentId'],
+                $row['role']
+            );
+            if (isset($row['groupMembershipId'])) {
+                $membership->assignGroupMembershipId((int) $row['groupMembershipId']);
+            }
+            if (isset($row['name'])) {
+                $membership->assignStudentName($row['name']);
+            }
+            $groupMembers[] = $membership;
+        }
+        return $groupMembers;
     }
 
     public function addMember(int $groupId, string $studentId, string $role = 'member'): void

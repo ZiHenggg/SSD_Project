@@ -1,7 +1,7 @@
 <?php
-namespace Ngmin\Ict2216G5\Boundary;
-use Ngmin\Ict2216G5\Control\StudentControl;
-use Ngmin\Ict2216G5\Entity\Student;
+namespace App\Boundary;
+use App\Control\StudentControl;
+use App\Entity\Student;
 class StudentPageController
 {
     private string $studentId;

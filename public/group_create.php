@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use Ngmin\Ict2216G5\Mapper\GroupMapper;
+use App\Mapper\GroupMapper;
 
 // Initialize GroupRepository
 $groupRepo = new GroupMapper($pdo);

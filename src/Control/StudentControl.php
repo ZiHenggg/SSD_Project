@@ -1,7 +1,7 @@
 <?php
-namespace Ngmin\Ict2216G5\Control;
-use Ngmin\Ict2216G5\Entity\Student;
-use Ngmin\Ict2216G5\Repository\StudentRepository;
+namespace App\Control;
+use App\Entity\Student;
+use App\Repository\StudentRepository;
 
 class StudentControl
 {
