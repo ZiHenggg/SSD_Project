@@ -1,3 +1,4 @@
+/* groups.php css */
 .form-wrapper {
     margin: 0 auto;
     background: #fff;
@@ -63,4 +64,77 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* group_info.php css */
+.group-container {
+    /* max-width: 600px; */
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.group-title h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.group-title p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.join-button {
+    background-color: #7b68ee;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.join-button:hover {
+    background-color: #6957d1;
+}
+
+.members-section h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.members-list {
+    list-style: none;
+    padding: 0;
+    background-color: #f3edff;
+    border-radius: 10px;
+    padding: 10px 0;
+}
+
+.members-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e0d7f3;
+    font-size: 14px;
+}
+
+.members-list li:last-child {
+    border-bottom: none;
+}
+
+.crown {
+    color: gold;
+    font-size: 16px;
 }
