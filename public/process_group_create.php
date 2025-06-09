@@ -3,16 +3,18 @@ require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Control\GroupControl;
+use App\Control\GroupMembershipControl;
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupMembershipMapper;
+use App\Mapper\GroupJoinRequestsMapper;
 use App\Boundary\GroupPageController;
-use App\Control\GroupMembershipControl;
 
 // Initialize control class
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 
 try {

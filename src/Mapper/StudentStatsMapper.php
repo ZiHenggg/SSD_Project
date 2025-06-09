@@ -14,13 +14,13 @@ class StudentStatsMapper implements StudentStatsRepository {
     }
 
     public function getTotalReviews(int $studentId): int {
-        $stmt = $this->dbConnection->prepare("SELECT totalReviews FROM studentStats WHERE studentId = :studentId");
-        $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
-        $stmt->execute();
+    $stmt = $this->dbConnection->prepare("SELECT totalReviews FROM studentStats WHERE studentId = :studentId");
+    $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
+    $stmt->execute();
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        return (int) $result['totalReviews'];
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    return $result && isset($result['totalReviews']) ? (int) $result['totalReviews'] : 0;
     }
 
     public function getAverageRating(int $studentId): float {
@@ -30,8 +30,9 @@ class StudentStatsMapper implements StudentStatsRepository {
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        return (float) $result['averageRating'];
+        return $result && isset($result['averageRating']) ? (float) $result['averageRating'] : 0.0;
     }
+
     
 } 
 ?>

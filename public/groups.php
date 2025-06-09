@@ -4,14 +4,16 @@ require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupMembershipMapper;
+use App\Mapper\GroupJoinRequestsMapper;
 use App\Control\GroupControl;
 use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
 
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $controller = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 
 // Fetch all active groups

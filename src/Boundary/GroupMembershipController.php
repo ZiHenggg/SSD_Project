@@ -26,5 +26,18 @@ class GroupMembershipController
         }
     }
 
+    public function showJoinRequest(int $groupId): array
+    {
+        try {
+            $joinRequests = $this->groupMembershipControl->getRequestsByGroup($groupId);
+            if (empty($joinRequests)) {
+                return ['message' => 'No join requests found for this group.'];
+            }
+            return ['joinRequest' => $joinRequests];
+        } catch (Exception $e) {
+            return ['error' => 'An error occurred while fetching join requests: ' . $e->getMessage()];
+        }
+    }
+
 }
 ?>

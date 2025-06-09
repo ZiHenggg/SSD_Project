@@ -3,18 +3,22 @@ namespace App\Control;
 
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupRepository;
+use App\Repository\GroupJoinRequestsRepository;
 
 class GroupMembershipControl
 {
     private GroupMembershipRepository $groupMembershipRepo;
     private GroupRepository $groupRepo;
+    private GroupJoinRequestsRepository $groupJoinRequestsRepo;
 
     public function __construct(
         GroupMembershipRepository $groupMembershipRepo,
-        GroupRepository $groupRepo
+        GroupRepository $groupRepo,
+        GroupJoinRequestsRepository $groupJoinRequestsRepo
     ) {
         $this->groupMembershipRepo = $groupMembershipRepo;
         $this->groupRepo = $groupRepo;
+        $this->groupJoinRequestsRepo = $groupJoinRequestsRepo;
     }
 
     public function addMember(int $groupId, string $studentId, string $role = 'member'): void
@@ -61,6 +65,10 @@ class GroupMembershipControl
     {
         return $this->groupMembershipRepo->getMembers($groupId);
         
+    }
+    public function getRequestsByGroup(int $groupId): array
+    {
+        return $this->groupJoinRequestsRepo->getRequestsByGroup($groupId);
     }
 }
 ?>

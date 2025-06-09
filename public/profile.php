@@ -35,7 +35,7 @@ $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
 
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo);
@@ -120,7 +120,7 @@ ob_start();
                             <img src="img/star-unfilled.svg" alt="Empty Star Rating" />
                         <?php endfor; ?>
                     </div>
-                    <p class="total-reviews m-0 text-muted small">(<?= htmlspecialchars($totalReviews) ?> reviews)</p>
+                    <p class="total-reviews m-0 text-muted small">(<?= htmlspecialchars($totalReviews) . ' ' . ($totalReviews < 2 ? "review" : "reviews") ?>)</p>
                 </div>
             </div>
             <div class="reviews-container">

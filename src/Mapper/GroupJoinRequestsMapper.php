@@ -35,5 +35,26 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
         return $requests;
     }
     
+    public function getRequestsByGroup(int $groupId): array {
+        $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupjoinrequests WHERE joinStatus = 'pending' AND groupId = :groupId");
+        $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $requestsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $requests = [];
+        foreach ($requestsData as $data) {
+            $requests[] = new GroupJoinRequests(
+                $data['requestId'],
+                $data['groupId'],
+                $data['requesterId'],
+                $data['joinStatus'],
+                new \DateTime($data['requestedAt']),
+                // new \DateTime($data['reviewedAt'])
+            );
+        }
+
+        return $requests;
+    }
 } 
 ?>

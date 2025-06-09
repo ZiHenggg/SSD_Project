@@ -3,33 +3,43 @@ require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Mapper\GroupMapper;
+use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
+use App\Mapper\StudentMapper;
 use App\Control\GroupControl;
+use App\Control\GroupJoinRequestsControl;
 use App\Control\GroupMembershipControl;
+use App\Control\StudentControl;
 use App\Boundary\GroupPageController;
+use App\Boundary\GroupMembershipController;
+use App\Boundary\StudentPageController;
 
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+$studentRepo = new StudentMapper($pdo);
 
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+$studentControl = new StudentControl($studentRepo);
 
-$controller = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$studentPageController = new StudentPageController($studentControl);
 
 // Get user from session
 $student = $_SESSION['user'];
 $studentId = (int) $student['id'];
 
 // Fetch groups for this student
-$groups = $controller->listUserGroups($studentId);
-$roles = $controller->getUserRolesForGroups($studentId, $groups);
+$groups = $groupController->listUserGroups($studentId);
+$roles = $groupController->getUserRolesForGroups($studentId, $groups);
 
 $title = "Dashboard";
 
 ob_start(); // Capture the page content
 ?>
 
-<!-- For now this will be here -->
 <div class="grayscreen"></div>
 <div class="mx-5">
     <h2>Welcome to your dashboard, Student ID: <?= htmlspecialchars($student['id']) ?></h2>
@@ -40,7 +50,6 @@ ob_start(); // Capture the page content
     <div class="group-container">
         <div class="group-wrapper">
             <div class="title d-flex justify-content-between">
-                <!-- <h2 class="m-0">My Current Groups (3)</h2> -->
                 <h2 class="m-0">My Current Groups (<?= count($groups) ?>)</h2>
                 <a href="group_create.php" class="text-decoration-none d-flex">
                     <img src="img/plus.svg" alt="Add Group" class="w-100 add-group" />
@@ -65,54 +74,51 @@ ob_start(); // Capture the page content
             <?php else: ?>
                 <p>You are not in any groups yet.</p>
             <?php endif; ?>
-
         </div>
     </div>
     <div class="info-container">
-        <!-- ONLY PENDING REQUEST INFO STATIC NOW -->
         <div class="info-wrapper">
             <div class="title d-flex justify-content-between">
                 <h2 class="m-0">Group Info</h2>
             </div>
-
             <?php if (count($groups) > 0): ?>
                 <?php foreach ($groups as $group): ?>
                     <div class="info-item">
                         <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
+                            <?php
+                                $joinRequestsResponse = $groupMembershipController->showJoinRequest($group->getGroupId());
+                                $requests = $joinRequestsResponse['joinRequest'] ?? [];
+                                ?>
                             <span class="header">Pending Requests</span>
-                            <ol class="pending-request name-list">
-                                <li>
-                                    <div class="request-wrapper">
-                                        <a class="profile-link text-decoration-none" href="#">Justin Goh</a>
-                                        <form class="pending-form" action="" method="post">
-                                            <button class="btn accept-btn" type="submit">
-                                                <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                            </button>
-                                            <button class="btn reject-btn" type="submit">
-                                                <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                            </button>
-                                        </form>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="request-wrapper">
-                                        <a class="profile-link text-decoration-none" href="#">Chua Fang Yi</a>
-                                        <form class="pending-form" action="" method="post">
-                                            <button class="btn accept-btn" type="submit">
-                                                <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                            </button>
-                                            <button class="btn reject-btn" type="submit">
-                                                <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                            </button>
-                                        </form>
-                                    </div>
-                                </li>
-                            </ol>
+                            <?php if(count($requests) > 0): ?>
+                                <ol class="pending-request name-list">
+                                    <?php foreach ($requests as $request):
+                                        $requesterId = $request->getRequesterId();
+                                        $requester = $studentPageController->showUserProfile($requesterId);
+                                    ?>
+                                        <li>
+                                            <div class="request-wrapper">
+                                                <a class="profile-link text-decoration-none" href="#"><?= htmlspecialchars($requester->getStudentName())?>, <?= htmlspecialchars($requesterId)?></a>
+                                                <form class="pending-form" action="" method="post">
+                                                    <button class="btn accept-btn" type="submit">
+                                                        <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
+                                                    </button>
+                                                    <button class="btn reject-btn" type="submit">
+                                                        <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ol>
+                            <?php else: ?>
+                                <p>No pending requests.</p>
+                            <?php endif; ?>
                         <?php endif; ?>
                         <span class="header">Current Members</span>
                         <ol class="current-members name-list">                     
                             <?php
-                                $groupData = $controller->displayGroupDetails($group->getGroupId());
+                                $groupData = $groupController->displayGroupDetails($group->getGroupId());
                                 $groupMembers = $groupData['members'];
                                 
                                 foreach ($groupMembers as $member):
@@ -141,17 +147,17 @@ ob_start(); // Capture the page content
                             </ol>
                             <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
 
-                                <div class="delete-section" data-group-id="group1">
+                                <div class="delete-section" data-group-id="<?= htmlspecialchars($group->getGroupId())?>">
                                     <div
                                         class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
                                         Delete Group
                                     </div>
                                 </div>
-                                <div class="delete-modal" data-group-id="group1">
+                                <div class="delete-modal" data-group-id="<?= htmlspecialchars($group->getGroupId())?>">
                                     <div class="delete-group-wrapper">
                                         <form class="delete-form" action="" method="post">
                                             <div class="delete-group-header">
-                                                <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
+                                                <h5 class="delete-group-title"><strong>Delete “<?= htmlspecialchars($group->getGroupName())?>”?</strong></h5>
                                             </div>
                                             <div class="delete-group-body">
                                                 This action cannot be undone. Current members will have to find another group.
@@ -182,244 +188,7 @@ ob_start(); // Capture the page content
                     <?php else: ?>
                         <p>You are not in any groups yet.</p>
                     <?php endif; ?>
-
-                    <!-- <li class="user admin">
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2308888</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2302222</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2303333</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2304444</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2305555</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li> -->
-                <!-- </ol>
-                <div class="delete-section" data-group-id="group1">
-                    <div
-                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                        Delete Group
-                    </div>
-                </div>
-                <div class="delete-modal" data-group-id="group1">
-                    <div class="delete-group-wrapper">
-                        <form class="delete-form" action="" method="post">
-                            <div class="delete-group-header">
-                                <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
-                            </div>
-                            <div class="delete-group-body">
-                                This action cannot be undone. Current members will have to find another group.
-                            </div>
-                            <div class="my-4">
-                                <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
-                                    name="delete group" value="true">
-                                <span class="delete-group-ack">I acknowledge the above and agree to delete the
-                                    group.</span>
-                            </div>
-                            <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
-                                <div class="cancel-section mx-4">
-                                    <span class="text-center"><small>Cancel</small></span>
-                                </div>
-                                <div class="confirm-section">
-                                    <button type="submit"
-                                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div> -->
             </div>
-            <!-- <div class="info-item">
-                <span class="header">Current Members</span>
-                <ol class="current-members name-list">
-                    <li class="admin">
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2301111</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2302222</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="user">
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2308888</a>
-                        </div>
-                    </li>
-                </ol>
-            </div>
-            <div class="info-item">
-                <span class="header">Pending Requests</span>
-                <ol class="pending-request name-list">
-                    <li>
-                        <div class="request-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">Faith Wong</a>
-                            <form class="pending-form" action="" method="post">
-                                <button class="btn accept-btn" type="submit">
-                                    <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                </button>
-                                <button class="btn reject-btn" type="submit">
-                                    <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="request-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">Estelle Lee</a>
-                            <form class="pending-form" action="" method="post">
-                                <button class="btn accept-btn" type="submit">
-                                    <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                </button>
-                                <button class="btn reject-btn" type="submit">
-                                    <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                </ol>
-
-                <span class="header">Current Members</span>
-                <ol class="current-members name-list">
-                    <li class="user admin">
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2308888</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2302222</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2303333</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2304444</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="member-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">XXXXX, 2305555</a>
-                            <div class="reply-section my-2 py-1">
-                                <a href="#"
-                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                    Review
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                </ol>
-                <div class="delete-section" data-group-id="group3">
-                    <div
-                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                        Delete Group
-                    </div>
-                </div>
-                <div class="delete-modal" data-group-id="group3">
-                    <div class="delete-group-wrapper">
-                        <form class="delete-form" action="" method="post">
-                            <div class="delete-group-header">
-                                <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
-                            </div>
-                            <div class="delete-group-body">
-                                This action cannot be undone. Current members will have to find another group.
-                            </div>
-                            <div class="my-4">
-                                <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
-                                    name="delete group" value="true">
-                                <span class="delete-group-ack">I acknowledge the above and agree to delete the
-                                    group.</span>
-                            </div>
-                            <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
-                                <div class="cancel-section mx-4">
-                                    <span class="text-center"><small>Cancel</small></span>
-                                </div>
-                                <div class="confirm-section">
-                                    <button type="submit"
-                                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
 </div>

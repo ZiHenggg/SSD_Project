@@ -3,11 +3,11 @@ var info_items = document.getElementsByClassName("info-item");
 
 var group_items_array = Array.from(group_items);
 
-const firstGroupItem = document.querySelector('.group-item');
+const firstGroupItem = document.querySelector('.home .group-item');
 if (firstGroupItem) {
   firstGroupItem.classList.add('selected');
 }
-const firstInfoItem = document.querySelector('.info-item');
+const firstInfoItem = document.querySelector('.home .info-item');
 if (firstInfoItem) {
   firstInfoItem.classList.add('showing');
 }
