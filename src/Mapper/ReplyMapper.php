@@ -31,6 +31,14 @@ class ReplyMapper implements ReplyRepository {
 
         return null; // No reply found
     }
+
+    public function hasReply(int $reviewId): bool {
+        $stmt = $this->dbConnection->prepare("SELECT COUNT(*) FROM reply WHERE reviewId = :reviewId");
+        $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchColumn() > 0;
+    }
     
 } 
 ?>

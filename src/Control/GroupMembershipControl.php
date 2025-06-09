@@ -51,5 +51,16 @@ class GroupMembershipControl
     {
         return $this->groupMembershipRepo->getRoleForUser($groupId, $studentId);
     }
+
+    public function getGroupId(int $groupMembersId): ?string
+    {
+        return $this->groupMembershipRepo->getGroupId($groupMembersId);
+    }
+
+    public function getGroupMembers(int $groupId): array
+    {
+        return $this->groupMembershipRepo->getMembers($groupId);
+        
+    }
 }
 ?>

@@ -115,5 +115,18 @@ class StudentPageController
 
         return $this->studentControl->loginStudent($email, $password);
     }
+
+    public function showUserProfile(int $studentId): ?Student
+    {
+        try {
+            $student = $this->studentControl->getStudentById($studentId);
+            if (!$student) {
+                return null; // Student not found
+            }
+            return $student;
+        } catch (\Exception $e) {
+            throw new \Exception('An error occurred while fetching the student profile: ' . $e->getMessage());
+        }
+    }
 }
 ?>

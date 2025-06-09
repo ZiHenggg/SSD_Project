@@ -3,6 +3,15 @@ var info_items = document.getElementsByClassName("info-item");
 
 var group_items_array = Array.from(group_items);
 
+const firstGroupItem = document.querySelector('.group-item');
+if (firstGroupItem) {
+  firstGroupItem.classList.add('selected');
+}
+const firstInfoItem = document.querySelector('.info-item');
+if (firstInfoItem) {
+  firstInfoItem.classList.add('showing');
+}
+
 for (var i = 0; i < group_items.length; i++) {
     group_items[i].addEventListener("click", function (e) {
         var clickedItem = e.currentTarget;

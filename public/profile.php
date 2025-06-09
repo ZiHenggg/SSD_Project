@@ -2,40 +2,63 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\StudentMapper;
-use App\Mapper\ReviewMapper;
-use App\Mapper\ReplyMapper;
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
+use App\Mapper\StudentStatsMapper;
 use App\Mapper\GroupJoinRequestsMapper;
 
+use App\Mapper\GroupMembershipMapper;
+use App\Control\GroupMembershipControl;
+use App\Boundary\GroupMembershipController;
+
+use App\Mapper\GroupMapper;
+use App\Control\GroupControl;
+use App\Boundary\GroupPageController;
+
+use App\Mapper\StudentMapper;
+use App\Control\StudentControl;
+use App\Boundary\StudentPageController;
+
+use App\Mapper\ReplyMapper;
+use App\Control\ReplyControl;
+use App\Boundary\ReplyPageController;
+
+use App\Mapper\ReviewMapper;
+use App\Control\ReviewControl;
+use App\Boundary\ReviewPageController;
+
 // Initialize Repositories
+$studentStatsRepo = new StudentStatsMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+
+$groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupRepo = new GroupMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
-$groupRepo = new GroupMapper($pdo);
-$groupMembersRepo = new GroupMembershipMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$studentControl = new StudentControl($studentRepo);
+$reviewControl = new ReviewControl($reviewRepo);
+$replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
+
+$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$studentController = new StudentPageController($studentControl, $pdo);
+$reviewController = new ReviewPageController($reviewControl, $pdo);
+$replyController = new ReplyPageController($replyControl, $pdo);
 
 // !!!!!!!!!!!!!!!!!!!!!!!!
 // Fetch info for the logged-in user (update when we implement viewing of other profiles)
-$student = $studentRepo->getStudentById($_SESSION['user']['id']);
+$student = $studentController->showUserProfile($_SESSION['user']['id']);
 // !!!!!!!!!!!!!!!!!!!!!!!!
 
-$reviews = $reviewRepo->getReviewsForReviewee($student->getStudentId());
+$reviewResponse = $reviewController->onViewReceivedReviews($student->getStudentId());
+$reviews = $reviewResponse['reviews'] ?? []; 
+
 $groupJoinRequests = $groupJoinRequestsRepo->getRequestsByStudent($student->getStudentId());
-
-$totalRating = 0;
-$reviewCount = count($reviews);
-
-if ($reviewCount > 0) {
-    foreach ($reviews as $review) {
-        $totalRating += $review->getRating();
-    }
-    $averageRating = round($totalRating / $reviewCount, 1);
-} else {
-    $averageRating = 0;
-}
+$totalReviews = $studentStatsRepo->getTotalReviews($student->getStudentId());
+$averageRating = $studentStatsRepo->getaverageRating($student->getStudentId());
+$maxStars = 5;
 
 $title = "Profile";
 ob_start();
@@ -80,21 +103,24 @@ ob_start();
                     <h3 class="rating-value"><?= htmlspecialchars($averageRating) ?> Stars</h3>
                     <p>on average</p>
                 </div>
-                <div class="rating-stars d-flex flex-row align-items-center">
-                    <?php
-                        $fullStars = floor($averageRating);
-                        $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
-                        $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                    ?>
-                    <?php for ($i = 0; $i < $fullStars; $i++): ?>
-                        <img src="img/star-filled.svg" alt="Full Star Rating" />
-                    <?php endfor; ?>
-                    <?php if ($halfStar): ?>
-                        <img src="img/star-half.svg" alt="Half Star Rating" />
-                    <?php endif; ?>
-                    <?php for ($i = 0; $i < $emptyStars; $i++): ?>
-                        <img src="img/star-unfilled.svg" alt="Empty Star Rating" />
-                    <?php endfor; ?>
+                <div class="d-flex flex-column align-items-center">
+                    <div class="rating-stars d-flex flex-row align-items-center mb-1">
+                        <?php
+                            $fullStars = floor($averageRating);
+                            $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
+                            $emptyStars = $maxStars - $fullStars - ($halfStar ? 1 : 0);
+                        ?>
+                        <?php for ($i = 0; $i < $fullStars; $i++): ?>
+                            <img src="img/star-filled.svg" alt="Full Star Rating" />
+                        <?php endfor; ?>
+                        <?php if ($halfStar): ?>
+                            <img src="img/star-half.svg" alt="Half Star Rating" />
+                        <?php endif; ?>
+                        <?php for ($i = 0; $i < $emptyStars; $i++): ?>
+                            <img src="img/star-unfilled.svg" alt="Empty Star Rating" />
+                        <?php endfor; ?>
+                    </div>
+                    <p class="total-reviews m-0 text-muted small">(<?= htmlspecialchars($totalReviews) ?> reviews)</p>
                 </div>
             </div>
             <div class="reviews-container">
@@ -126,8 +152,9 @@ ob_start();
                             <div class="review-content">
                                 <div class="review-group-name mt-2">
                                     <?php
-                                        $groupId = $groupMembersRepo->getGroupId($review->getGroupMembersId());
-                                        $group = $groupRepo->getGroup($groupId);
+                                        $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
+                                        $groupData = $groupController->displayGroupDetails($groupId);
+                                        $group = $groupData['group'];
                                     ?>
                                     <p class="mb-0"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></p>
                                 </div>
@@ -135,8 +162,9 @@ ob_start();
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
                                 </div>
                                 <?php
-                                    $reply = $replyRepo->getReplyByReviewId($review->getReviewId());
-                                    if ($reply):
+                                    $hasReply = $replyController->checkIfReplyExists($review->getReviewId());
+                                    if ($hasReply):
+                                        $reply = $replyController->onViewReply($review->getReviewId());
                                 ?>
                                     <div class="reply-section borderline mt-3">
                                         <div class="reply-title"><strong>Reply:</strong></div>

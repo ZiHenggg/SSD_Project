@@ -45,31 +45,7 @@ ob_start(); // Capture the page content
                 <a href="group_create.php" class="text-decoration-none d-flex">
                     <img src="img/plus.svg" alt="Add Group" class="w-100 add-group" />
                 </a>
-            </div>
-            <!-- <div class="group-item selected" data-group-id="group1">
-                <span class="group-name header">[24/25 T3]-ICT2216-P1-G4 (TRIAL)</span>
-                <span class="module">ICT2116, Secure Software Development</span>
-                <span class="acad-term">[24/25 T3]</span>
-                <span class="member-count">5/7</span>
-                <div class="img-wrapper leader">
-                    <img class="leader-icon w-100" src="img/crown.svg" alt="Leader" />
-                </div>
-            </div>
-            <div class="group-item" data-group-id="group2">
-                <span class="group-name header">[24/25 T3]-ICT2216-P1-G4</span>
-                <span class="module">ICT2116, Secure Software Development</span>
-                <span class="acad-term">[24/25 T3]</span>
-                <span class="member-count">3/7</span>
-            </div>
-            <div class="group-item" data-group-id="group3">
-                <span class="group-name header">[24/25 T3]-ICT2216-P1-G4</span>
-                <span class="module">ICT2116, Secure Software Development</span>
-                <span class="acad-term">[24/25 T3]</span>
-                <span class="member-count">5/7</span>
-                <div class="img-wrapper leader">
-                    <img class="leader-icon w-100" src="img/crown.svg" alt="Leader" />
-                </div>
-            </div> -->
+            </div>            
             <?php if (count($groups) > 0): ?>
                 <?php foreach ($groups as $group): ?>
                     <div class="group-item" data-group-id="<?= $group->getGroupId() ?>">
@@ -92,47 +68,119 @@ ob_start(); // Capture the page content
 
         </div>
     </div>
-    <!-- Pending - TO BE ADDED -->
     <div class="info-container">
-        <!-- All content inside here for now is static or placeholder -->
+        <!-- ONLY PENDING REQUEST INFO STATIC NOW -->
         <div class="info-wrapper">
             <div class="title d-flex justify-content-between">
                 <h2 class="m-0">Group Info</h2>
             </div>
-            <div class="info-item showing">
-                <span class="header">Pending Requests</span>
-                <ol class="pending-request name-list">
-                    <li>
-                        <div class="request-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">Justin Goh</a>
-                            <form class="pending-form" action="" method="post">
-                                <button class="btn accept-btn" type="submit">
-                                    <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                </button>
-                                <button class="btn reject-btn" type="submit">
-                                    <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="request-wrapper">
-                            <a class="profile-link text-decoration-none" href="#">Chua Fang Yi</a>
-                            <form class="pending-form" action="" method="post">
-                                <button class="btn accept-btn" type="submit">
-                                    <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                </button>
-                                <button class="btn reject-btn" type="submit">
-                                    <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                </ol>
 
-                <span class="header">Current Members</span>
-                <ol class="current-members name-list">
-                    <li class="user admin">
+            <?php if (count($groups) > 0): ?>
+                <?php foreach ($groups as $group): ?>
+                    <div class="info-item">
+                        <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
+                            <span class="header">Pending Requests</span>
+                            <ol class="pending-request name-list">
+                                <li>
+                                    <div class="request-wrapper">
+                                        <a class="profile-link text-decoration-none" href="#">Justin Goh</a>
+                                        <form class="pending-form" action="" method="post">
+                                            <button class="btn accept-btn" type="submit">
+                                                <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
+                                            </button>
+                                            <button class="btn reject-btn" type="submit">
+                                                <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="request-wrapper">
+                                        <a class="profile-link text-decoration-none" href="#">Chua Fang Yi</a>
+                                        <form class="pending-form" action="" method="post">
+                                            <button class="btn accept-btn" type="submit">
+                                                <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
+                                            </button>
+                                            <button class="btn reject-btn" type="submit">
+                                                <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            </ol>
+                        <?php endif; ?>
+                        <span class="header">Current Members</span>
+                        <ol class="current-members name-list">                     
+                            <?php
+                                $groupData = $controller->displayGroupDetails($group->getGroupId());
+                                $groupMembers = $groupData['members'];
+                                
+                                foreach ($groupMembers as $member):
+                                    if (($member->getRole() === 'admin') && ($member->getStudentId() == $studentId)): ?>
+                                        <li class="user admin">
+                                    <?php elseif($member->getRole() === 'admin'): ?>
+                                        <li class="admin">
+                                    <?php elseif($member->getStudentId() == $studentId): ?>
+                                        <li class="user">
+                                    <?php else: ?>
+                                        <li>
+                                    <?php endif; ?>
+                                            <div class="member-wrapper">
+                                            <a class="profile-link text-decoration-none" href="#"><?= htmlspecialchars($member->getStudentName())?>, <?= htmlspecialchars($member->getStudentId())?></a>
+                                            <?php if ($member->getStudentId() != $studentId): ?>
+                                                <div class="reply-section my-2 py-1">
+                                                    <a href="#"
+                                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                    Review
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ol>
+                            <div class="delete-section" data-group-id="group1">
+                                <div
+                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
+                                    Delete Group
+                                </div>
+                            </div>
+                            <div class="delete-modal" data-group-id="group1">
+                                <div class="delete-group-wrapper">
+                                    <form class="delete-form" action="" method="post">
+                                        <div class="delete-group-header">
+                                            <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
+                                        </div>
+                                        <div class="delete-group-body">
+                                            This action cannot be undone. Current members will have to find another group.
+                                        </div>
+                                        <div class="my-4">
+                                            <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
+                                                name="delete group" value="true">
+                                            <span class="delete-group-ack">I acknowledge the above and agree to delete the
+                                                group.</span>
+                                        </div>
+                                        <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
+                                            <div class="cancel-section mx-4">
+                                                <span class="text-center"><small>Cancel</small></span>
+                                            </div>
+                                            <div class="confirm-section">
+                                                <button type="submit"
+                                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
+                                                    Confirm
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            </div>
+                            <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>You are not in any groups yet.</p>
+                    <?php endif; ?>
+
+                    <!-- <li class="user admin">
                         <div class="member-wrapper">
                             <a class="profile-link text-decoration-none" href="#">XXXXX, 2308888</a>
                         </div>
@@ -180,8 +228,8 @@ ob_start(); // Capture the page content
                                 </a>
                             </div>
                         </div>
-                    </li>
-                </ol>
+                    </li> -->
+                <!-- </ol>
                 <div class="delete-section" data-group-id="group1">
                     <div
                         class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
@@ -216,9 +264,9 @@ ob_start(); // Capture the page content
                             </div>
                         </form>
                     </div>
-                </div>
+                </div> -->
             </div>
-            <div class="info-item">
+            <!-- <div class="info-item">
                 <span class="header">Current Members</span>
                 <ol class="current-members name-list">
                     <li class="admin">
@@ -368,7 +416,7 @@ ob_start(); // Capture the page content
                         </form>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

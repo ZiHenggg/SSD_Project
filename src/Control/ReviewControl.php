@@ -1,0 +1,28 @@
+<?php
+namespace App\Control;
+
+use App\Repository\ReviewRepository;
+
+class ReviewControl
+{
+    private ReviewRepository $reviewRepo;
+    private int $noOfReviews;
+    private array $reviews;
+
+    public function __construct(
+        ReviewRepository $reviewRepo
+    ) {
+        $this->reviewRepo = $reviewRepo;
+        $this->noOfReviews = 0;
+        $this->reviews = [];
+    }
+
+    public function getReviewsByUser(int $userId): array
+    {
+        $this->reviews = $this->reviewRepo->getReviewsForReviewee($userId);
+        $this->noOfReviews = count($this->reviews);
+        return $this->reviews;
+    }
+    
+}
+?>

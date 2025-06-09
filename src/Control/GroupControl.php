@@ -58,5 +58,10 @@ class GroupControl
     {
         return $this->groupRepo->getAllActiveGroups();
     }
+
+    public function getGroupInfo(int $groupId): ?Group
+    {
+        return $this->groupRepo->getGroup($groupId);
+    }
 }
 ?>

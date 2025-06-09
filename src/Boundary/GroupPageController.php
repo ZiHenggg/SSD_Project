@@ -93,6 +93,20 @@ class GroupPageController
         return $roles;
     }
 
+    public function displayGroupDetails(int $groupId): ?array
+    {
+        $group = $this->groupControl->getGroupInfo($groupId);
+        if (!$group) {
+            return null; // Group not found
+        }
+
+        $members = $this->groupMembershipControl->getGroupMembers($groupId);
+        return [
+            'group' => $group,
+            'members' => $members,
+        ];
+    }
+
     // public function onDeleteGroup(int $groupId, string $adminId): void
     // {
     //     try {
