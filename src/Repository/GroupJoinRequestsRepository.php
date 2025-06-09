@@ -1,6 +1,6 @@
 <?php
-namespace Ngmin\Ict2216G5\Repository;
-use Ngmin\Ict2216G5\Entity\GroupJoinRequests; 
+namespace App\Repository;
+use App\Entity\GroupJoinRequests; 
 
 interface GroupJoinRequestsRepository
 {

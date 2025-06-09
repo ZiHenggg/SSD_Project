@@ -1,5 +1,5 @@
 <?php
-namespace Ngmin\Ict2216G5\Entity;
+namespace App\Entity;
 use DateTime;
 
 class GroupJoinRequests {

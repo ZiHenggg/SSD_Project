@@ -84,6 +84,19 @@ class GroupMembershipMapper implements GroupMembershipRepository
             ':role' => $role
         ]);
     }
+
+    public function getGroupId(int $groupMembersId): ?int
+    {
+        $stmt = $this->db->prepare("
+            SELECT groupId 
+            FROM groupMembers 
+            WHERE groupMembersId = :groupMembersId
+        ");
+        $stmt->execute([':groupMembersId' => $groupMembersId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ? (int) $result['groupId'] : null;
+    }
 }
 
 ?>

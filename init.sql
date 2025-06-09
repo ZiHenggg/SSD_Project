@@ -99,11 +99,13 @@ CREATE TABLE reviews (
   reviewId INT AUTO_INCREMENT PRIMARY KEY,
   reviewerId INT NOT NULL,
   revieweeId INT NOT NULL,
+  groupMembersId INT NOT NULL,
   reviewRating INT NOT NULL,
   description TEXT NOT NULL,
   reviewDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (reviewerId) REFERENCES students(studentId),
-  FOREIGN KEY (revieweeId) REFERENCES students(studentId)
+  FOREIGN KEY (revieweeId) REFERENCES students(studentId),
+  FOREIGN KEY (groupMembersId) REFERENCES groupMembers(groupMembersId)
 );
 
 -- reply table
@@ -124,7 +126,9 @@ INSERT INTO modules (moduleCode, moduleName) VALUES
 
 INSERT INTO labGroups (labGroupCode, moduleCode) VALUES
 ('P1', 'ICT2216'), 
-('P2', 'ICT2216');
+('P2', 'ICT2216'), 
+('P1', 'ICT2114'), 
+('P2', 'ICT2114');
 
 INSERT INTO students (studentId, name, email, password) VALUES
 (1000001, 'Alice Tan1', 'alice@example.com', 'pass123'),
@@ -132,24 +136,32 @@ INSERT INTO students (studentId, name, email, password) VALUES
 (1000003, 'Charlie Lim1', 'charlie@example.com', 'pass123');
 
 INSERT INTO studentStats (studentId, totalReviews, averageRating) VALUES
-(1000001, 3, 4.33),
-(1000002, 1, 5.00),
+(1000001, 2, 3.50),
+(1000002, 1, 4.00),
 (1000003, 0, 0.00);
 
 INSERT INTO `groups` (groupName, acadYear, trimester, moduleCode, labGroupCode, groupNumber, noOfMembers, maxGroupSize, groupStatus) VALUES
-('[2024/25 T3] ICT2216-P1-G5', '2024/25', 'T3', 'ICT2216', 'P1', 5, 6, 7, 'active');
+('[2024/25 T3] ICT2216-P1-G5', '2024/25', 'T3', 'ICT2216', 'P1', 5, 6, 7, 'active'),
+('[2024/25 T3] ICT2114-P2-G1', '2024/25', 'T3', 'ICT2114', 'P2', 1, 2, 5, 'active');
 
 INSERT INTO groupMembers (groupId, studentId, role) VALUES
-(1, 1, 'admin'),
-(1, 2, 'member');
+(1, 1000001, 'admin'),
+(1, 1000002, 'member'),
+(2, 1000003, 'admin'),
+(2, 1000001, 'member');
 
 INSERT INTO groupJoinRequests (groupId, requesterId) VALUES
-(1, 3);
+(2, 1000002),
+(1, 1000003);
 
-INSERT INTO reviews (reviewerId, revieweeId, reviewRating, description) VALUES
-(1, 2, 4, 'Great teamwork and communication!');
+INSERT INTO reviews (reviewerId, revieweeId, groupMembersId, reviewRating, description) VALUES
+(1000001, 1000002, 1, 4, 'Great teamwork and communication!'),
+(1000001, 1000003, 4, 4, 'Fun teammate'),
+(1000002, 1000001, 2, 4, 'Good teammate, very helpful!'),
+(1000003, 1000001, 3, 3, 'Excellent contributions to the project!');
 
 INSERT INTO reply (reviewId, responderId, justification) VALUES
-(1, 2, 'Thank you! I really appreciated the project.');
+(1, 1000002, 'Thank you! I really appreciated the project.'),
+(4, 1000001, 'Thanks!');
 
 SET FOREIGN_KEY_CHECKS = 1;

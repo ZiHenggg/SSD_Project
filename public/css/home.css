@@ -7,6 +7,10 @@
     width: 50%;
 }
 
+.home .group-container {
+    border-radius: 0;
+}
+
 .group-wrapper, .info-wrapper {
     width: 80%;
     margin: 2% auto;

@@ -6,12 +6,14 @@ use App\Mapper\StudentMapper;
 use App\Mapper\ReviewMapper;
 use App\Mapper\ReplyMapper;
 use App\Mapper\GroupMapper;
+use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupJoinRequestsMapper;
 
 // Initialize Repositories
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $groupRepo = new GroupMapper($pdo);
+$groupMembersRepo = new GroupMembershipMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 
@@ -57,19 +59,17 @@ ob_start();
                 <?php if (count($groupJoinRequests) > 0): ?>
                     <?php foreach ($groupJoinRequests as $request): ?>
                         <?php
-                        $group = $groupRepo->getGroup($request->getGroupId());
+                            $group = $groupRepo->getGroup($request->getGroupId());
                         ?>
                         <div class="mt-3 group-item">
                             <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
                             <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, TODO: ADD MODULE NAME</span>
-                            <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?>
-                                <?= htmlspecialchars($group->getTrimester()) ?>]</span>
-                            <span
-                                class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+                            <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> <?= htmlspecialchars($group->getTrimester()) ?>]</span>
+                            <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p>No pending reviews.</p>
+                    <p>No pending requests.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -82,9 +82,9 @@ ob_start();
                 </div>
                 <div class="rating-stars d-flex flex-row align-items-center">
                     <?php
-                    $fullStars = floor($averageRating);
-                    $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
-                    $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                        $fullStars = floor($averageRating);
+                        $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
+                        $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
                     ?>
                     <?php for ($i = 0; $i < $fullStars; $i++): ?>
                         <img src="img/star-filled.svg" alt="Full Star Rating" />
@@ -104,10 +104,10 @@ ob_start();
                             <div class="top-wrapper d-flex flex-row align-items-center">
                                 <div class="rating-stars d-flex flex-row align-items-center">
                                     <?php
-                                    $rating = $review->getRating();
-                                    $fullStars = floor($rating);
-                                    $halfStar = ($rating - $fullStars) >= 0.5 ? true : false;
-                                    $emptyStars = floor(5 - ($rating));
+                                        $rating = $review->getRating();
+                                        $fullStars = floor($rating);
+                                        $halfStar = ($rating - $fullStars) >= 0.5 ? true : false;
+                                        $emptyStars = floor(5 - ($rating));
                                     ?>
                                     <?php for ($i = 0; $i < $fullStars; $i++): ?>
                                         <img src="img/star-filled.svg" alt="Full Star Rating" />
@@ -120,21 +120,24 @@ ob_start();
                                     <?php endfor; ?>
                                 </div>
                                 <div class="timestamp">
-                                    <span
-                                        class="text-muted small"><?= htmlspecialchars($review->getReviewDate()->format('D, d M Y H:i:s')) ?></span>
+                                    <span class="text-muted small"><?= htmlspecialchars($review->getReviewDate()->format('D, d M Y H:i:s')) ?></span>
                                 </div>
                             </div>
                             <div class="review-content">
                                 <div class="review-group-name mt-2">
-                                    <p class="mb-0"><strong>still hardcoded [24/25 T3]-ICT2216-P1-G4</strong></p>
+                                    <?php
+                                        $groupId = $groupMembersRepo->getGroupId($review->getGroupMembersId());
+                                        $group = $groupRepo->getGroup($groupId);
+                                    ?>
+                                    <p class="mb-0"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></p>
                                 </div>
                                 <div class="review-text mt-2">
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
                                 </div>
                                 <?php
-                                $reply = $replyRepo->getReplyByReviewId($review->getReviewId());
-                                if ($reply):
-                                    ?>
+                                    $reply = $replyRepo->getReplyByReviewId($review->getReviewId());
+                                    if ($reply):
+                                ?>
                                     <div class="reply-section borderline mt-3">
                                         <div class="reply-title"><strong>Reply:</strong></div>
                                         <div class="reply-text">
@@ -143,8 +146,7 @@ ob_start();
                                     </div>
                                 <?php else: ?>
                                     <div class="reply-section mt-3">
-                                        <a href="#"
-                                            class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                        <a href="#" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
                                             Reply
                                         </a>
                                     </div>

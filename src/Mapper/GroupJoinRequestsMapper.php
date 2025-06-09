@@ -1,8 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
+namespace App\Mapper;
 
-use Ngmin\Ict2216G5\Entity\GroupJoinRequests;
-use Ngmin\Ict2216G5\Repository\GroupJoinRequestsRepository;
+use App\Entity\GroupJoinRequests;
+use App\Repository\GroupJoinRequestsRepository;
 use PDO;
 
 class groupJoinRequestsMapper implements GroupJoinRequestsRepository {

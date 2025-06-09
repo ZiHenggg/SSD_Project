@@ -1,6 +1,6 @@
 <?php
 
-namespace Ngmin\Ict2216G5\Entity;
+namespace App\Entity;
 
 use DateTime;
 
@@ -23,6 +23,9 @@ class Review {
     public function getRevieweeId(): int {
         return $this->revieweeId;
     }
+    public function getGroupMembersId(): int {
+        return $this->groupMembersId;
+    }
     public function getRating(): int {
         return $this->rating;
     }
@@ -43,6 +46,9 @@ class Review {
     private function setRevieweeId(int $revieweeId): void {
         $this->revieweeId = $revieweeId;
     }
+    private function setGroupMembersId(int $groupMembersId): void {
+        $this->groupMembersId = $groupMembersId;
+    }
     private function setRating(int $rating): void {
         $this->rating = $rating;
     }
@@ -54,10 +60,11 @@ class Review {
     }
 
     // Constructor
-    public function __construct(int $reviewId, int $reviewerId, int $revieweeId, int $rating, string $reviewDescription, string $reviewDate) {
+    public function __construct(int $reviewId, int $reviewerId, int $revieweeId, int $groupMembersId, int $rating, string $reviewDescription, string $reviewDate) {
         $this->reviewId = $reviewId;
         $this->reviewerId = $reviewerId;
         $this->revieweeId = $revieweeId;
+        $this->groupMembersId = $groupMembersId;
         $this->rating = $rating;
         $this->reviewDescription = $reviewDescription;
         $this->reviewDate = new DateTime($reviewDate);  // Convert to DateTime object

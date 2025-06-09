@@ -1,8 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
+namespace App\Mapper;
 
-use Ngmin\Ict2216G5\Entity\Reply;
-use Ngmin\Ict2216G5\Repository\ReplyRepository;
+use App\Entity\Reply;
+use App\Repository\ReplyRepository;
 use PDO;
 
 class ReplyMapper implements ReplyRepository {

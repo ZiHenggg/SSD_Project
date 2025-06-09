@@ -1,8 +1,8 @@
 <?php
-namespace Ngmin\Ict2216G5\Mapper;
+namespace App\Mapper;
 
-use Ngmin\Ict2216G5\Entity\Review;
-use Ngmin\Ict2216G5\Repository\ReviewRepository;
+use App\Entity\Review;
+use App\Repository\ReviewRepository;
 use PDO;
 
 class ReviewMapper implements ReviewRepository {
@@ -15,7 +15,7 @@ class ReviewMapper implements ReviewRepository {
 
     public function getReviewsForReviewee(int $studentId): array {
         $stmt = $this->dbConnection->prepare("
-            SELECT rev.reviewId, rev.reviewerId, rev.revieweeId, rev.`description`, rev.reviewRating, rev.reviewDate, 
+            SELECT rev.reviewId, rev.reviewerId, rev.revieweeId, rev.groupMembersId, rev.`description`, rev.reviewRating, rev.reviewDate, 
                         rep.replyId
             FROM reviews rev
             LEFT JOIN reply rep ON rev.reviewId = rep.reviewId 
@@ -32,6 +32,7 @@ class ReviewMapper implements ReviewRepository {
                 $review['reviewId'],
                 $review['reviewerId'],
                 $review['revieweeId'],
+                $review['groupMembersId'],
                 $review['reviewRating'],
                 $review['description'],
                 $review['reviewDate']
