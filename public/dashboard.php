@@ -139,41 +139,44 @@ ob_start(); // Capture the page content
                                     </li>
                                 <?php endforeach; ?>
                             </ol>
-                            <div class="delete-section" data-group-id="group1">
-                                <div
-                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                                    Delete Group
+                            <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
+
+                                <div class="delete-section" data-group-id="group1">
+                                    <div
+                                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
+                                        Delete Group
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="delete-modal" data-group-id="group1">
-                                <div class="delete-group-wrapper">
-                                    <form class="delete-form" action="" method="post">
-                                        <div class="delete-group-header">
-                                            <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
-                                        </div>
-                                        <div class="delete-group-body">
-                                            This action cannot be undone. Current members will have to find another group.
-                                        </div>
-                                        <div class="my-4">
-                                            <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
-                                                name="delete group" value="true">
-                                            <span class="delete-group-ack">I acknowledge the above and agree to delete the
-                                                group.</span>
-                                        </div>
-                                        <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
-                                            <div class="cancel-section mx-4">
-                                                <span class="text-center"><small>Cancel</small></span>
+                                <div class="delete-modal" data-group-id="group1">
+                                    <div class="delete-group-wrapper">
+                                        <form class="delete-form" action="" method="post">
+                                            <div class="delete-group-header">
+                                                <h5 class="delete-group-title"><strong>Delete “[24/25 T3]-ICT2216-P1-G4”?</strong></h5>
                                             </div>
-                                            <div class="confirm-section">
-                                                <button type="submit"
-                                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
-                                                    Confirm
-                                                </button>
+                                            <div class="delete-group-body">
+                                                This action cannot be undone. Current members will have to find another group.
                                             </div>
-                                        </div>
-                                    </form>
+                                            <div class="my-4">
+                                                <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
+                                                    name="delete group" value="true">
+                                                <span class="delete-group-ack">I acknowledge the above and agree to delete the
+                                                    group.</span>
+                                            </div>
+                                            <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
+                                                <div class="cancel-section mx-4">
+                                                    <span class="text-center"><small>Cancel</small></span>
+                                                </div>
+                                                <div class="confirm-section">
+                                                    <button type="submit"
+                                                        class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
+                                                        Confirm
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
+                                <?php endif; ?>
                             </div>
                             <?php endforeach; ?>
                     <?php else: ?>
