@@ -35,7 +35,11 @@ ob_start();
         <?php if (count($groups) > 0): ?>
             <?php foreach ($groups as $group): ?>
                 <div class="group-item">
-                    <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
+                    <a href="group_info.php?groupId=<?= $group->getGroupId() ?>">
+                        <?= htmlspecialchars($group->getGroupName()) ?>
+                    </a>
+
+                    <!-- <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span> -->
                     <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?></span>
                     <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?>]</span>
                     <span class="member-count"><?= $group->getNoOfMembers() ?>/<?= $group->getMaxMembers() ?></span>
