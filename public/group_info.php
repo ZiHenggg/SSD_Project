@@ -4,10 +4,12 @@ require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupMembershipMapper;
+use App\Mapper\GroupJoinRequestsMapper;
 
 $title = "Group Info";
 ob_start();
 
+$studentId = $_SESSION['user']['id'] ?? null;
 $groupId = isset($_GET['groupId']) ? (int)$_GET['groupId'] : null;
 
 if (!$groupId) {
@@ -16,6 +18,9 @@ if (!$groupId) {
     include '_layout.php';
     exit;
 }
+
+$requestMapper = new GroupJoinRequestsMapper($pdo);
+$hasRequested = $requestMapper->requestExists($studentId, $groupId);
 
 $groupMapper = new GroupMapper($pdo);
 $memberMapper = new GroupMembershipMapper($pdo);
@@ -31,7 +36,15 @@ $members = $memberMapper->getMembers($groupId);
             <h2><?= htmlspecialchars($group->getGroupName()) ?></h2>
             <p><?= htmlspecialchars($group->getModuleCode()) ?> [<?= htmlspecialchars($group->getAcadYear()) ?> <?= htmlspecialchars($group->getTrimester()) ?>]</p>
         </div>
-        <button class="join-button">Request to Join</button>
+        <form method="POST" action="process_group_request.php" style="display: inline;">
+            <input type="hidden" name="groupId" value="<?= $groupId ?>">
+            <?php if ($hasRequested): ?>
+                <button class="join-button" disabled style="background-color: grey;">Requested</button>
+            <?php else: ?>
+                <button class="join-button" type="submit">Request to Join</button>
+            <?php endif; ?>
+        </form>
+
     </div>
 
     <div class="members-section">

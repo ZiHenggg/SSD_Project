@@ -134,7 +134,7 @@
     border-bottom: none;
 }
 
-.crown {
-    color: gold;
-    font-size: 16px;
+.join-button[disabled] {
+    background-color: grey;
+    cursor: not-allowed;
 }

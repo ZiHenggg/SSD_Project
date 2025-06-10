@@ -56,5 +56,36 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
 
         return $requests;
     }
+
+    public function addRequest(GroupJoinRequests $request): void 
+    {
+        $stmt = $this->dbConnection->prepare("
+            INSERT INTO groupjoinrequests (groupId, requesterId, joinStatus, requestedAt)
+            VALUES (:groupId, :requesterId, :joinStatus, :requestedAt)
+        ");
+
+        $stmt->execute([
+            ':groupId' => $request->getGroupId(),
+            ':requesterId' => $request->getRequesterId(),
+            ':joinStatus' => $request->getJoinStatus(),
+            ':requestedAt' => $request->getRequestAt()->format('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function requestExists(int $studentId, int $groupId): bool
+    {
+        $stmt = $this->dbConnection->prepare("
+            SELECT COUNT(*) FROM groupjoinrequests
+            WHERE groupId = :groupId AND requesterId = :studentId
+        ");
+        $stmt->execute([
+            ':groupId' => $groupId,
+            ':studentId' => $studentId
+        ]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
+
 } 
 ?>

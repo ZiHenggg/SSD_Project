@@ -1,6 +1,7 @@
 <?php
 namespace App\Control;
 
+use App\Entity\GroupJoinRequests;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupRepository;
 use App\Repository\GroupJoinRequestsRepository;
@@ -70,5 +71,28 @@ class GroupMembershipControl
     {
         return $this->groupJoinRequestsRepo->getRequestsByGroup($groupId);
     }
+
+    public function requestExists(int $studentId, int $groupId): bool
+    {
+        return $this->groupJoinRequestsRepo->requestExists($studentId, $groupId);
+    }
+
+    public function submitJoinRequest(int $groupId, int $studentId): void
+    {
+        if ($this->groupJoinRequestsRepo->requestExists($groupId, $studentId)) {
+            throw new \Exception("A join request already exists for this group.");
+        }
+
+        $request = new GroupJoinRequests(
+            0, // Auto-generated ID
+            $groupId,
+            $studentId,
+            'pending',
+            new \DateTime()
+        );
+
+        $this->groupJoinRequestsRepo->addRequest($request);
+    }
+
 }
 ?>
