@@ -38,6 +38,7 @@ class GroupMembershipController
             return ['error' => 'An error occurred while fetching join requests: ' . $e->getMessage()];
         }
     }
+    
     public function onJoinGroupRequest(int $groupId, int $studentId): void
     {
         if ($this->groupMembershipControl->requestExists($groupId, $studentId)) {
@@ -45,6 +46,11 @@ class GroupMembershipController
         }
 
         $this->groupMembershipControl->submitJoinRequest($groupId, $studentId);
+    }
+
+    public function onCheckIfRequested(int $groupId, int $studentId): bool
+    {
+        return $this->groupMembershipControl->requestExists($groupId, $studentId);
     }
 
 }

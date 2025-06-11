@@ -95,6 +95,10 @@ nav .search {
     font-weight: bold;
 }
 
+.dropdown-toggle:hover {
+    cursor: pointer;
+}
+
 
 @media screen and (max-width: 720px) {
     .logo-wrapper .text {

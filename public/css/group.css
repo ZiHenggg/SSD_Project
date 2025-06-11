@@ -37,12 +37,13 @@
     padding: 10px 24px;
     border-radius: 8px;
     font-weight: 600;
-    text-transform: uppercase;
     transition: all 0.3s;
+    text-decoration: none;
 }
 
 .btn-cancel:hover {
     background: #f0f0ff;
+    color: var(--primary);
 }
 
 .btn-submit {
@@ -52,12 +53,11 @@
     padding: 10px 24px;
     border-radius: 8px;
     font-weight: 600;
-    text-transform: uppercase;
     transition: all 0.3s;
 }
 
 .btn-submit:hover {
-    background: #6944ff;
+    background: var(--accent);
 }
 
 .form-buttons {
@@ -95,7 +95,7 @@
 }
 
 .join-button {
-    background-color: #7b68ee;
+    background-color: var(--primary);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -106,7 +106,7 @@
 }
 
 .join-button:hover {
-    background-color: #6957d1;
+    background-color: var(--accent);
 }
 
 .members-section h3 {
@@ -114,27 +114,24 @@
     margin-bottom: 10px;
 }
 
-.members-list {
-    list-style: none;
-    padding: 0;
-    background-color: #f3edff;
-    border-radius: 10px;
-    padding: 10px 0;
+.group-info .info-item {
+    padding: 5px 0 25px 60px;
 }
 
-.members-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
-    border-bottom: 1px solid #e0d7f3;
-    font-size: 14px;
+.group-info .profile-link {
+    color: var(--text);
+    transition: all 0.3s ease;
 }
 
-.members-list li:last-child {
-    border-bottom: none;
+.group-info .current-members.name-list > li {
+    padding: 18px 0;
+}
+
+.group-info .profile-link:hover {
+    color: var(--primary);
 }
 
 .join-button[disabled] {
-    background-color: grey;
+    background-color: var(--text-secondary);
     cursor: not-allowed;
 }

@@ -183,15 +183,15 @@
     width: 32px;
 }
 
-.pending-request > li::marker, .pending-request > li a {
+.pending-request > li::marker, .pending-request .profile-link {
     color: var(--primary);
 }
 
-.current-members > li::marker, .current-members > li > div > a {
+.current-members > li::marker, .current-members .profile-link {
     color: var(--text);
 }
 
-.current-members > li.user > div > a, .current-members > li.user::marker {
+.current-members > li.user .profile-link, .current-members > li.user::marker {
     color: var(--accent);
 }
 

@@ -5,6 +5,11 @@ require_once __DIR__ . '/../src/auth_check.php';
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupJoinRequestsMapper;
+use App\Control\GroupControl;
+use App\Control\GroupMembershipControl;
+use App\Control\GroupJoinRequestsControl;
+use App\Boundary\GroupPageController;
+use App\Boundary\GroupMembershipController;
 
 $title = "Group Info";
 ob_start();
@@ -19,41 +24,56 @@ if (!$groupId) {
     exit;
 }
 
-$requestMapper = new GroupJoinRequestsMapper($pdo);
-$hasRequested = $requestMapper->requestExists($studentId, $groupId);
+$groupRepo = new GroupMapper($pdo);
+$groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 
-$groupMapper = new GroupMapper($pdo);
-$memberMapper = new GroupMembershipMapper($pdo);
-                  
-$group = $groupMapper->getGroup($groupId);
-$members = $memberMapper->getMembers($groupId);
+$hasRequested = $groupMembershipController->onCheckIfRequested($studentId, $groupId);
+$groupData = $groupController->displayGroupDetails($groupId);
+$group = $groupData['group'];
+$members = $groupData['members'];
 
 ?>
 
-<div class="container">
+<div class="group-info container">
     <div class="group-header">
         <div class="group-title">
             <h2><?= htmlspecialchars($group->getGroupName()) ?></h2>
-            <p><?= htmlspecialchars($group->getModuleCode()) ?> [<?= htmlspecialchars($group->getAcadYear()) ?> <?= htmlspecialchars($group->getTrimester()) ?>]</p>
+            <p><?= htmlspecialchars($group->getModuleCode()) ?> [<?= htmlspecialchars($group->getAcadYear()) ?> T<?= htmlspecialchars($group->getTrimester()) ?>]</p>
         </div>
         <form method="POST" action="process_group_request.php" style="display: inline;">
             <input type="hidden" name="groupId" value="<?= $groupId ?>">
             <?php if ($hasRequested): ?>
-                <button class="join-button" disabled style="background-color: grey;">Requested</button>
+                <button class="join-button" disabled>Requested</button>
             <?php else: ?>
                 <button class="join-button" type="submit">Request to Join</button>
             <?php endif; ?>
         </form>
-
     </div>
 
     <div class="members-section">
         <h3>Members (<?= count($members) ?>/<?= $group->getMaxMembers() ?>)</h3>
-        <ul class="members-list"> 
-            <?php foreach ($members as $index => $member): ?>
-                <li><span><?= ($index + 1) ?>. <?= htmlspecialchars($member->getStudentName()) ?>, <?= htmlspecialchars($member->getStudentId()) ?></span></li>
+        <ol class="info-item showing current-members name-list">                     
+            <?php foreach ($members as $member):
+                if (($member->getRole() === 'admin') && ($member->getStudentId() == $studentId)): ?>
+                    <li class="user admin">
+                <?php elseif($member->getRole() === 'admin'): ?>
+                    <li class="admin">
+                <?php elseif($member->getStudentId() == $studentId): ?>
+                    <li class="user">
+                <?php else: ?>
+                    <li>
+                <?php endif; ?>
+                        <div class="member-wrapper">
+                            <a class="profile-link text-decoration-none" href="#"><?= htmlspecialchars($member->getStudentName())?>, <?= htmlspecialchars($member->getStudentId())?></a>
+                        </div>
+                    </li>
             <?php endforeach; ?>
-        </ul>
+        </ol>
     </div>
 </div>
 
