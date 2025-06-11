@@ -13,9 +13,9 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
         $this->dbConnection = $dbConnection;
     }
 
-    public function getRequestsByStudent(int $requesterId): array {
-        $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupjoinrequests WHERE requesterId = :requesterId");
-        $stmt->bindParam(':requesterId', $requesterId, PDO::PARAM_INT);
+    public function getRequestsByStudent(int $studentId): array {
+        $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupjoinrequests WHERE requesterId = :studentId");
+        $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
         $stmt->execute();
 
         $requestsData = $stmt->fetchAll(PDO::FETCH_ASSOC);

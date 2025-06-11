@@ -133,22 +133,26 @@ INSERT INTO labGroups (labGroupCode, moduleCode) VALUES
 INSERT INTO students (studentId, name, email, password) VALUES
 (1000001, 'Alice Tan1', 'alice@example.com', 'pass123'),
 (1000002, 'Bob Lee1', 'bob@example.com', 'pass123'),
-(1000003, 'Charlie Lim1', 'charlie@example.com', 'pass123');
+(1000003, 'Charlie Lim1', 'charlie@example.com', 'pass123'),
+(1000004, 'David Wong1', 'david@example.com', 'pass123');
 
 INSERT INTO studentStats (studentId, totalReviews, averageRating) VALUES
 (1000001, 2, 3.50),
 (1000002, 1, 4.00),
-(1000003, 1, 4.00);
+(1000003, 1, 4.00),
+(1000004, 0, 0.00);
 
 INSERT INTO `groups` (groupName, acadYear, trimester, moduleCode, labGroupCode, groupNumber, noOfMembers, maxGroupSize, groupStatus) VALUES
-('[2024/25 T3] ICT2216-P1-G5', '2024/25', 'T3', 'ICT2216', 'P1', 5, 6, 7, 'active'),
-('[2024/25 T3] ICT2114-P2-G1', '2024/25', 'T3', 'ICT2114', 'P2', 1, 2, 5, 'active');
+('[2024/25 T3] ICT2216-P1-G5', '2024/25', '3', 'ICT2216', 'P1', 5, 3, 7, 'active'),
+('[2024/25 T3] ICT2114-P2-G1', '2024/25', '3', 'ICT2114', 'P2', 1, 3, 5, 'active');
 
 INSERT INTO groupMembers (groupId, studentId, role) VALUES
 (1, 1000001, 'admin'),
 (1, 1000002, 'member'),
+(1, 1000004, 'member'),
 (2, 1000003, 'admin'),
-(2, 1000001, 'member');
+(2, 1000001, 'member'),
+(2, 1000004, 'member');
 
 INSERT INTO groupJoinRequests (groupId, requesterId) VALUES
 (2, 1000002),

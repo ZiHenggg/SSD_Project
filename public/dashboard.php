@@ -6,26 +6,32 @@ use App\Mapper\GroupMapper;
 use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\StudentMapper;
+use App\Mapper\ReviewMapper;
 use App\Control\GroupControl;
 use App\Control\GroupJoinRequestsControl;
 use App\Control\GroupMembershipControl;
 use App\Control\StudentControl;
+use App\Control\ReviewControl;
 use App\Boundary\GroupPageController;
 use App\Boundary\GroupMembershipController;
 use App\Boundary\StudentPageController;
+use App\Boundary\ReviewPageController;
 
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
+$reviewRepo = new ReviewMapper($pdo);
 
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
+$reviewControl = new ReviewControl($reviewRepo);
 
 $groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 $studentPageController = new StudentPageController($studentControl);
+$reviewPageController = new ReviewPageController($reviewControl, $pdo);
 
 // Get user from session
 $student = $_SESSION['user'];
@@ -120,6 +126,7 @@ ob_start(); // Capture the page content
                             <?php
                                 $groupData = $groupController->displayGroupDetails($group->getGroupId());
                                 $groupMembers = $groupData['members'];
+
                                 
                                 foreach ($groupMembers as $member):
                                     if (($member->getRole() === 'admin') && ($member->getStudentId() == $studentId)): ?>
@@ -135,8 +142,11 @@ ob_start(); // Capture the page content
                                             <a class="profile-link text-decoration-none" href="#"><?= htmlspecialchars($member->getStudentName())?>, <?= htmlspecialchars($member->getStudentId())?></a>
                                             <?php if ($member->getStudentId() != $studentId): ?>
                                                 <div class="reply-section my-2 py-1">
-                                                    <a href="#"
-                                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                    <?php if ($reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId())): ?>
+                                                        <a href="#" class="disabled text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                    <?php else: ?>
+                                                        <a href="#" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                    <?php endif; ?>
                                                     Review
                                                 </a>
                                             </div>

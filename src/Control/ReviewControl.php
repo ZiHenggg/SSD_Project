@@ -24,5 +24,9 @@ class ReviewControl
         return $this->reviews;
     }
     
+    public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool
+    {
+        return $this->reviewRepo->hasUserReviewed($reviewerId, $revieweeId, $groupId);
+    }
 }
 ?>

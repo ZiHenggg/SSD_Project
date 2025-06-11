@@ -32,8 +32,6 @@
 .group-item, .info-item {
     position: relative;
     background-color: var(--secondary-25);
-    /* padding: 3%;
-    padding-left: 5%; */
     padding: 20px;
     padding-left: 34px;
     border-radius: 25px;
@@ -116,8 +114,18 @@
     transition: all 0.3s ease;
 }
 
+.home .reply-button.disabled {
+    background-color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
 .home .reply-button:hover {
     background-color: var(--accent);
+}
+
+.home .reply-button.disabled:hover {
+    background-color: var(--text-secondary);
+    cursor: not-allowed;
 }
 
 .delete-section {

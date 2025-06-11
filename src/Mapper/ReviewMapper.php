@@ -43,5 +43,19 @@ class ReviewMapper implements ReviewRepository {
 
         return $reviewObjects;
     }
+
+    public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool {
+        $stmt = $this->dbConnection->prepare("
+            select count(*) from reviews
+            inner join groupmembers on
+            studentId = reviewerId where reviewerId = :reviewerId and revieweeId = :revieweeId and groupId = :groupId;
+        ");
+        $stmt->bindParam(':reviewerId', $reviewerId, PDO::PARAM_INT);
+        $stmt->bindParam(':revieweeId', $revieweeId, PDO::PARAM_INT);
+        $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (bool) $stmt->fetchColumn();
+    }
 } 
 ?>

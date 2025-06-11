@@ -30,5 +30,14 @@ class ReviewPageController
         }
     }
 
+    public function onCheckIfReviewed(int $reviewerId, int $revieweeId, int $groupId): bool
+    {
+        try {
+            return $this->reviewControl->hasUserReviewed($reviewerId, $revieweeId, $groupId);
+        } catch (Exception $e) {
+            throw new Exception('An error occurred while checking review status: ' . $e->getMessage());
+        }
+    }
+
 }
 ?>

@@ -12,7 +12,7 @@ interface ReviewRepository {
 
     public function getReviewsForReviewee(int $studentId): array;
 
-    // public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool;
+    public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool;
 
     // public function getAllReviews(): array;
 }
