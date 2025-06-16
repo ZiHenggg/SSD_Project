@@ -31,10 +31,30 @@ class ReplyControl
         return $reply;
     }
     
-
     public function hasUserReplied(int $reviewId): bool
     {
         return $this->replyRepo->hasReply($reviewId);
+    }
+
+    public function submitReply(int $reviewId, int $responderId, string $justification): void
+    {
+        if (!$this->studentRepo->getStudentById($responderId)) {
+            throw new \Exception("Invalid responder ID: $responderId");
+        }
+
+        if (!$this->reviewRepo->getReview($reviewId)) {
+            throw new \Exception("Review not found with ID: $reviewId");
+        }
+
+        $reply = new Reply(
+            null,
+            $reviewId,
+            $responderId,
+            $justification,
+            date('Y-m-d H:i:s')
+        );
+
+        $this->replyRepo->addReply($reply);
     }
 }
 ?>

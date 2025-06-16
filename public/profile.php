@@ -48,9 +48,11 @@ $reviewController = new ReviewPageController($reviewControl, $pdo);
 $replyController = new ReplyPageController($replyControl, $pdo);
 
 // !!!!!!!!!!!!!!!!!!!!!!!!
-// Fetch info for the logged-in user (update when we implement viewing of other profiles)
+// Fetch info for user profile (update when we implement viewing of other profiles)
 $student = $studentController->showUserProfile($_SESSION['user']['id']);
 // !!!!!!!!!!!!!!!!!!!!!!!!
+
+$loggedInId = $_SESSION['user']['id'];
 
 $reviewResponse = $reviewController->onViewReceivedReviews($student->getStudentId());
 $reviews = $reviewResponse['reviews'] ?? []; 
@@ -66,6 +68,8 @@ ob_start();
 
 <!-- Page-specific content starts here -->
 <div class="profile">
+    <?php displayErrorMessage(); ?>
+    <?php displaySuccessMessage(); ?>
     <h2 class="mb-5">My Profile</h2>
     <div class="content-container d-flex justify-content-between">
         <div class="info-pending-wrapper">
@@ -175,11 +179,17 @@ ob_start();
                                             <p class="mb-0"><?= htmlspecialchars($reply->getJustification()) ?></p>
                                         </div>
                                     </div>
-                                <?php else: ?>
+                                <?php elseif ($student->getStudentId() === $_SESSION['user']['id']): ?>
                                     <div class="reply-section mt-3">
-                                        <a href="#" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
-                                            Reply
-                                        </a>
+                                        <form action="process_reply_create.php" method="post">
+                                            <input type="hidden" name="review_id" value="<?= htmlspecialchars($review->getReviewId()) ?>">
+                                            <input type="hidden" name="reviewer_id" value="<?= htmlspecialchars($review->getReviewerId()) ?>">
+                                            <input type="hidden" name="responder_id" value="<?= htmlspecialchars($review->getRevieweeId()) ?>">
+                                            <div class="d-flex flex-row align-items-center justify-content-around">
+                                                <textarea name="justification" class="form-control m-0" placeholder="Enter a reply" rows="1" required=""></textarea>
+                                                <button type="submit" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 <?php endif; ?>
                             </div>

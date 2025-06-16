@@ -39,11 +39,12 @@ try {
         $description,
         date('Y-m-d H:i:s')
     );
-    // Redirect or show success
+    
+    unset($_SESSION['review_context']); // Clear context after successful submission
+    $_SESSION['success'] = "Review submitted successfully.";
     header("Location: dashboard.php");
     exit;
 } catch (Exception $e) {
-    // Handle error: log it or show message
     $_SESSION['error'] = $e->getMessage();
     header("Location: review_create.php");
     exit;

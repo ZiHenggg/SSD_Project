@@ -6,7 +6,7 @@ interface ReviewRepository {
     
     public function addReview(Review $review): void;
     
-    // public function getReview(int $reviewId): ?Review;
+    public function getReview(int $reviewId): ?Review;
 
     // public function getReviewsByReviewer(int $studentId): array;
 

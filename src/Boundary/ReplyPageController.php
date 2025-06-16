@@ -36,5 +36,17 @@ class ReplyPageController
         }
     }
 
+    public function onSubmitReply(int $reviewId, int $responderId, string $justification): void
+    {
+        if (empty($justification)) {
+            throw new Exception("Justification cannot be empty.");
+        }
+
+        try {
+            $this->replyControl->submitReply($reviewId, $responderId, $justification);
+        } catch (Exception $e) {
+            throw new Exception('An error occurred while submitting the reply: ' . $e->getMessage());
+        }
+    }
 }
 ?>

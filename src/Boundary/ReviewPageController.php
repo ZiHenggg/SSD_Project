@@ -41,6 +41,10 @@ class ReviewPageController
 
     public function onSubmitReview(int $reviewerId, int $revieweeId, int $groupId, int $rating, string $description): void
     {
+        if ($this->onCheckIfReviewed($reviewerId, $revieweeId, $groupId)) {
+            throw new Exception("You have already reviewed this user in this group.");
+        }
+        
         if ($rating < 1 || $rating > 5 || empty($description)) {
             throw new Exception("Invalid input. Please fill out all fields correctly.");
         }

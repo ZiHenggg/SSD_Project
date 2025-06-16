@@ -48,6 +48,8 @@ ob_start(); // Capture the page content
 
 <div class="grayscreen"></div>
 <div class="mx-5">
+    <?php displayErrorMessage(); ?>
+    <?php displaySuccessMessage(); ?>
     <h2>Welcome to your dashboard, Student ID: <?= htmlspecialchars($student['id']) ?></h2>
     <p>Name: <?= htmlspecialchars($student['name']) ?></p>
 </div>

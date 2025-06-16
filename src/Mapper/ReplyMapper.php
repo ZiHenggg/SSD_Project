@@ -24,6 +24,7 @@ class ReplyMapper implements ReplyRepository {
             return new Reply(
                 $replyData['replyId'],
                 $reviewId,
+                $replyData['responderId'],
                 $replyData['justification'],
                 $replyData['replyDate']
             );
@@ -40,5 +41,20 @@ class ReplyMapper implements ReplyRepository {
         return $stmt->fetchColumn() > 0;
     }
     
+    public function addReply(Reply $reply): void {
+        $stmt = $this->dbConnection->prepare("INSERT INTO reply (reviewId, responderId, justification) VALUES (:reviewId, :responderId, :justification)");
+        
+        $reviewId = $reply->getReviewId();
+        $responderId = $reply->getResponderId();
+        $justification = $reply->getJustification();
+
+        $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
+        $stmt->bindParam(':responderId', $responderId, PDO::PARAM_INT);
+        $stmt->bindParam(':justification', $justification, PDO::PARAM_STR);
+        
+        if (!$stmt->execute()) {
+            throw new \Exception("Failed to add reply: " . implode(", ", $stmt->errorInfo()));
+        }
+    }
 } 
 ?>

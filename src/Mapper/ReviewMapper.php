@@ -13,6 +13,31 @@ class ReviewMapper implements ReviewRepository {
         $this->dbConnection = $dbConnection;
     }
 
+    public function getReview(int $reviewId): ?Review {
+        $stmt = $this->dbConnection->prepare("
+            SELECT reviewId, reviewerId, revieweeId, groupMembersId, description, reviewRating, reviewDate
+            FROM reviews
+            WHERE reviewId = :reviewId
+        ");
+        $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $reviewData = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$reviewData) {
+            return null;
+        }
+
+        return new Review(
+            $reviewData['reviewId'],
+            $reviewData['reviewerId'],
+            $reviewData['revieweeId'],
+            $reviewData['groupMembersId'],
+            $reviewData['reviewRating'],
+            $reviewData['description'],
+            $reviewData['reviewDate']
+        );
+    }
+
     public function getReviewsForReviewee(int $studentId): array {
         $stmt = $this->dbConnection->prepare("
             SELECT rev.reviewId, rev.reviewerId, rev.revieweeId, rev.groupMembersId, rev.`description`, rev.reviewRating, rev.reviewDate, 
@@ -72,13 +97,13 @@ class ReviewMapper implements ReviewRepository {
 
             $reviewerId = $review->getReviewerId();
             $revieweeId = $review->getRevieweeId();
-            $groupId = $review->getGroupMembersId();
+            $groupMembersId = $review->getGroupMembersId();
             $rating = $review->getRating();
             $description = $review->getReviewDescription();
 
             $stmt->bindParam(':reviewerId', $reviewerId, PDO::PARAM_INT);
             $stmt->bindParam(':revieweeId', $revieweeId, PDO::PARAM_INT);
-            $stmt->bindParam(':groupMembersId', $groupId, PDO::PARAM_INT);
+            $stmt->bindParam(':groupMembersId', $groupMembersId, PDO::PARAM_INT);
             $stmt->bindParam(':reviewRating', $rating, PDO::PARAM_INT);
             $stmt->bindParam(':description', $description, PDO::PARAM_STR);
 
@@ -117,6 +142,26 @@ class ReviewMapper implements ReviewRepository {
             throw $e;
         }
     }
+
+    public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): ?int {
+    $stmt = $this->dbConnection->prepare("
+        SELECT gm.groupMembersId
+        FROM groupmembers gm
+        WHERE gm.studentId = :reviewerId
+          AND gm.groupId = :groupId
+          AND EXISTS (
+              SELECT 1 FROM groupmembers gm2
+              WHERE gm2.studentId = :revieweeId AND gm2.groupId = :groupId
+          )
+    ");
+    $stmt->bindParam(':reviewerId', $reviewerId, PDO::PARAM_INT);
+    $stmt->bindParam(':revieweeId', $revieweeId, PDO::PARAM_INT);
+    $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result ? (int)$result['groupMembersId'] : null;
+}
 
 } 
 ?>

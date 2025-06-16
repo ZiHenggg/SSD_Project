@@ -30,13 +30,14 @@ class ReviewControl
         return $this->reviewRepo->hasUserReviewed($reviewerId, $revieweeId, $groupId);
     }
 
-    public function submitReview(int $reviewerId, int $revieweeId, int $groupId, int $rating, string $description): void
-    {
+    public function submitReview(int $reviewerId, int $revieweeId, int $groupId, int $rating, string $description): void {
+        $groupMembersId = $this->reviewRepo->resolveGroupMembersId($reviewerId, $revieweeId, $groupId);
+        
         $review = new Review(
             null,
             $reviewerId,
             $revieweeId,
-            $groupId,
+            $groupMembersId,
             $rating,
             $description,
             date('Y-m-d H:i:s')
