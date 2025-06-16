@@ -5,7 +5,7 @@ namespace App\Entity;
 use DateTime;
 
 class Review {
-    private int $reviewId;
+    private ?int $reviewId;
     private int $reviewerId;
     private int $revieweeId;
     private int $groupMembersId;
@@ -60,7 +60,7 @@ class Review {
     }
 
     // Constructor
-    public function __construct(int $reviewId, int $reviewerId, int $revieweeId, int $groupMembersId, int $rating, string $reviewDescription, string $reviewDate) {
+    public function __construct(?int $reviewId, int $reviewerId, int $revieweeId, int $groupMembersId, int $rating, string $reviewDescription, string $reviewDate) {
         $this->reviewId = $reviewId;
         $this->reviewerId = $reviewerId;
         $this->revieweeId = $revieweeId;

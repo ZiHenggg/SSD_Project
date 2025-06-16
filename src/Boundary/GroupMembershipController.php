@@ -53,5 +53,10 @@ class GroupMembershipController
         return $this->groupMembershipControl->requestExists($groupId, $studentId);
     }
 
+    public function OnCheckIfMember(int $groupId, int $studentId): bool
+    {
+        return $this->groupMembershipControl->memberExists($groupId, $studentId);
+    }
+
 }
 ?>

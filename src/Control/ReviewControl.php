@@ -1,6 +1,7 @@
 <?php
 namespace App\Control;
 
+use App\Entity\Review;
 use App\Repository\ReviewRepository;
 
 class ReviewControl
@@ -27,6 +28,21 @@ class ReviewControl
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool
     {
         return $this->reviewRepo->hasUserReviewed($reviewerId, $revieweeId, $groupId);
+    }
+
+    public function submitReview(int $reviewerId, int $revieweeId, int $groupId, int $rating, string $description): void
+    {
+        $review = new Review(
+            null,
+            $reviewerId,
+            $revieweeId,
+            $groupId,
+            $rating,
+            $description,
+            date('Y-m-d H:i:s')
+        );
+
+        $this->reviewRepo->addReview($review);
     }
 }
 ?>

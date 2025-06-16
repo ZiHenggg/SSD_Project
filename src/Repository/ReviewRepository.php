@@ -4,7 +4,7 @@ use App\Entity\Review;
 
 interface ReviewRepository {
     
-    // public function addReview(Review $review): void;
+    public function addReview(Review $review): void;
     
     // public function getReview(int $reviewId): ?Review;
 

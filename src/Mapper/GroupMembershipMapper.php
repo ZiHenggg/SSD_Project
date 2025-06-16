@@ -14,7 +14,7 @@ class GroupMembershipMapper implements GroupMembershipRepository
         $this->db = $db;
     }
 
-    public function isMember(int $groupId, string $studentId): bool
+    public function isMember(int $groupId, int $studentId): bool
     {
         $stmt = $this->db->prepare("
             SELECT COUNT(*) 
@@ -72,7 +72,7 @@ class GroupMembershipMapper implements GroupMembershipRepository
         return $groupMembers;
     }
 
-    public function addMember(int $groupId, string $studentId, string $role = 'member'): void
+    public function addMember(int $groupId, int $studentId, string $role = 'member'): void
     {
         $stmt = $this->db->prepare("
         INSERT INTO groupMembers (groupId, studentId, role)

@@ -22,7 +22,7 @@ class GroupMembershipControl
         $this->groupJoinRequestsRepo = $groupJoinRequestsRepo;
     }
 
-    public function addMember(int $groupId, string $studentId, string $role = 'member'): void
+    public function addMember(int $groupId, int $studentId, string $role = 'member'): void
     {
         // Check if the group exists
         $group = $this->groupRepo->getGroup($groupId);
@@ -92,6 +92,11 @@ class GroupMembershipControl
         );
 
         $this->groupJoinRequestsRepo->addRequest($request);
+    }
+
+    public function memberExists(int $groupId, int $studentId): bool
+    {
+        return $this->groupMembershipRepo->isMember($groupId, $studentId);
     }
 
 }

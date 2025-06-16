@@ -142,13 +142,17 @@ ob_start(); // Capture the page content
                                             <a class="profile-link text-decoration-none" href="#"><?= htmlspecialchars($member->getStudentName())?>, <?= htmlspecialchars($member->getStudentId())?></a>
                                             <?php if ($member->getStudentId() != $studentId): ?>
                                                 <div class="reply-section my-2 py-1">
+                                                    <form action="review_create.php" method="post">
+                                                        <input type="hidden" name="group_id" value="<?= $group->getGroupId() ?>">
+                                                        <input type="hidden" name="reviewee_id" value="<?= $member->getStudentId() ?>">
                                                     <?php if ($reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId())): ?>
-                                                        <a href="#" class="disabled text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                        <button class="disabled reply-button">
                                                     <?php else: ?>
-                                                        <a href="#" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center">
+                                                        <button type="submit" class="reply-button">
                                                     <?php endif; ?>
-                                                    Review
-                                                </a>
+                                                            Review
+                                                        </button>
+                                                    </form>
                                             </div>
                                         <?php endif; ?>
                                         </div>

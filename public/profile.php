@@ -167,7 +167,10 @@ ob_start();
                                         $reply = $replyController->onViewReply($review->getReviewId());
                                 ?>
                                     <div class="reply-section borderline mt-3">
-                                        <div class="reply-title"><strong>Reply:</strong></div>
+                                        <div class="reply-title">
+                                            <strong>Reply</strong>
+                                            <span class="text-muted small">(<?= htmlspecialchars($reply->getReplyDate()->format('D, d M Y H:i:s')) ?>)</span>
+                                        </div>
                                         <div class="reply-text">
                                             <p class="mb-0"><?= htmlspecialchars($reply->getJustification()) ?></p>
                                         </div>

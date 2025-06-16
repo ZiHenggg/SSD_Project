@@ -3,8 +3,8 @@ namespace App\Repository;
 
 interface GroupMembershipRepository
 {
-    public function isMember(int $groupId, string $studentId): bool;
-    public function addMember(int $groupId, string $studentId, string $role = 'member'): void;
+    public function isMember(int $groupId, int $studentId): bool;
+    public function addMember(int $groupId, int $studentId, string $role = 'member'): void;
     public function getRoleForUser(int $groupId, int $studentId): ?string;
 
     public function getMembers(int $groupId): array;
