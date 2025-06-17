@@ -30,7 +30,7 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           cd ~/ssd-project
-          docker-compose down || true
+          sudo docker-compose down -v|| true
           docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
           docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
-          docker-compose up -d --build
+          sudo docker-compose up -d --build
