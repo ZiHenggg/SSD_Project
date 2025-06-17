@@ -1,12 +1,3 @@
 # Ignore Docker volumes and environment files
 mysql-data/
 .env
-
-# Ignore editor files
-*.log
-*.php~
-.DS_Store
-.idea/
-.vscode/
-
-# Optional: if using Composer or Node
