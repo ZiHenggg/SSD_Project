@@ -10,5 +10,5 @@ mysql-data/
 .vscode/
 
 # Optional: if using Composer or Node
-vendor/
+
 node_modules/
