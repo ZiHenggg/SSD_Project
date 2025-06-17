@@ -4,7 +4,8 @@
 -- docker exec -it mysql-ssd-db mysql -u root -proot
 
 -- Create the database (if not already selected)
-CREATE DATABASE IF NOT EXISTS ssddb;
+DROP DATABASE IF EXISTS ssddb;
+CREATE DATABASE ssddb;
 USE ssddb;
 SET FOREIGN_KEY_CHECKS = 0;
 

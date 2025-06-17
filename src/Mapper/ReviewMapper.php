@@ -72,7 +72,7 @@ class ReviewMapper implements ReviewRepository {
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool {
         $stmt = $this->dbConnection->prepare("
             SELECT COUNT(*) FROM reviews rev
-            INNER JOIN groupmembers gm ON gm.groupMembersId = rev.groupMembersId
+            INNER JOIN groupMembers gm ON gm.groupMembersId = rev.groupMembersId
             WHERE rev.reviewerId = :reviewerId 
             AND rev.revieweeId = :revieweeId 
             AND gm.groupId = :groupId
@@ -146,11 +146,11 @@ class ReviewMapper implements ReviewRepository {
     public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): ?int {
     $stmt = $this->dbConnection->prepare("
         SELECT gm.groupMembersId
-        FROM groupmembers gm
+        FROM groupMembers gm
         WHERE gm.studentId = :reviewerId
           AND gm.groupId = :groupId
           AND EXISTS (
-              SELECT 1 FROM groupmembers gm2
+              SELECT 1 FROM groupMembers gm2
               WHERE gm2.studentId = :revieweeId AND gm2.groupId = :groupId
           )
     ");
