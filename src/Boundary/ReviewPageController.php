@@ -55,5 +55,16 @@ class ReviewPageController
             throw new Exception('An error occurred while submitting the review: ' . $e->getMessage());
         }
     }
+
+    public function displayReviewStats(int $studentId): array
+    {
+        try {
+            $averageRating = $this->reviewControl->calculateAverageRating($studentId);
+            $noOfReviews = $this->reviewControl->getTotalReviews($studentId);
+            return ['averageRating' => $averageRating, 'totalReviews' => $noOfReviews];
+        } catch (Exception $e) {
+            return ['error' => 'An error occurred while calculating average rating: ' . $e->getMessage()];
+        }
+    }
 }
 ?>

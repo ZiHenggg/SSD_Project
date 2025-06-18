@@ -23,11 +23,13 @@ if ($rating < 1 || $rating > 5 || empty($description)) {
 }
 
 use App\Mapper\ReviewMapper;
+use App\Mapper\StudentStatsMapper;
 use App\Control\ReviewControl;
 use App\Boundary\ReviewPageController;
 
 $reviewRepo = new ReviewMapper($pdo);
-$reviewControl = new ReviewControl($reviewRepo);
+$studentStatsRepo = new StudentStatsMapper($pdo);
+$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $reviewController = new ReviewPageController($reviewControl, $pdo);
 
 try {

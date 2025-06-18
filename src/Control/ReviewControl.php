@@ -3,26 +3,24 @@ namespace App\Control;
 
 use App\Entity\Review;
 use App\Repository\ReviewRepository;
+use App\Repository\StudentStatsRepository;
 
 class ReviewControl
 {
     private ReviewRepository $reviewRepo;
-    private int $noOfReviews;
-    private array $reviews;
+    private StudentStatsRepository $studentStatsRepo;
 
     public function __construct(
-        ReviewRepository $reviewRepo
+        ReviewRepository $reviewRepo,
+        StudentStatsRepository $studentStatsRepo
     ) {
         $this->reviewRepo = $reviewRepo;
-        $this->noOfReviews = 0;
-        $this->reviews = [];
+        $this->studentStatsRepo = $studentStatsRepo;
     }
 
     public function getReviewsByUser(int $studentId): array
     {
-        $this->reviews = $this->reviewRepo->getReviewsForReviewee($studentId);
-        $this->noOfReviews = count($this->reviews);
-        return $this->reviews;
+        return $this->reviewRepo->getReviewsForReviewee($studentId);
     }
      
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool
@@ -45,5 +43,16 @@ class ReviewControl
 
         $this->reviewRepo->addReview($review);
     }
+
+    public function calculateAverageRating(int $studentId): float
+    {
+        return $this->studentStatsRepo->getAverageRating($studentId);
+    }
+
+    public function getTotalReviews(int $studentId): int
+    {
+        return $this->studentStatsRepo->getTotalReviews($studentId);
+    }
+
 }
 ?>

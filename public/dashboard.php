@@ -8,6 +8,7 @@ use App\Mapper\GroupMembershipMapper;
 use App\Mapper\StudentMapper;
 use App\Mapper\ReviewMapper;
 use App\Mapper\ModuleMapper;
+use App\Mapper\StudentStatsMapper;
 use App\Control\GroupControl;
 use App\Control\GroupJoinRequestsControl;
 use App\Control\GroupMembershipControl;
@@ -24,12 +25,12 @@ $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $moduleRepo = new moduleMapper($pdo);
+$studentStatsRepo = new StudentStatsMapper($pdo);
 
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo);
-
+$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 $studentPageController = new StudentPageController($studentControl);
@@ -99,7 +100,7 @@ ob_start(); // Capture the page content
                     <div class="info-item">
                         <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
                             <?php
-                                $joinRequestsResponse = $groupMembershipController->showJoinRequest($group->getGroupId());
+                                $joinRequestsResponse = $groupMembershipController->displayGroupJoinRequests($group->getGroupId());
                                 $requests = $joinRequestsResponse['joinRequest'] ?? [];
                             ?>
                             <span class="header">Pending Requests</span>

@@ -71,6 +71,10 @@ class GroupMembershipControl
     {
         return $this->groupJoinRequestsRepo->getRequestsByGroup($groupId);
     }
+    public function getRequestsByStudent(int $studentId): array
+    {
+        return $this->groupJoinRequestsRepo->getRequestsByStudent($studentId);
+    }
 
     public function requestExists(int $groupId, int $studentId): bool
     {

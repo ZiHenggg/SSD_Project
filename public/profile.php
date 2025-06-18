@@ -27,21 +27,19 @@ use App\Boundary\ReviewPageController;
 
 use App\Mapper\ModuleMapper;
 
-// Initialize Repositories
-$studentStatsRepo = new StudentStatsMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupRepo = new GroupMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
 $moduleRepo = new moduleMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+$studentStatsRepo = new StudentStatsMapper($pdo);
 
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo);
+$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
@@ -72,9 +70,13 @@ try {
 $reviewResponse = $reviewController->onViewReceivedReviews($student->getStudentId());
 $reviews = $reviewResponse['reviews'] ?? []; 
 
-$groupJoinRequests = $groupJoinRequestsRepo->getRequestsByStudent($student->getStudentId());
-$totalReviews = $studentStatsRepo->getTotalReviews($student->getStudentId());
-$averageRating = $studentStatsRepo->getaverageRating($student->getStudentId());
+$groupJoinRequestsResponse = $groupMembershipController->displayStudentJoinRequests($student->getStudentId());
+$groupJoinRequests = $groupJoinRequestsResponse['joinRequest'] ?? [];
+
+$studentStatsResponse = $reviewController->displayReviewStats($student->getStudentId());
+$totalReviews = $studentStatsResponse['totalReviews'] ?? 0;
+$averageRating = $studentStatsResponse['averageRating'] ?? 0;
+
 $maxStars = 5;
 
 $title = "Profile";
