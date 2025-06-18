@@ -5,15 +5,18 @@ use App\Entity\GroupJoinRequests;
 use App\Repository\GroupJoinRequestsRepository;
 use PDO;
 
-class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
+class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
+{
 
     private PDO $dbConnection;
 
-    public function __construct(PDO $dbConnection) {
+    public function __construct(PDO $dbConnection)
+    {
         $this->dbConnection = $dbConnection;
     }
 
-    public function getRequestsByStudent(int $studentId): array {
+    public function getRequestsByStudent(int $studentId): array
+    {
         $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupjoinrequests WHERE requesterId = :studentId");
         $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
         $stmt->execute();
@@ -34,9 +37,10 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
 
         return $requests;
     }
-    
-    public function getRequestsByGroup(int $groupId): array {
-        $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupjoinrequests WHERE joinStatus = 'pending' AND groupId = :groupId");
+
+    public function getRequestsByGroup(int $groupId): array
+    {
+        $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupJoinRequests WHERE joinStatus = 'pending' AND groupId = :groupId");
         $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -57,10 +61,10 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
         return $requests;
     }
 
-    public function addRequest(GroupJoinRequests $request): void 
+    public function addRequest(GroupJoinRequests $request): void
     {
         $stmt = $this->dbConnection->prepare("
-            INSERT INTO groupjoinrequests (groupId, requesterId, joinStatus, requestedAt)
+            INSERT INTO groupJoinRequests (groupId, requesterId, joinStatus, requestedAt)
             VALUES (:groupId, :requesterId, :joinStatus, :requestedAt)
         ");
 
@@ -75,7 +79,7 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
     public function requestExists(int $studentId, int $groupId): bool
     {
         $stmt = $this->dbConnection->prepare("
-            SELECT COUNT(*) FROM groupjoinrequests
+            SELECT COUNT(*) FROM groupJoinRequests
             WHERE groupId = :groupId AND requesterId = :studentId
         ");
         $stmt->execute([
@@ -87,5 +91,5 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
     }
 
 
-} 
+}
 ?>
