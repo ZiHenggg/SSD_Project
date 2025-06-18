@@ -120,7 +120,7 @@ CREATE TABLE reply (
   FOREIGN KEY (responderId) REFERENCES students(studentId)
 );
 
--- Now insert sample data
+-- Now insert sample dataa
 INSERT INTO modules (moduleCode, moduleName) VALUES 
 ('ICT2216', 'Secure Software Development'), 
 ('ICT2114', 'Integrative Team Project');
