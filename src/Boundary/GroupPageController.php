@@ -19,7 +19,7 @@ class GroupPageController
         $this->pdo = $pdo;
     }
 
-    public function createGroup(array $formData, string $adminId): void
+    public function onCreateGroup(array $formData, string $studentId): void
     {
         // Fetch lab groups from the database
         $stmt = $this->pdo->query("SELECT labGroupCode, moduleCode FROM labGroups");
@@ -39,7 +39,7 @@ class GroupPageController
         $maxGroupSize = (int) ($formData['maxGroupSize'] ?? 0);
 
         // Validate required fields
-        if (!$adminId) {
+        if (!$studentId) {
             throw new Exception("User not logged in.");
         }
 
@@ -63,7 +63,7 @@ class GroupPageController
             $trimester,
             $moduleCode,
             $maxGroupSize,
-            $adminId,
+            $studentId,
             $labGroup
         );
     }

@@ -19,9 +19,9 @@ $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $grou
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 
 try {
-    $groupPageController->createGroup($_POST, $_SESSION['user']['id']);
+    $groupPageController->onCreateGroup($_POST, $_SESSION['user']['id']);
     // Redirect or show success
-    header("Location: groups.php");
+    header("Location: dashboard.php");
     exit;
 } catch (Exception $e) {
     // Handle error: log it or show message
