@@ -79,6 +79,11 @@ class GroupPageController
         return $this->groupControl->getGroupsByUser($studentId);
     }
 
+    public function listActiveUserGroups(int $studentId): array
+    {
+        return $this->groupControl->getActiveGroupsByUser($studentId);
+    }
+
     public function getUserRoleInGroup(int $groupId, int $studentId): ?string
     {
         return $this->groupMembershipControl->getUserRole($groupId, $studentId);
@@ -107,18 +112,18 @@ class GroupPageController
         ];
     }
 
-    // public function onDeleteGroup(int $groupId, string $adminId): void
-    // {
-    //     try {
-    //         $this->groupControl->deleteGroup($groupId, $adminId);
-    //         header("Location: groups.php");
-    //         exit;
-    //     } catch (Exception $e) {
-    //         $_SESSION['error'] = $e->getMessage();
-    //         header("Location: group_details.php?id=$groupId");
-    //         exit;
-    //     }
-    // }
+    public function onDeleteGroup(int $groupId): void
+    {
+        try {
+            $this->groupControl->softDeleteGroup($groupId);
+            // header("Location: groups.php");
+            // exit;
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: group_details.php?id=$groupId");
+            exit;
+        }
+    }
 
     // public function onUpdateGroupStatus(int $groupId, string $status): void
     // {

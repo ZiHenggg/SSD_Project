@@ -54,6 +54,11 @@ class GroupControl
         return $this->groupRepo->getGroupsByUser($studentId);
     }
 
+    public function getActiveGroupsByUser(int $studentId): array
+    {
+        return $this->groupRepo->getActiveGroupsByUser($studentId);
+    }
+
     public function getAllActiveGroups(): array
     {
         return $this->groupRepo->getAllActiveGroups();
@@ -62,6 +67,16 @@ class GroupControl
     public function getGroupInfo(int $groupId): ?Group
     {
         return $this->groupRepo->getGroup($groupId);
+    }
+
+    public function softDeleteGroup(int $groupId): void
+    {
+        $group = $this->getGroupInfo($groupId);
+        if ($group) {
+            // $group->setIsActive(false); // Set the group as inactive
+            // $this->groupRepo->updateGroup($group); // Update the group in the repository
+            $this->groupRepo->updateGroupStatus($groupId, 'inactive');
+        }
     }
 }
 ?>

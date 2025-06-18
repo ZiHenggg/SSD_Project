@@ -10,8 +10,10 @@ interface GroupRepository
 
     public function getGroup(int $groupId): ?Group;
     public function getGroupsByUser(int $studentId): array;
+    public function getActiveGroupsByUser(int $studentId): array;
     public function updateGroup(Group $group): void;
 
     public function getAllActiveGroups(): array;
+    public function updateGroupStatus(int $groupId, string $status): void;
 }
 ?>
