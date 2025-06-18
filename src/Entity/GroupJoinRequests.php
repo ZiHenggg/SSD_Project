@@ -37,7 +37,7 @@ class GroupJoinRequests {
     private function setGroupId(int $groupId): void {
         $this->groupId = $groupId;
     }
-    private function setrequesterId(int $requesterId): void {
+    private function setRequesterId(int $requesterId): void {
         $this->requesterId = $requesterId;
     }
     private function setJoinStatus(string $joinStatus): void {

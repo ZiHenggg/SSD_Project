@@ -105,10 +105,13 @@ class GroupPageController
             return null; // Group not found
         }
 
+        $module = $this->groupControl->getModuleByGroupId($groupId);
+
         $members = $this->groupMembershipControl->getGroupMembers($groupId);
         return [
             'group' => $group,
             'members' => $members,
+            'module' => $module,
         ];
     }
 

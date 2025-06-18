@@ -18,13 +18,13 @@ class ReviewControl
         $this->reviews = [];
     }
 
-    public function getReviewsByUser(int $userId): array
+    public function getReviewsByUser(int $studentId): array
     {
-        $this->reviews = $this->reviewRepo->getReviewsForReviewee($userId);
+        $this->reviews = $this->reviewRepo->getReviewsForReviewee($studentId);
         $this->noOfReviews = count($this->reviews);
         return $this->reviews;
     }
-    
+     
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool
     {
         return $this->reviewRepo->hasUserReviewed($reviewerId, $revieweeId, $groupId);

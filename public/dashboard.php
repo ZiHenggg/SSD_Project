@@ -7,6 +7,7 @@ use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\StudentMapper;
 use App\Mapper\ReviewMapper;
+use App\Mapper\ModuleMapper;
 use App\Control\GroupControl;
 use App\Control\GroupJoinRequestsControl;
 use App\Control\GroupMembershipControl;
@@ -22,8 +23,9 @@ $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
+$moduleRepo = new moduleMapper($pdo);
 
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo);
@@ -65,9 +67,12 @@ ob_start(); // Capture the page content
             </div>
             <?php if (count($groups) > 0): ?>
                 <?php foreach ($groups as $group): ?>
+                    <?php 
+                        $module = $groupControl->getModuleByGroupId($group->getGroupId());
+                    ?>
                     <div class="group-item" data-group-id="<?= $group->getGroupId() ?>">
-                        <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
-                        <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?></span>
+                        <a href="group_info.php?groupId=<?= $group->getGroupId() ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                        <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($module->getModuleName()) ?></span>
                         <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?>
                             T<?= htmlspecialchars($group->getTrimester()) ?>]</span>
                         <span class="member-count"><?= $group->getNoOfMembers() ?>/<?= $group->getMaxMembers() ?></span>

@@ -76,7 +76,7 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
         ]);
     }
 
-    public function requestExists(int $studentId, int $groupId): bool
+    public function requestExists(int $groupId, int $studentId): bool
     {
         $stmt = $this->dbConnection->prepare("
             SELECT COUNT(*) FROM groupJoinRequests

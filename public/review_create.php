@@ -7,6 +7,7 @@ use App\Mapper\GroupMapper;
 use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\ReviewMapper;
+use App\Mapper\ModuleMapper;
 use App\Control\GroupControl;
 use App\Control\StudentControl;
 use App\Control\GroupMembershipControl;
@@ -21,8 +22,9 @@ $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
+$moduleRepo = new moduleMapper($pdo);
 
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo);

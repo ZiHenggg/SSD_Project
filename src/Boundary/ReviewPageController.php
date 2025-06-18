@@ -16,11 +16,11 @@ class ReviewPageController
         $this->pdo = $pdo;
     }
 
-    public function onViewReceivedReviews(int $userId): array
+    public function onViewReceivedReviews(int $studentId): array
     {
         try {
             // Fetch reviews for the user
-            $reviews = $this->reviewControl->getReviewsByUser($userId);
+            $reviews = $this->reviewControl->getReviewsByUser($studentId);
             if (empty($reviews)) {
                 return ['message' => 'No reviews found for this user.'];
             }

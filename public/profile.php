@@ -25,6 +25,8 @@ use App\Mapper\ReviewMapper;
 use App\Control\ReviewControl;
 use App\Boundary\ReviewPageController;
 
+use App\Mapper\ModuleMapper;
+
 // Initialize Repositories
 $studentStatsRepo = new StudentStatsMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
@@ -34,9 +36,10 @@ $groupRepo = new GroupMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
+$moduleRepo = new moduleMapper($pdo);
 
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
@@ -103,12 +106,14 @@ ob_start();
                     <?php if (count($groupJoinRequests) > 0): ?>
                         <?php foreach ($groupJoinRequests as $request): ?>
                             <?php
-                                $group = $groupRepo->getGroup($request->getGroupId());
+                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                                $group = $groupData['group'];
+                                $moduleData = $groupData['module'];
                             ?>
                             <div class="mt-3 group-item">
-                                <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
-                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, TODO: ADD MODULE NAME</span>
-                                <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> <?= htmlspecialchars($group->getTrimester()) ?>]</span>
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> T<?= htmlspecialchars($group->getTrimester()) ?>]</span>
                                 <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
                             </div>
                         <?php endforeach; ?>
@@ -177,8 +182,9 @@ ob_start();
                                         $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
                                         $groupData = $groupController->displayGroupDetails($groupId);
                                         $group = $groupData['group'];
+                                        $moduleData = $groupData['module'];
                                     ?>
-                                    <p class="mb-0"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></p>
+                                    <a href="group_info.php?groupId=<?=$groupId?>" class="group-name header text-decoration-none"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></a>
                                 </div>
                                 <div class="review-text mt-2">
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
