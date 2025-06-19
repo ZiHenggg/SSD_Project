@@ -39,7 +39,7 @@ jobs:
             echo "DB_PASS=$DB_PASS" >> .env.prod
 
             echo "🛑 Stopping existing containers"
-            sudo docker-compose -f docker-compose-prod.yml down -v || true
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v || true
 
             echo "🧹 Cleaning composer.lock"
             docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
@@ -48,4 +48,5 @@ jobs:
             docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
 
             echo "🚀 Starting containers"
-            sudo docker-compose -f docker-compose-prod.yml up -d --build
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build
+
