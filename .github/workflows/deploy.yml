@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
-        uses: appleboy/ssh-action@v0.1.10   # ✅ Use correct version
+        uses: appleboy/ssh-action@v0.1.10   
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
