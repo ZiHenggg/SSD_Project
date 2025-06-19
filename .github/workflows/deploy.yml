@@ -33,13 +33,25 @@ jobs:
 
             echo "📁 Checking for project directory..."
             if [ ! -d "$HOME/ssd-project" ]; then
-              echo "📥 Cloning repository with GH_PAT..."
-              git clone https://$GH_PAT@github.com/mogaman/SSD_Project.git $HOME/ssd-project
+              echo "📥 Cloning production branch of repository with GH_PAT..."
+              git clone --branch production https://$GH_PAT@github.com/mogaman/SSD_Project.git $HOME/ssd-project
             else
               echo "✅ Project directory exists."
             fi
 
             cd $HOME/ssd-project
+            echo "📁 Listing project files..."
+            ls -la
+
+            if [ ! -f "docker-compose-prod.yml" ]; then
+              echo "❌ docker-compose-prod.yml not found!"
+              exit 1
+            fi
+
+            if [ ! -f "composer.json" ]; then
+              echo "❌ composer.json not found!"
+              exit 1
+            fi
 
             echo "✅ Creating .env.prod file"
             echo "DB_HOST=$DB_HOST" > .env.prod
