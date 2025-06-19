@@ -1,4 +1,4 @@
-name: Deploy to EC2 (Test Flow)
+name: Deploy to EC2 (Production)
 
 on:
   push:
@@ -30,7 +30,13 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         script: |
           cd ~/ssd-project
-          sudo docker-compose down -v|| true
+          
+          # Ensure old containers are down
+          sudo docker-compose down -v || true
+
+          # Clear and update dependencies using composer (if needed)
           docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
           docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
-          sudo docker-compose up -d --build
+
+          # Start containers with production config
+          sudo docker-compose -f docker-compose-prod.yml up -d --build
