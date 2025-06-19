@@ -9,11 +9,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:  # ✅ ENV VARS from GitHub Secrets
+    env:
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASS: ${{ secrets.DB_PASS }}
+      GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
@@ -22,7 +23,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          envs: DB_HOST,DB_NAME,DB_USER,DB_PASS
+          envs: DB_HOST,DB_NAME,DB_USER,DB_PASS,GH_PAT
           script: |
             echo "🔎 Verifying env vars..."
             echo "DB_HOST=$DB_HOST"
@@ -32,8 +33,8 @@ jobs:
 
             echo "📁 Checking for project directory..."
             if [ ! -d "$HOME/ssd-project" ]; then
-              echo "📥 Cloning repository..."
-              git clone https://github.com/mogaman/SSD_Project.git $HOME/ssd-project
+              echo "📥 Cloning repository with GH_PAT..."
+              git clone https://$GH_PAT@github.com/mogaman/SSD_Project.git $HOME/ssd-project
             else
               echo "✅ Project directory exists."
             fi
