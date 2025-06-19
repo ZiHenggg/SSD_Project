@@ -1,46 +1,22 @@
-name: Deploy to EC2 (Production)
+- name: SSH to EC2 and deploy with Docker Compose
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USER }}
+    key: ${{ secrets.EC2_KEY }}
+    envs: DB_HOST,DB_NAME,DB_USER,DB_PASS   # ✅ This line is critical
+    script: |
+      cd ~/ssd-project
 
-on:
-  push:
-    branches:
-      - production
+      # ✅ Securely create .env.prod from GitHub Secrets
+      cat > .env.prod <<EOF
+DB_HOST=${DB_HOST}
+DB_NAME=${DB_NAME}
+DB_USER=${DB_USER}
+DB_PASS=${DB_PASS}
+EOF
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Upload project to EC2
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        source: "."
-        target: "~/ssd-project"
-
-    - name: SSH to EC2 and deploy with Docker Compose
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        envs: DB_HOST,DB_NAME,DB_USER,DB_PASS
-        script: |
-          cd ~/ssd-project
-
-          # ✅ Securely create .env.prod using secrets
-          cat > .env.prod <<EOF
-                DB_HOST=${DB_HOST}
-                DB_NAME=${DB_NAME}
-                DB_USER=${DB_USER}
-                DB_PASS=${DB_PASS}
-                EOF
-
-          sudo docker-compose -f docker-compose-prod.yml down -v || true
-          docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
-          docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
-          sudo docker-compose -f docker-compose-prod.yml up -d --build
+      sudo docker-compose -f docker-compose-prod.yml down -v || true
+      docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
+      docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
+      sudo docker-compose -f docker-compose-prod.yml up -d --build
