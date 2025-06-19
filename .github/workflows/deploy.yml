@@ -9,9 +9,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # ✅ This block makes secrets available to 'envs:' inside the ssh-action
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
-        uses: appleboy/ssh-action@master 
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
