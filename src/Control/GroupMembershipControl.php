@@ -62,10 +62,15 @@ class GroupMembershipControl
         return $this->groupMembershipRepo->getGroupId($groupMembersId);
     }
 
+    public function getGroupIdByRequestId(int $requestId): ?int
+    {
+        return $this->groupJoinRequestsRepo->getGroupIdByRequestId($requestId);
+    }
+
     public function getGroupMembers(int $groupId): array
     {
         return $this->groupMembershipRepo->getMembers($groupId);
-        
+
     }
     public function getRequestsByGroup(int $groupId): array
     {
@@ -99,5 +104,72 @@ class GroupMembershipControl
         return $this->groupMembershipRepo->isMember($groupId, $studentId);
     }
 
+    public function acceptJoinRequest(int $requestId, int $requesterId, int $approverId): void
+    {
+        // Get the join request
+        $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
+        $request = null;
+        // TODO: Use a more efficient way to find the request
+        foreach ($requests as $req) {
+            if ($req->getRequestId() === $requestId) {
+                $request = $req;
+                break;
+            }
+        }
+        if (!$request) {
+            throw new \Exception("Join request with ID $requestId does not exist.");
+        }
+
+        if ($request->getRequesterId() !== $requesterId) {
+            throw new \Exception("Mismatch: Join request does not belong to the provided student.");
+        }
+
+        if ($request->getJoinStatus() !== 'pending') {
+            throw new \Exception("Join request with ID $requestId is not pending.");
+        }
+
+        // Update the join request status to accepted
+        $this->groupJoinRequestsRepo->updateRequestStatus(
+            $requestId,
+            $approverId,
+            'accepted'
+        );
+
+        // Add the member to the group
+        $groupId = $request->getGroupId();
+        $this->addMember($groupId, $requesterId);
+    }
+
+    public function rejectJoinRequest(int $requestId, int $requesterId, int $approverId): void
+    {
+        // Get the join request
+        $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
+        $request = null;
+        // TODO: Use a more efficient way to find the request
+        foreach ($requests as $req) {
+            if ($req->getRequestId() === $requestId) {
+                $request = $req;
+                break;
+            }
+        }
+        if (!$request) {
+            throw new \Exception("Join request with ID $requestId does not exist.");
+        }
+
+        if ($request->getRequesterId() !== $requesterId) {
+            throw new \Exception("Mismatch: Join request does not belong to the provided student.");
+        }
+
+        if ($request->getJoinStatus() !== 'pending') {
+            throw new \Exception("Join request with ID $requestId is not pending.");
+        }
+
+        // Update the join request status to accepted
+        $this->groupJoinRequestsRepo->updateRequestStatus(
+            $requestId,
+            $approverId,
+            'rejected'
+        );
+    }
 }
 ?>
