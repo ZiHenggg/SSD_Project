@@ -1,13 +1,14 @@
-name: Deploy to EC2
+name: Deploy to EC2 with Docker Compose
 
 on:
   push:
     branches:
-      - main
+      - production  # 👈 triggers only on production branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
@@ -19,15 +20,20 @@ jobs:
           script: |
             cd ~/ssd-project
 
-            # ✅ Create .env.prod safelyy
+            echo "✅ Creating .env.prod file"
             echo "DB_HOST=$DB_HOST" > .env.prod
             echo "DB_NAME=$DB_NAME" >> .env.prod
             echo "DB_USER=$DB_USER" >> .env.prod
             echo "DB_PASS=$DB_PASS" >> .env.prod
 
+            echo "🛑 Stopping existing containers"
             sudo docker-compose -f docker-compose-prod.yml down -v || true
+
+            echo "🧹 Cleaning composer.lock"
             docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
+
+            echo "📦 Running composer update"
             docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
-            sudo docker-compose -f docker-compose-prod.yml up -d --buildore-platform-req=ext-pdo_mysql
 
-
+            echo "🚀 Starting containers"
+            sudo docker-compose -f docker-compose-prod.yml up -d --build
