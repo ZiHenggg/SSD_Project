@@ -28,15 +28,19 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
+        envs: DB_HOST,DB_NAME,DB_USER,DB_PASS
         script: |
           cd ~/ssd-project
-          
-          # Ensure old containers are down
-          sudo docker-compose down -v || true
 
-          # Clear and update dependencies using composer (if needed)
+          # ✅ Securely create .env.prod using secrets
+          cat > .env.prod <<EOF
+                DB_HOST=${DB_HOST}
+                DB_NAME=${DB_NAME}
+                DB_USER=${DB_USER}
+                DB_PASS=${DB_PASS}
+                EOF
+
+          sudo docker-compose -f docker-compose-prod.yml down -v || true
           docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
           docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
-
-          # Start containers with production config
           sudo docker-compose -f docker-compose-prod.yml up -d --build
