@@ -25,20 +25,21 @@ use App\Mapper\ReviewMapper;
 use App\Control\ReviewControl;
 use App\Boundary\ReviewPageController;
 
-// Initialize Repositories
-$studentStatsRepo = new StudentStatsMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+use App\Mapper\ModuleMapper;
 
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupRepo = new GroupMapper($pdo);
 $studentRepo = new StudentMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
 $replyRepo = new ReplyMapper($pdo);
+$moduleRepo = new moduleMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+$studentStatsRepo = new StudentStatsMapper($pdo);
 
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo);
+$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
@@ -47,19 +48,35 @@ $studentController = new StudentPageController($studentControl, $pdo);
 $reviewController = new ReviewPageController($reviewControl, $pdo);
 $replyController = new ReplyPageController($replyControl, $pdo);
 
-// !!!!!!!!!!!!!!!!!!!!!!!!
-// Fetch info for user profile (update when we implement viewing of other profiles)
-$student = $studentController->showUserProfile($_SESSION['user']['id']);
-// !!!!!!!!!!!!!!!!!!!!!!!!
-
 $loggedInId = $_SESSION['user']['id'];
+
+try {
+    if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
+        $profileId = (int)$_GET['id'];
+    } else if (isset($_GET['id']) && !ctype_digit($_GET['id'])) {
+        header("Location: /profile.php?id=" . $loggedInId);
+    } else {
+        $profileId = $loggedInId; 
+    }
+    $student = $studentController->showUserProfile($profileId);
+    if (!$student) {
+        header("Location: /profile.php?id=" . $loggedInId);
+        exit;
+    }
+} catch (Exception $e) {
+    header("Location: /profile.php?id=" . $loggedInId);
+}
 
 $reviewResponse = $reviewController->onViewReceivedReviews($student->getStudentId());
 $reviews = $reviewResponse['reviews'] ?? []; 
 
-$groupJoinRequests = $groupJoinRequestsRepo->getRequestsByStudent($student->getStudentId());
-$totalReviews = $studentStatsRepo->getTotalReviews($student->getStudentId());
-$averageRating = $studentStatsRepo->getaverageRating($student->getStudentId());
+$groupJoinRequestsResponse = $groupMembershipController->displayStudentJoinRequests($student->getStudentId());
+$groupJoinRequests = $groupJoinRequestsResponse['joinRequest'] ?? [];
+
+$studentStatsResponse = $reviewController->displayReviewStats($student->getStudentId());
+$totalReviews = $studentStatsResponse['totalReviews'] ?? 0;
+$averageRating = $studentStatsResponse['averageRating'] ?? 0;
+
 $maxStars = 5;
 
 $title = "Profile";
@@ -70,7 +87,13 @@ ob_start();
 <div class="profile">
     <?php displayErrorMessage(); ?>
     <?php displaySuccessMessage(); ?>
-    <h2 class="mb-5">My Profile</h2>
+    <h2 class="mb-5">
+        <?php if ($profileId !== $loggedInId):?>
+            Viewing <?= htmlspecialchars($student->getStudentName()) ?>'s Profile
+        <?php else: ?>
+            My Profile
+        <?php endif; ?>
+    </h2>
     <div class="content-container d-flex justify-content-between">
         <div class="info-pending-wrapper">
             <div class="profile-info">
@@ -79,26 +102,28 @@ ob_start();
                 <p><strong>Student ID:</strong> <?= htmlspecialchars($student->getStudentId()) ?></p>
                 <p><strong>Email:</strong> <?= htmlspecialchars($student->getEmail()) ?></p>
             </div>
-
-            <div class="mt-5 pending-requests">
-                <h3>Pending Requests</h3>
-
-                <?php if (count($groupJoinRequests) > 0): ?>
-                    <?php foreach ($groupJoinRequests as $request): ?>
-                        <?php
-                            $group = $groupRepo->getGroup($request->getGroupId());
-                        ?>
-                        <div class="mt-3 group-item">
-                            <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span>
-                            <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, TODO: ADD MODULE NAME</span>
-                            <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> <?= htmlspecialchars($group->getTrimester()) ?>]</span>
-                            <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No pending requests.</p>
-                <?php endif; ?>
-            </div>
+            <?php if ($profileId === $loggedInId):?>
+                <div class="mt-5 pending-requests">
+                    <h3>Pending Requests</h3>
+                    <?php if (count($groupJoinRequests) > 0): ?>
+                        <?php foreach ($groupJoinRequests as $request): ?>
+                            <?php
+                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                                $group = $groupData['group'];
+                                $moduleData = $groupData['module'];
+                            ?>
+                            <div class="mt-3 group-item">
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> T<?= htmlspecialchars($group->getTrimester()) ?>]</span>
+                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No pending requests.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="review-wrapper">
@@ -159,8 +184,9 @@ ob_start();
                                         $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
                                         $groupData = $groupController->displayGroupDetails($groupId);
                                         $group = $groupData['group'];
+                                        $moduleData = $groupData['module'];
                                     ?>
-                                    <p class="mb-0"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></p>
+                                    <a href="group_info.php?groupId=<?=$groupId?>" class="group-name header text-decoration-none"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></a>
                                 </div>
                                 <div class="review-text mt-2">
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
@@ -179,7 +205,7 @@ ob_start();
                                             <p class="mb-0"><?= htmlspecialchars($reply->getJustification()) ?></p>
                                         </div>
                                     </div>
-                                <?php elseif ($student->getStudentId() === $_SESSION['user']['id']): ?>
+                                <?php elseif ($student->getStudentId() === $loggedInId): ?>
                                     <div class="reply-section mt-3">
                                         <form action="process_reply_create.php" method="post">
                                             <input type="hidden" name="review_id" value="<?= htmlspecialchars($review->getReviewId()) ?>">

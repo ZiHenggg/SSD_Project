@@ -15,11 +15,11 @@ if (!$groupId || !$studentId) {
 
 $mapper = new GroupJoinRequestsMapper($pdo);
 
-if (!$mapper->requestExists($studentId, $groupId)) {
+if (!$mapper->requestExists($groupId, $studentId)) {
     $request = new GroupJoinRequests(
         0,
-        (int)$groupId,
         (int)$studentId,
+        (int)$groupId,
         'pending',
         new DateTime()
     );

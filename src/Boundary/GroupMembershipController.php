@@ -26,7 +26,7 @@ class GroupMembershipController
         }
     }
 
-    public function showJoinRequest(int $groupId): array
+    public function displayGroupJoinRequests(int $groupId): array
     {
         try {
             $joinRequests = $this->groupMembershipControl->getRequestsByGroup($groupId);
@@ -36,6 +36,19 @@ class GroupMembershipController
             return ['joinRequest' => $joinRequests];
         } catch (Exception $e) {
             return ['error' => 'An error occurred while fetching join requests: ' . $e->getMessage()];
+        }
+    }
+
+    public function displayStudentJoinRequests(int $studentId): array
+    {
+        try {
+            $joinRequests = $this->groupMembershipControl->getRequestsByStudent($studentId);
+            if (empty($joinRequests)) {
+                return ['message' => 'No join requests found for this student.'];
+            }
+            return ['joinRequest' => $joinRequests];
+        } catch (Exception $e) {
+            return ['error' => 'An error occurred while fetching student join requests: ' . $e->getMessage()];
         }
     }
     

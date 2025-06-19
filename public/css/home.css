@@ -25,8 +25,17 @@
     border-right: 4px solid var(--secondary);
 }
 
-.group-item {
+.home .group-item {
     cursor: pointer;
+}
+
+.group-name {
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.group-name:hover {
+    color: var(--accent);
 }
 
 .group-item, .info-item {
@@ -188,7 +197,7 @@
     color: var(--primary);
 }
 
-.current-members > li::marker, .current-members .profile-link {
+.current-members > li::marker, .profile-link {
     color: var(--text);
 }
 
