@@ -9,6 +9,6 @@ mysql-data/
 .idea/
 .vscode/
 
-# Optional: if using Composer or Nodee
+# Optional: if using Composer or Node
 vendor/
 node_modules/
