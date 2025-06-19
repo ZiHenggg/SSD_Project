@@ -68,12 +68,14 @@ ob_start(); // Capture the page content
             </div>
             <?php if (count($groups) > 0): ?>
                 <?php foreach ($groups as $group): ?>
-                    <?php 
-                        $module = $groupControl->getModuleByGroupId($group->getGroupId());
+                    <?php
+                    $module = $groupControl->getModuleByGroupId($group->getGroupId());
                     ?>
                     <div class="group-item" data-group-id="<?= $group->getGroupId() ?>">
-                        <a href="group_info.php?groupId=<?= $group->getGroupId() ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
-                        <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($module->getModuleName()) ?></span>
+                        <a href="group_info.php?groupId=<?= $group->getGroupId() ?>"
+                            class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                        <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>,
+                            <?= htmlspecialchars($module->getModuleName()) ?></span>
                         <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?>
                             T<?= htmlspecialchars($group->getTrimester()) ?>]</span>
                         <span class="member-count"><?= $group->getNoOfMembers() ?>/<?= $group->getMaxMembers() ?></span>
@@ -100,8 +102,8 @@ ob_start(); // Capture the page content
                     <div class="info-item">
                         <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
                             <?php
-                                $joinRequestsResponse = $groupMembershipController->displayGroupJoinRequests($group->getGroupId());
-                                $requests = $joinRequestsResponse['joinRequest'] ?? [];
+                            $joinRequestsResponse = $groupMembershipController->displayGroupJoinRequests($group->getGroupId());
+                            $requests = $joinRequestsResponse['joinRequest'] ?? [];
                             ?>
                             <span class="header">Pending Requests</span>
                             <?php if (count($requests) > 0): ?>
@@ -112,12 +114,33 @@ ob_start(); // Capture the page content
                                         ?>
                                         <li>
                                             <div class="request-wrapper">
-                                                <a class="profile-link text-decoration-none" href="profile.php?id=<?= htmlspecialchars($requesterId)?>"><?= htmlspecialchars($requester->getStudentName())?>, <?= htmlspecialchars($requesterId)?></a>
-                                                <form class="pending-form" action="" method="post">
+                                                <a class="profile-link text-decoration-none"
+                                                    href="profile.php?id=<?= htmlspecialchars($requesterId) ?>"><?= htmlspecialchars($requester->getStudentName()) ?>,
+                                                    <?= htmlspecialchars($requesterId) ?></a>
+                                                <!-- <form class="pending-form" action="" method="post">
                                                     <button class="btn accept-btn" type="submit">
                                                         <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
                                                     </button>
                                                     <button class="btn reject-btn" type="submit">
+                                                        <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
+                                                    </button>
+                                                </form> -->
+                                                <!-- Reject form -->
+                                                <form class="pending-form" action="process_reject_request.php" method="post"
+                                                    style="display:inline;">
+                                                    <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
+                                                    <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
+                                                    <button class="btn reject-btn" type="submit">
+                                                        <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
+                                                    </button>
+                                                </form>
+
+                                                <!-- Accept form -->
+                                                <form class="pending-form" action="process_accept_request.php" method="post"
+                                                    style="display:inline;">
+                                                    <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
+                                                    <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
+                                                    <button class="btn accept-btn" type="submit">
                                                         <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
                                                     </button>
                                                 </form>
@@ -131,33 +154,35 @@ ob_start(); // Capture the page content
                         <?php endif; ?>
                         <span class="header">Current Members</span>
                         <ol class="current-members name-list">
-                        <?php
+                            <?php
                             $groupData = $groupController->displayGroupDetails($group->getGroupId());
                             $groupMembers = $groupData['members'];
                             foreach ($groupMembers as $member):
                                 if (($member->getRole() === 'admin') && ($member->getStudentId() == $studentId)): ?>
                                     <li class="user admin">
-                                <?php elseif ($member->getRole() === 'admin'): ?>
+                                    <?php elseif ($member->getRole() === 'admin'): ?>
                                     <li class="admin">
-                                <?php elseif ($member->getStudentId() == $studentId): ?>
+                                    <?php elseif ($member->getStudentId() == $studentId): ?>
                                     <li class="user">
-                                <?php else: ?>
+                                    <?php else: ?>
                                     <li>
-                                <?php endif; ?>
+                                    <?php endif; ?>
                                     <div class="member-wrapper">
-                                        <a class="profile-link text-decoration-none" href="profile.php?id=<?= htmlspecialchars($member->getStudentId())?>"><?= htmlspecialchars($member->getStudentName())?>, <?= htmlspecialchars($member->getStudentId())?></a>
+                                        <a class="profile-link text-decoration-none"
+                                            href="profile.php?id=<?= htmlspecialchars($member->getStudentId()) ?>"><?= htmlspecialchars($member->getStudentName()) ?>,
+                                            <?= htmlspecialchars($member->getStudentId()) ?></a>
                                         <?php if ($member->getStudentId() != $studentId): ?>
                                             <div class="reply-section my-2 py-1">
                                                 <form action="review_create.php" method="post">
                                                     <input type="hidden" name="group_id" value="<?= $group->getGroupId() ?>">
                                                     <input type="hidden" name="reviewee_id" value="<?= $member->getStudentId() ?>">
-                                                <?php if ($reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId())): ?>
-                                                    <button class="disabled reply-button">
-                                                <?php else: ?>
-                                                    <button type="submit" class="reply-button">
-                                                <?php endif; ?>
-                                                        Review
-                                                    </button>
+                                                    <?php if ($reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId())): ?>
+                                                        <button class="disabled reply-button">
+                                                        <?php else: ?>
+                                                            <button type="submit" class="reply-button">
+                                                            <?php endif; ?>
+                                                            Review
+                                                        </button>
                                                 </form>
                                             </div>
                                         <?php endif; ?>
@@ -167,28 +192,34 @@ ob_start(); // Capture the page content
                         </ol>
                         <?php if ($roles[$group->getGroupId()] === 'admin'): ?>
                             <div class="delete-section" data-group-id="<?= htmlspecialchars($group->getGroupId()) ?>">
-                                <div class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">Delete Group</div>
+                                <div
+                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">
+                                    Delete Group</div>
                             </div>
                             <div class="delete-modal" data-group-id="<?= htmlspecialchars($group->getGroupId()) ?>">
                                 <div class="delete-group-wrapper">
                                     <form class="delete-form" action="process_group_delete.php" method="post">
                                         <input type="hidden" name="group_id" value="<?= htmlspecialchars($group->getGroupId()) ?>">
                                         <div class="delete-group-header">
-                                            <h5 class="delete-group-title"><strong>Delete “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
+                                            <h5 class="delete-group-title"><strong>Delete
+                                                    “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
                                         </div>
                                         <div class="delete-group-body">
                                             This action cannot be undone. Current members will have to find another group.
                                         </div>
                                         <div class="my-4">
-                                            <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id" name="delete_group" value="true">
-                                            <span class="delete-group-ack">I acknowledge the above and agree to delete the group.</span>
+                                            <input required type="checkbox" class="delete-group-checkbox" id="placeholder-delete-id"
+                                                name="delete_group" value="true">
+                                            <span class="delete-group-ack">I acknowledge the above and agree to delete the
+                                                group.</span>
                                         </div>
                                         <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
                                             <div class="cancel-section mx-4">
                                                 <span class="text-center"><small>Cancel</small></span>
                                             </div>
                                             <div class="confirm-section">
-                                                <button type="submit" class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">Confirm</button>
+                                                <button type="submit"
+                                                    class="text-decoration-none text-center delete-button d-flex align-items-center justify-content-center">Confirm</button>
                                             </div>
                                         </div>
                                     </form>

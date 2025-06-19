@@ -1,4 +1,7 @@
 <?php
+// Set default timezone to Singapore
+date_default_timezone_set('Asia/Singapore');
+
 // Start session only if not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

@@ -51,7 +51,7 @@ class GroupMembershipController
             return ['error' => 'An error occurred while fetching student join requests: ' . $e->getMessage()];
         }
     }
-    
+
     public function onJoinGroupRequest(int $groupId, int $studentId): void
     {
         if ($this->groupMembershipControl->requestExists($groupId, $studentId)) {
@@ -69,6 +69,44 @@ class GroupMembershipController
     public function OnCheckIfMember(int $groupId, int $studentId): bool
     {
         return $this->groupMembershipControl->memberExists($groupId, $studentId);
+    }
+
+    // Accept Join Request
+    public function onAcceptJoinRequest(int $requestId, int $requesterId, int $approverId): void
+    {
+        // Get the group ID from the request
+        $groupId = $this->groupMembershipControl->getGroupIdByRequestId($requestId);
+
+        $role = $this->groupMembershipControl->getUserRole($groupId, $approverId);
+        if ($role !== 'admin') {
+            throw new Exception("Only group admins can accept join requests.");
+        }
+
+        if (!$this->onCheckIfRequested($groupId, $requesterId)) {
+            throw new Exception("No join request found for this student.");
+        }
+
+        // Approve the join request
+        $this->groupMembershipControl->acceptJoinRequest($requestId, $requesterId, $approverId);
+    }
+
+    // Reject Join Request
+    public function onRejectJoinRequest(int $requestId, int $requesterId, int $approverId): void
+    {
+        // Get the group ID from the request
+        $groupId = $this->groupMembershipControl->getGroupIdByRequestId($requestId);
+
+        $role = $this->groupMembershipControl->getUserRole($groupId, $approverId);
+        if ($role !== 'admin') {
+            throw new Exception("Only group admins can reject join requests.");
+        }
+
+        if (!$this->onCheckIfRequested($groupId, $requesterId)) {
+            throw new Exception("No join request found for this student.");
+        }
+
+        // Reject the join request
+        $this->groupMembershipControl->rejectJoinRequest($requestId, $requesterId, $approverId);
     }
 
 }
