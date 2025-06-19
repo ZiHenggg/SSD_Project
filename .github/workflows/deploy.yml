@@ -9,8 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # ✅ This block makes secrets available to 'envs:' inside the ssh-action
-    env:
+    env:  # ✅ SET ENVIRONMENT VARIABLES FROM SECRETS
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USER: ${{ secrets.DB_USER }}
@@ -18,13 +17,19 @@ jobs:
 
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           envs: DB_HOST,DB_NAME,DB_USER,DB_PASS
           script: |
+            echo "🔎 Verifying env vars..."
+            echo "DB_HOST=$DB_HOST"
+            echo "DB_NAME=$DB_NAME"
+            echo "DB_USER=$DB_USER"
+            echo "DB_PASS=$DB_PASS"
+
             cd ~/ssd-project
 
             echo "✅ Creating .env.prod file"
