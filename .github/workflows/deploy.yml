@@ -19,7 +19,7 @@ jobs:
           script: |
             cd ~/ssd-project
 
-            # ✅ Create .env.prod safely
+            # ✅ Create .env.prod safelyy
             echo "DB_HOST=$DB_HOST" > .env.prod
             echo "DB_NAME=$DB_NAME" >> .env.prod
             echo "DB_USER=$DB_USER" >> .env.prod
