@@ -3,7 +3,7 @@ name: Deploy to EC2 with Docker Compose
 on:
   push:
     branches:
-      - production  # 👈 triggers only on production branch
+      - production
 
 jobs:
   deploy:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v0.1.10   # ✅ Use correct version
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
