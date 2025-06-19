@@ -6,7 +6,7 @@ services:
     container_name: php-webapp
     build: .
     ports:
-      - "80:80"  # Use port 80 directly in production
+      - "80:80"  # Use port 80 directly in productionn
     volumes:
       - .:/var/www
       - ./public:/var/www/html
