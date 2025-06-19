@@ -116,34 +116,29 @@ ob_start(); // Capture the page content
                                             <div class="request-wrapper">
                                                 <a class="profile-link text-decoration-none"
                                                     href="profile.php?id=<?= htmlspecialchars($requesterId) ?>"><?= htmlspecialchars($requester->getStudentName()) ?>,
-                                                    <?= htmlspecialchars($requesterId) ?></a>
-                                                <!-- <form class="pending-form" action="" method="post">
-                                                    <button class="btn accept-btn" type="submit">
-                                                        <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                                    </button>
-                                                    <button class="btn reject-btn" type="submit">
-                                                        <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                                    </button>
-                                                </form> -->
-                                                <!-- Reject form -->
-                                                <form class="pending-form" action="process_reject_request.php" method="post"
-                                                    style="display:inline;">
-                                                    <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
-                                                    <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
-                                                    <button class="btn reject-btn" type="submit">
-                                                        <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
-                                                    </button>
-                                                </form>
+                                                    <?= htmlspecialchars($requesterId) ?>
+                                                </a>
+                                                <div class="pending-form-wrapper">
+                                                    <!-- Reject form -->
+                                                    <form class="pending-form" action="process_reject_request.php" method="post"
+                                                        style="display:inline;">
+                                                        <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
+                                                        <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
+                                                        <button class="btn reject-btn" type="submit">
+                                                            <img src="img/reject.svg" alt="Reject" class="w-100 reject" />
+                                                        </button>
+                                                    </form>
 
-                                                <!-- Accept form -->
-                                                <form class="pending-form" action="process_accept_request.php" method="post"
-                                                    style="display:inline;">
-                                                    <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
-                                                    <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
-                                                    <button class="btn accept-btn" type="submit">
-                                                        <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
-                                                    </button>
-                                                </form>
+                                                    <!-- Accept form -->
+                                                    <form class="pending-form" action="process_accept_request.php" method="post"
+                                                        style="display:inline;">
+                                                        <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
+                                                        <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
+                                                        <button class="btn accept-btn" type="submit">
+                                                            <img src="img/accept.svg" alt="Accept" class="w-100 accept" />
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </li>
                                     <?php endforeach; ?>

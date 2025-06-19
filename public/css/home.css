@@ -182,12 +182,6 @@
     text-decoration: underline;
 }
 
-.pending-form {
-    width: 15%;
-    display: flex;
-    gap: 15%;
-}
-
 .accept-btn, .reject-btn {
     padding: 0;
     width: 32px;

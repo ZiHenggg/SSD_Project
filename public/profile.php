@@ -72,6 +72,26 @@ $reviews = $reviewResponse['reviews'] ?? [];
 
 $groupJoinRequestsResponse = $groupMembershipController->displayStudentJoinRequests($student->getStudentId());
 $groupJoinRequests = $groupJoinRequestsResponse['joinRequest'] ?? [];
+$pendingJoinRequests = [];
+foreach ($groupJoinRequests as $request) {
+    if ($request->getJoinStatus() === 'pending') {
+        $pendingJoinRequests[] = $request;
+    }
+}
+
+$rejectedJoinRequests = [];
+foreach ($groupJoinRequests as $request) {
+    if ($request->getJoinStatus() === 'rejected') {
+        $rejectedJoinRequests[] = $request;
+    }
+}
+
+$acceptedJoinRequests = [];
+foreach ($groupJoinRequests as $request) {
+    if ($request->getJoinStatus() === 'accepted') {
+        $acceptedJoinRequests[] = $request;
+    }
+}
 
 $studentStatsResponse = $reviewController->displayReviewStats($student->getStudentId());
 $totalReviews = $studentStatsResponse['totalReviews'] ?? 0;
@@ -104,9 +124,10 @@ ob_start();
             </div>
             <?php if ($profileId === $loggedInId):?>
                 <div class="mt-5 pending-requests">
-                    <h3>Pending Requests</h3>
-                    <?php if (count($groupJoinRequests) > 0): ?>
-                        <?php foreach ($groupJoinRequests as $request): ?>
+                    <h3>Group Request Status</h3>
+                    <h4>Pending</h4>
+                    <?php if (count($pendingJoinRequests) > 0): ?>
+                        <?php foreach ($pendingJoinRequests as $request): ?>
                             <?php
                                 $groupData = $groupController->displayGroupDetails($request->getGroupId());
                                 $group = $groupData['group'];
@@ -115,12 +136,54 @@ ob_start();
                             <div class="mt-3 group-item">
                                 <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
                                 <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
-                                <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?> T<?= htmlspecialchars($group->getTrimester()) ?>]</span>
+                                <span class="timestamp"><strong>Requested At: </strong><?= htmlspecialchars($request->getRequestAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No requests are currently pending.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-2 accepted-requests">
+                    <h4>Accepted</h4>
+                    <?php if (count($acceptedJoinRequests) > 0): ?>
+                        <?php foreach ($acceptedJoinRequests as $request): ?>
+                            <?php
+                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                                $group = $groupData['group'];
+                                $moduleData = $groupData['module'];
+                            ?>
+                            <div class="mt-3 group-item">
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="timestamp"><strong>Accepted At: </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
                                 <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p>No pending requests.</p>
+                        <p>No requests have been accepted.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-2 rejected-requests">
+                    <h4>Rejected</h4>
+                    <?php if (count($rejectedJoinRequests) > 0): ?>
+                        <?php foreach ($rejectedJoinRequests as $request): ?>
+                            <?php
+                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                                $group = $groupData['group'];
+                                $moduleData = $groupData['module'];
+                            ?>
+                            <div class="mt-3 group-item">
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="timestamp"><strong>Rejected At: </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No requests have been rejected.</p>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
