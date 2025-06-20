@@ -26,7 +26,7 @@ class GroupMembershipController
         }
     }
 
-    public function showJoinRequest(int $groupId): array
+    public function displayGroupJoinRequests(int $groupId): array
     {
         try {
             $joinRequests = $this->groupMembershipControl->getRequestsByGroup($groupId);

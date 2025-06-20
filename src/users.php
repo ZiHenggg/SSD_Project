@@ -1,7 +1,7 @@
 <?php
 // Get DB credentials from environment
 $host = getenv('DB_HOST');
-$db   = getenv('DB_NAME');
+$db = getenv('DB_NAME');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 
@@ -31,15 +31,15 @@ try {
     echo "❌ Database error: " . $e->getMessage();
 }
 
-class students {
-    public $studentId;
-    public $name;
-    public $email;
+// class students {
+//     public $studentId;
+//     public $name;
+//     public $email;
 
-    public function set($studentId, $name, $email) {
-        $this->studentId = $studentId;
-        $this->name = $name;
-        $this->email = $email;
-    }
-}
+//     public function set($studentId, $name, $email) {
+//         $this->studentId = $studentId;
+//         $this->name = $name;
+//         $this->email = $email;
+//     }
+// }
 ?>

@@ -2,11 +2,11 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\ModuleMapper;
 use App\Control\GroupControl;
+use App\Mapper\GroupMapper;
+use App\Mapper\GroupMembershipMapper;
+use App\Mapper\GroupJoinRequestsMapper;
+use App\Mapper\ModuleMapper;
 use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
 // Initialize control class
@@ -18,19 +18,16 @@ $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 
-try {
-    $groupPageController->onCreateGroup($_POST, $_SESSION['user']['id']);
-    // Redirect or show success
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['delete_group'])) {
+    $groupId = (int) $_POST['group_id'];
+    $groupPageController->onDeleteGroup($groupId);
+    $_SESSION['success'] = "Group deleted successfully.";
     header("Location: dashboard.php");
     exit;
-} catch (Exception $e) {
-    // Handle error: log it or show message
-    $_SESSION['error'] = $e->getMessage();
-    header("Location: group_create.php");
+} else {
+    $_SESSION['error'] = "Invalid group deletion request.";
+    header("Location: dashboard.php");
     exit;
 }
 
-
-
-// TODO: Do we need to store previous inputs? in case of error?
 ?>

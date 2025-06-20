@@ -34,19 +34,8 @@ if (!$groupId || !$studentId) {
 //         new DateTime()
 //     );
 
-<<<<<<< HEAD
-if (!$mapper->requestExists($studentId, $groupId)) {
-    $request = new GroupJoinRequests(
-        0,
-        (int)$groupId,
-        (int)$studentId,
-        'pending',
-        new DateTime()
-    );
-=======
 //     $mapper->addRequest($request);
 // }
->>>>>>> 7d8b353 (added accept and reject join request)
 
 try {
     $groupMembershipController->onJoinGroupRequest($groupId, $studentId);

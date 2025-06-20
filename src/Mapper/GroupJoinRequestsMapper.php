@@ -6,11 +6,13 @@ use App\Entity\GroupJoinRequests;
 use App\Repository\GroupJoinRequestsRepository;
 use PDO;
 
-class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
+class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
+{
 
     private PDO $dbConnection;
 
-    public function __construct(PDO $dbConnection) {
+    public function __construct(PDO $dbConnection)
+    {
         $this->dbConnection = $dbConnection;
     }
 
@@ -91,10 +93,10 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
         return $result ? (int) $result['groupId'] : null;
     }
 
-    public function addRequest(GroupJoinRequests $request): void 
+    public function addRequest(GroupJoinRequests $request): void
     {
         $stmt = $this->dbConnection->prepare("
-            INSERT INTO groupjoinrequests (groupId, requesterId, joinStatus, requestedAt)
+            INSERT INTO groupJoinRequests (groupId, requesterId, joinStatus, requestedAt)
             VALUES (:groupId, :requesterId, :joinStatus, :requestedAt)
         ");
 
@@ -106,10 +108,10 @@ class groupJoinRequestsMapper implements GroupJoinRequestsRepository {
         ]);
     }
 
-    public function requestExists(int $studentId, int $groupId): bool
+    public function requestExists(int $groupId, int $studentId): bool
     {
         $stmt = $this->dbConnection->prepare("
-            SELECT COUNT(*) FROM groupjoinrequests
+            SELECT COUNT(*) FROM groupJoinRequests
             WHERE groupId = :groupId AND requesterId = :studentId
         ");
         $stmt->execute([

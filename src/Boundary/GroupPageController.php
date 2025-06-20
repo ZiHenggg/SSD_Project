@@ -19,7 +19,7 @@ class GroupPageController
         $this->pdo = $pdo;
     }
 
-    public function createGroup(array $formData, string $adminId): void
+    public function onCreateGroup(array $formData, string $studentId): void
     {
         // Fetch lab groups from the database
         $stmt = $this->pdo->query("SELECT labGroupCode, moduleCode FROM labGroups");
@@ -39,7 +39,7 @@ class GroupPageController
         $maxGroupSize = (int) ($formData['maxGroupSize'] ?? 0);
 
         // Validate required fields
-        if (!$adminId) {
+        if (!$studentId) {
             throw new Exception("User not logged in.");
         }
 
@@ -63,7 +63,7 @@ class GroupPageController
             $trimester,
             $moduleCode,
             $maxGroupSize,
-            $adminId,
+            $studentId,
             $labGroup
         );
     }
@@ -77,6 +77,11 @@ class GroupPageController
     public function listUserGroups(int $studentId): array
     {
         return $this->groupControl->getGroupsByUser($studentId);
+    }
+
+    public function listActiveUserGroups(int $studentId): array
+    {
+        return $this->groupControl->getActiveGroupsByUser($studentId);
     }
 
     public function getUserRoleInGroup(int $groupId, int $studentId): ?string
@@ -100,25 +105,28 @@ class GroupPageController
             return null; // Group not found
         }
 
+        $module = $this->groupControl->getModuleByGroupId($groupId);
+
         $members = $this->groupMembershipControl->getGroupMembers($groupId);
         return [
             'group' => $group,
             'members' => $members,
+            'module' => $module,
         ];
     }
 
-    // public function onDeleteGroup(int $groupId, string $adminId): void
-    // {
-    //     try {
-    //         $this->groupControl->deleteGroup($groupId, $adminId);
-    //         header("Location: groups.php");
-    //         exit;
-    //     } catch (Exception $e) {
-    //         $_SESSION['error'] = $e->getMessage();
-    //         header("Location: group_details.php?id=$groupId");
-    //         exit;
-    //     }
-    // }
+    public function onDeleteGroup(int $groupId): void
+    {
+        try {
+            $this->groupControl->softDeleteGroup($groupId);
+            // header("Location: groups.php");
+            // exit;
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: group_details.php?id=$groupId");
+            exit;
+        }
+    }
 
     // public function onUpdateGroupStatus(int $groupId, string $status): void
     // {

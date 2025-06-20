@@ -5,19 +5,25 @@ require_once __DIR__ . '/../src/auth_check.php';
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupJoinRequestsMapper;
+use App\Mapper\ModuleMapper;
 use App\Control\GroupControl;
 use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
+use App\Boundary\GroupMembershipController;
 
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo);
+$moduleRepo = new moduleMapper($pdo);
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $controller = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 
 // Fetch all active groups
 $groups = $controller->listAllActiveGroups();
+$noGroups = count($groups);
+$studentId = $_SESSION['user']['id'] ?? null;
 
 $title = "Groups";
 ob_start();
@@ -32,22 +38,29 @@ ob_start();
             </a>
         </div>
 
-        <?php if (count($groups) > 0): ?>
-            <?php foreach ($groups as $group): ?>
+        <?php 
+            $anyShown = false;
+            foreach ($groups as $group): 
+                $module = $groupControl->getModuleByGroupId($group->getGroupId());
+                $isMember = $groupMembershipController->onCheckIfMember($group->getGroupId(), $studentId);
+
+                if ($isMember) continue;
+
+                $anyShown = true;
+            ?>
                 <div class="group-item">
-                    <a href="group_info.php?groupId=<?= $group->getGroupId() ?>">
+                    <a class="group-name text-decoration-none header" href="group_info.php?groupId=<?= $group->getGroupId() ?>">
                         <?= htmlspecialchars($group->getGroupName()) ?>
                     </a>
-
-                    <!-- <span class="group-name header"><?= htmlspecialchars($group->getGroupName()) ?></span> -->
-                    <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?></span>
+                    <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($module->getModuleName()) ?></span>
                     <span class="acad-term">[<?= htmlspecialchars($group->getAcadYear()) ?>]</span>
                     <span class="member-count"><?= $group->getNoOfMembers() ?>/<?= $group->getMaxMembers() ?></span>
                 </div>
             <?php endforeach; ?>
-        <?php else: ?>
-            <p>No groups found.</p>
-        <?php endif; ?>
+
+            <?php if (!$anyShown): ?>
+                <p>No groups found.</p>
+            <?php endif; ?>
 
     </div>
 </div>

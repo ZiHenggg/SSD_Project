@@ -16,11 +16,11 @@ class ReviewPageController
         $this->pdo = $pdo;
     }
 
-    public function onViewReceivedReviews(int $userId): array
+    public function onViewReceivedReviews(int $studentId): array
     {
         try {
             // Fetch reviews for the user
-            $reviews = $this->reviewControl->getReviewsByUser($userId);
+            $reviews = $this->reviewControl->getReviewsByUser($studentId);
             if (empty($reviews)) {
                 return ['message' => 'No reviews found for this user.'];
             }
@@ -53,6 +53,17 @@ class ReviewPageController
             $this->reviewControl->submitReview($reviewerId, $revieweeId, $groupId, $rating, $description);
         } catch (Exception $e) {
             throw new Exception('An error occurred while submitting the review: ' . $e->getMessage());
+        }
+    }
+
+    public function displayReviewStats(int $studentId): array
+    {
+        try {
+            $averageRating = $this->reviewControl->calculateAverageRating($studentId);
+            $noOfReviews = $this->reviewControl->getTotalReviews($studentId);
+            return ['averageRating' => $averageRating, 'totalReviews' => $noOfReviews];
+        } catch (Exception $e) {
+            return ['error' => 'An error occurred while calculating average rating: ' . $e->getMessage()];
         }
     }
 }
