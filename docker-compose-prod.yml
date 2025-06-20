@@ -185,8 +185,9 @@ services:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=changeme  # Change this in production!
     ports:
-      - "8888:8000"  # Splunk UI available at https://<your-ec2>:8888
+      - "127.0.0.1:8000:8000"  # 🔐 Local access only (for SSH tunneling)
     volumes:
-      - ./splunk-data:/opt/splunk/var
-      - ./nginx/logs:/mnt/nginx-logs
+      - ./splunk-data:/opt/splunk/var          # Indexed log data
+      - ./splunk-etc:/opt/splunk/etc           # 🧠 Persistent config (dashboards, inputs, etc.)
+      - ./nginx/logs:/mnt/nginx-logs           # Nginx logs for Splunk to read
     restart: unless-stopped
