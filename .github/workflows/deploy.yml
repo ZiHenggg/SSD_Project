@@ -37,6 +37,11 @@ jobs:
               git clone --branch production https://$GH_PAT@github.com/mogaman/SSD_Project.git $HOME/ssd-project
             else
               echo "✅ Project directory exists."
+              cd $HOME/ssd-project
+              echo "🔄 Pulling latest changes from production branch..."
+              git reset --hard
+              git clean -fd
+              git pull origin production
             fi
 
             cd $HOME/ssd-project
