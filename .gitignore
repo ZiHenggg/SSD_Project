@@ -1,14 +1,39 @@
-# Ignore Docker volumes and environment files
+# # Ignore Docker volumes and environment files
+# mysql-data/
+# .env
+
+# # Ignore editor files
+# *.log
+# *.php~
+# .DS_Store
+# .idea/
+# .vscode/
+
+# # Optional: if using Composer or Node
+# vendor/
+# node_modules/
+
+# -------------------------------
+# Dependency Check
+/odc-data/
+/odc-reports/
+
+# Docker volumes and env
 mysql-data/
 .env
 
-# Ignore editor files
+# Logs and temp files
 *.log
 *.php~
 .DS_Store
+
+# IDE/editor settings
 .idea/
 .vscode/
 
-# Optional: if using Composer or Node
-vendor/
-node_modules/
+# Composer (PHP)
+/vendor/
+
+# Node (if applicable)
+/node_modules/
+
