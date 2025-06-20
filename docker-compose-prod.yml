@@ -1,12 +1,32 @@
+# version: '3.8'
+
+# services:
+
+#   web:
+#     container_name: php-webapp
+#     build: .
+#     ports:
+#       - "80:80"  # Use port 80 directly in productionn
+#     volumes:
+#       - .:/var/www
+#       - ./public:/var/www/html
+#     restart: unless-stopped
+#     env_file:
+#       - .env.prod
+#     environment:
+#       DB_HOST: ${DB_HOST}
+#       DB_NAME: ${DB_NAME}
+#       DB_USER: ${DB_USER}
+#       DB_PASS: ${DB_PASS}
+
 version: '3.8'
 
 services:
-
   web:
     container_name: php-webapp
     build: .
-    ports:
-      - "80:80"  # Use port 80 directly in productionn
+    expose:
+      - "9000"
     volumes:
       - .:/var/www
       - ./public:/var/www/html
@@ -18,3 +38,14 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - web
