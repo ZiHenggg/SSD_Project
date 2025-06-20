@@ -20,39 +20,6 @@
 #       DB_PASS: ${DB_PASS}
 
 #reverse proxy
-# version: '3.8'
-
-# services:
-#   web:
-#     container_name: php-webapp
-#     build: .
-#     expose:
-#       - "9000"
-#     volumes:
-#       - .:/var/www
-#       - ./public:/var/www/html
-#     restart: unless-stopped
-#     env_file:
-#       - .env.prod
-#     environment:
-#       DB_HOST: ${DB_HOST}
-#       DB_NAME: ${DB_NAME}
-#       DB_USER: ${DB_USER}
-#       DB_PASS: ${DB_PASS}
-
-#   nginx:
-#     image: nginx:latest
-#     container_name: nginx
-#     ports:
-#       - "80:80"
-#     volumes:
-#       - ./public:/var/www/html
-#       - ./nginx/conf.d:/etc/nginx/conf.d
-#     depends_on:
-#       - web
-
-
-# For getting SSL certificates with certbot
 version: '3.8'
 
 services:
@@ -81,17 +48,50 @@ services:
     volumes:
       - ./public:/var/www/html
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     depends_on:
       - web
 
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
+
+# For getting SSL certificates with certbot
+# version: '3.8'
+
+# services:
+#   web:
+#     container_name: php-webapp
+#     build: .
+#     expose:
+#       - "9000"
+#     volumes:
+#       - .:/var/www
+#       - ./public:/var/www/html
+#     restart: unless-stopped
+#     env_file:
+#       - .env.prod
+#     environment:
+#       DB_HOST: ${DB_HOST}
+#       DB_NAME: ${DB_NAME}
+#       DB_USER: ${DB_USER}
+#       DB_PASS: ${DB_PASS}
+
+#   nginx:
+#     image: nginx:latest
+#     container_name: nginx
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./public:/var/www/html
+#       - ./nginx/conf.d:/etc/nginx/conf.d
+#       - ./data/certbot/conf:/etc/letsencrypt
+#       - ./data/certbot/www:/var/www/certbot
+#     depends_on:
+#       - web
+
+#   certbot:
+#     image: certbot/certbot
+#     container_name: certbot
+#     volumes:
+#       - ./data/certbot/conf:/etc/letsencrypt
+#       - ./data/certbot/www:/var/www/certbot
 
 # version: '3.8'
 
