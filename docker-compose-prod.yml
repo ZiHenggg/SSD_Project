@@ -188,4 +188,5 @@ services:
       - "8888:8000"  # Splunk UI available at https://<your-ec2>:8888
     volumes:
       - ./splunk-data:/opt/splunk/var
+      - ./nginx/logs:/mnt/nginx-logs
     restart: unless-stopped
