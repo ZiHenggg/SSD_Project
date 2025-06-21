@@ -61,6 +61,11 @@ class GroupMembershipController
         $this->groupMembershipControl->submitJoinRequest($groupId, $studentId);
     }
 
+    public function onRemoveJoinRequest(int $groupId, int $studentId): void
+    {
+        $this->groupMembershipControl->removeJoinRequest($groupId, $studentId);
+    }
+
     public function onCheckIfRequested(int $groupId, int $studentId): bool
     {
         return $this->groupMembershipControl->requestExists($groupId, $studentId);

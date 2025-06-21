@@ -103,6 +103,11 @@ class GroupMembershipControl
         $this->groupJoinRequestsRepo->addRequest($request);
     }
 
+    public function removeJoinRequest(int $groupId, int $studentId): void 
+    {
+        $this->groupJoinRequestsRepo->removeRequest($groupId, $studentId);
+    }
+
     public function memberExists(int $groupId, int $studentId): bool
     {
         return $this->groupMembershipRepo->isMember($groupId, $studentId);

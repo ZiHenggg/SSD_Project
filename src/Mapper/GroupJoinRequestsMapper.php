@@ -108,6 +108,18 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
         ]);
     }
 
+    public function removeRequest(int $groupId, int $requesterId): void 
+    {
+        $stmt = $this->dbConnection->prepare("
+            DELETE FROM groupJoinRequests
+            WHERE groupId = :groupId AND requesterId = :requesterId
+        ");
+        $stmt->execute([
+            ':groupId' => $groupId,
+            ':requesterId' => $requesterId
+        ]);
+    }
+
     public function requestExists(int $groupId, int $studentId): bool
     {
         $stmt = $this->dbConnection->prepare("
