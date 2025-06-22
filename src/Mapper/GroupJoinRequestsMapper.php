@@ -104,7 +104,7 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
             ':groupId' => $request->getGroupId(),
             ':requesterId' => $request->getRequesterId(),
             ':joinStatus' => $request->getJoinStatus(),
-            ':requestedAt' => $request->getRequestAt()->format('Y-m-d H:i:s'),
+            ':requestedAt' => $request->getRequestedAt()->format('Y-m-d H:i:s'),
         ]);
     }
 

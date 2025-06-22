@@ -9,7 +9,6 @@ interface GroupJoinRequestsRepository
     public function getRequestsByGroup(int $groupId): array;
     public function getRequestsByStudent(int $studentId): array;
     // public function getRequestById(int $requestId): ?GroupJoinRequests;
-    // public function updateRequestStatus(int $requestId, string $status, DateTime $reviewedAt): void;
     public function getGroupIdByRequestId(int $requestId): ?int;
     public function requestExists(int $groupId, int $studentId): bool;
     public function updateRequestStatus(int $requestId, int $reviewerId, string $status): void;

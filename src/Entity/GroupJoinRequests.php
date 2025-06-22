@@ -8,7 +8,7 @@ class GroupJoinRequests
     private int $groupId;
     private int $requesterId;
     private string $joinStatus; // e.g., 'pending', 'accepted', 'rejected'
-    private DateTime $requestAt;
+    private DateTime $requestedAt;
     private ?DateTime $reviewedAt;
     private ?int $reviewedBy;
 
@@ -29,9 +29,9 @@ class GroupJoinRequests
     {
         return $this->joinStatus;
     }
-    public function getRequestAt(): DateTime
+    public function getRequestedAt(): DateTime
     {
-        return $this->requestAt;
+        return $this->requestedAt;
     }
     public function getReviewedAt(): ?DateTime
     {
@@ -59,9 +59,9 @@ class GroupJoinRequests
     {
         $this->joinStatus = $joinStatus;
     }
-    private function setRequestAt(DateTime $requestAt): void
+    private function setRequestedAt(DateTime $requestedAt): void
     {
-        $this->requestAt = $requestAt;
+        $this->requestedAt = $requestedAt;
     }
     private function setReviewedAt(?DateTime $reviewedAt): void
     {
@@ -78,7 +78,7 @@ class GroupJoinRequests
         int $groupId,
         int $requesterId,
         string $joinStatus,
-        DateTime $requestAt,
+        DateTime $requestedAt,
         ?DateTime $reviewedAt = null,
         ?int $reviewedBy = null
     ) {
@@ -86,7 +86,7 @@ class GroupJoinRequests
         $this->setGroupId($groupId);
         $this->setRequesterId($requesterId);
         $this->setJoinStatus($joinStatus);
-        $this->setRequestAt($requestAt);
+        $this->setRequestedAt($requestedAt);
         $this->reviewedAt = $reviewedAt;
         $this->reviewedBy = $reviewedBy;
     }

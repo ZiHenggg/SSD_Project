@@ -43,6 +43,8 @@ $moduleData = $groupData['module'];
 ?>
 
 <div class="group-info container">
+    <?php displayErrorMessage(); ?>
+    <?php displaySuccessMessage(); ?>
     <div class="group-header">
         <div class="group-title">
             <h2><?= htmlspecialchars($group->getGroupName()) ?></h2>
@@ -52,7 +54,7 @@ $moduleData = $groupData['module'];
             <form method="POST" action="<?= $hasRequested ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
                 <input type="hidden" name="groupId" value="<?= $groupId ?>">
                 <?php if ($hasRequested): ?>
-                    <button class="join-button" type="submit">Requested</button>
+                    <button class="join-button" type="submit">Cancel Request</button>
                 <?php else: ?>
                     <button class="join-button" type="submit">Request to Join</button>
                 <?php endif; ?>
