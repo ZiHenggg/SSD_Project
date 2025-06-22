@@ -68,6 +68,12 @@ class GroupPageController
         );
     }
 
+    public function onSearchGroupsByModuleName(string $moduleName): array 
+    {
+        return $this->groupControl->searchGroup($moduleName);
+    }
+
+
     public function listAllActiveGroups(): array
     {
         // return $this->groupControl->getGroupsByUser($studentId);

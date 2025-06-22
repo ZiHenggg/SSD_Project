@@ -200,6 +200,25 @@ class GroupMapper implements GroupRepository
         return $groups; // Return an array of Group objects
     }
 
+    public function getGroupsByModuleName(string $moduleName): array 
+    {
+        $stmt = $this->dbConnection->prepare("
+            SELECT g.* 
+            FROM `groups` g
+            JOIN modules m ON g.moduleCode = m.moduleCode
+            WHERE m.moduleName LIKE :moduleName
+            AND g.groupStatus = 'active'
+        ");
+        $stmt->execute([':moduleName' => '%' . $moduleName . '%']);
+
+        $groups = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $groups[] = $this->mapRowToGroup($row);
+        }
+        return $groups;
+    }
+
+
     // update group status
     public function updateGroupStatus(int $groupId, string $status): void
     {

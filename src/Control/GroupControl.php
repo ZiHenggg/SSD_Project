@@ -50,6 +50,12 @@ class GroupControl
         return $group;
     }
 
+    public function searchGroup(string $moduleName): array 
+    {
+        return $this->groupRepo->getGroupsByModuleName($moduleName);
+    }
+
+
     public function isMember(int $groupId, int $studentId): bool
     {
         return $this->groupMembershipRepo->isMember($groupId, $studentId);
