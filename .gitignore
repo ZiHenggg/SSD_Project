@@ -21,6 +21,7 @@
 # Docker volumes and env
 mysql-data/
 .env
+.env.prod
 
 # Logs and temp files
 *.log
