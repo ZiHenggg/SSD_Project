@@ -42,3 +42,25 @@ services:
     restart: always
     ports:
       - 8081:8080
+
+  splunk: 
+    image: splunk/splunk:latest         # Always pull latest Splunk
+    container_name: splunk            
+    hostname: splunk
+    restart: always                     # Restart if container stops
+    ports:
+      - "8000:8000"                     # Splunk Web UI Port
+      - "8088:8088"                     # HEC Port
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN}
+    volumes: 
+      - splunk_data:/opt/splunk/var
+      - splunk_etc:/opt/splunk/etc
+
+volumes:
+  splunk_data: 
+    driver: local
+  splunk_etc:
+    driver: local
