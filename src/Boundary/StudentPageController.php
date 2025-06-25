@@ -2,6 +2,9 @@
 namespace App\Boundary;
 use App\Control\StudentControl;
 use App\Entity\Student;
+
+use DivineOmega\PasswordExposed\Enums\PasswordStatus;
+
 class StudentPageController
 {
     private string $studentId;
@@ -12,6 +15,21 @@ class StudentPageController
         $this->studentControl = $studentControl;
     }
 
+    // Validate password according to NIST guidelines and check against known breaches
+    public function validatePassword(string $password): ?string
+    {
+        if (strlen($password) < 8 || strlen($password) > 64) {
+            return "Password must be between 8 and 64 characters.";
+        }
+
+        switch (password_exposed($password)) {
+            case PasswordStatus::EXPOSED:
+                return "This password has been found in a known data breach. Please choose a more secure one.";
+            case PasswordStatus::UNKNOWN:
+                return "Unable to verify password security at this time. Try again later.";
+        }
+        return null; // Password is valid
+    }
     public function validateStudentInput(array $data): ?string
     {
         $studentId = isset($data['studentId']) ? (int) $data['studentId'] : 0;
@@ -40,6 +58,10 @@ class StudentPageController
         }
 
         // TODO: Add password validation rules
+        $passwordError = $this->validatePassword($password);
+        if ($passwordError !== null) {
+            return $passwordError;
+        }
 
         return null;
     }
@@ -75,31 +97,6 @@ class StudentPageController
         }
     }
 
-    // public function loginStudent(array $postLogin): string {
-    // $email = trim($postLogin['email'] ?? '');
-    // $password = trim($postLogin['password'] ?? '');
-
-    // if (empty($email) || empty($password)) {
-    //     return "Email and password are required.";
-    // }
-
-    // // Validate email format
-    // if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    //     return "Invalid email format.";
-    // }
-
-    // // Retrieve student by email
-    // $student = $this->studentControl->getStudentByEmail($email);
-    // if (!$student || !password_verify($password, $student->getPassword())) {
-    //     return "Invalid email or password.";
-    // }
-
-    // // Set session variables
-    // $_SESSION['email'] = (string)$email;
-    // $_SESSION['studentName'] = $student->getStudentName();
-
-    //     return "Login successful. Welcome, " . htmlspecialchars($student->getStudentName()) . "!";
-    // }
     public function loginStudent(array $postLogin): array
     {
         $email = trim($postLogin['email'] ?? '');
@@ -129,10 +126,8 @@ class StudentPageController
         }
     }
 
-    public function updatePassword(array $postData): array
+    public function updatePassword(string $email, array $postData): array
     {
-        $email = $_SESSION['user']['email'] ?? null;
-
         if (!$email) {
             return ['success' => false, 'message' => 'User not authenticated.'];
         }
@@ -142,6 +137,16 @@ class StudentPageController
 
         if (!$oldPassword || !$newPassword) {
             return ['success' => false, 'message' => 'Both fields are required.'];
+        }
+
+        if (hash_equals($oldPassword, $newPassword)) {
+            return ['success' => false, 'message' => 'New password must be different from the old password.'];
+        }
+
+        // Validate new password using NIST/breach check
+        $newPasswordError = $this->validatePassword($newPassword);
+        if ($newPasswordError !== null) {
+            return ['success' => false, 'message' => $newPasswordError];
         }
 
         try {

@@ -42,11 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
 
-            $control->updatePassword(
-                $email,
-                $_SESSION['pending_pw_change']['old_password'],
-                $_SESSION['pending_pw_change']['new_password']
-            );
+            $result = $pageController->updatePassword($email, [
+                'old_password' => $_SESSION['pending_pw_change']['old_password'],
+                'new_password' => $_SESSION['pending_pw_change']['new_password']
+            ]);
+
+            if (!$result['success']) {
+                $_SESSION['change_pw_error'] = $result['message'];
+                header("Location: change_password.php");
+                exit;
+            }
 
             // Clear session data
             unset(
