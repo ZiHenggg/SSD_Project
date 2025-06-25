@@ -1,143 +1,3 @@
-# version: '3.8'
-
-# services:
-
-#   web:
-#     container_name: php-webapp
-#     build: .
-#     ports:
-#       - "80:80"  # Use port 80 directly in productionn
-#     volumes:
-#       - .:/var/www
-#       - ./public:/var/www/html
-#     restart: unless-stopped
-#     env_file:
-#       - .env.prod
-#     environment:
-#       DB_HOST: ${DB_HOST}
-#       DB_NAME: ${DB_NAME}
-#       DB_USER: ${DB_USER}
-#       DB_PASS: ${DB_PASS}
-
-#reverse proxy
-# version: '3.8'
-
-# services:
-#   web:
-#     container_name: php-webapp
-#     build: .
-#     expose:
-#       - "9000"
-#     volumes:
-#       - .:/var/www
-#       - ./public:/var/www/html
-#     restart: unless-stopped
-#     env_file:
-#       - .env.prod
-#     environment:
-#       DB_HOST: ${DB_HOST}
-#       DB_NAME: ${DB_NAME}
-#       DB_USER: ${DB_USER}
-#       DB_PASS: ${DB_PASS}
-
-#   nginx:
-#     image: nginx:latest
-#     container_name: nginx
-#     ports:
-#       - "80:80"
-#     volumes:
-#       - ./public:/var/www/html
-#       - ./nginx/conf.d:/etc/nginx/conf.d
-#     depends_on:
-#       - web
-
-
-# For getting SSL certificates with certbot
-# version: '3.8'
-
-# services:
-#   web:
-#     container_name: php-webapp
-#     build: .
-#     expose:
-#       - "9000"
-#     volumes:
-#       - .:/var/www
-#       - ./public:/var/www/html
-#     restart: unless-stopped
-#     env_file:
-#       - .env.prod
-#     environment:
-#       DB_HOST: ${DB_HOST}
-#       DB_NAME: ${DB_NAME}
-#       DB_USER: ${DB_USER}
-#       DB_PASS: ${DB_PASS}
-
-#   nginx:
-#     image: nginx:latest
-#     container_name: nginx
-#     ports:
-#       - "80:80"
-#     volumes:
-#       - ./public:/var/www/html
-#       - ./nginx/conf.d:/etc/nginx/conf.d
-#       - ./data/certbot/conf:/etc/letsencrypt
-#       - ./data/certbot/www:/var/www/certbot
-#     depends_on:
-#       - web
-
-#   certbot:
-#     image: certbot/certbot
-#     container_name: certbot
-#     volumes:
-#       - ./data/certbot/conf:/etc/letsencrypt
-#       - ./data/certbot/www:/var/www/certbot
-
-# Final version with HTTPS enabled
-# version: '3.8'
-
-# services:
-#   web:
-#     container_name: php-webapp
-#     build: .
-#     expose:
-#       - "9000"
-#     volumes:
-#       - .:/var/www
-#       - ./public:/var/www/html
-#     restart: unless-stopped
-#     env_file:
-#       - .env.prod
-#     environment:
-#       DB_HOST: ${DB_HOST}
-#       DB_NAME: ${DB_NAME}
-#       DB_USER: ${DB_USER}
-#       DB_PASS: ${DB_PASS}
-
-#   nginx:
-#     image: nginx:latest
-#     container_name: nginx
-#     ports:
-#       - "80:80"
-#       - "443:443"  # ✅ Enable HTTPS access
-#     volumes:
-#       - ./public:/var/www/html
-#       - ./nginx/conf.d:/etc/nginx/conf.d
-#       - ./data/certbot/conf:/etc/letsencrypt
-#       - ./data/certbot/www:/var/www/certbot
-#     depends_on:
-#       - web
-
-#   certbot:
-#     image: certbot/certbot
-#     container_name: certbot
-#     volumes:
-#       - ./data/certbot/conf:/etc/letsencrypt
-#       - ./data/certbot/www:/var/www/certbot
-
-#  splunk:
-version: '3.8'
-
 services:
   web:
     container_name: php-webapp
@@ -167,7 +27,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      - ./nginx/logs:/var/log/nginx
+      - ./nginx/logs:/var/log/nginx         # Needs to be added to be logged via Splunk
     depends_on:
       - web
 
@@ -184,10 +44,31 @@ services:
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=changeme  # Change this in production!
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN}
     ports:
-      - "127.0.0.1:8000:8000"  # 🔐 Local access only (for SSH tunneling)
+      - "127.0.0.1:8000:8000"                   # 🔐 Local access only (for SSH tunneling)
+      - "8088:8088"                             # HEC Port
     volumes:
-      - ./splunk-data:/opt/splunk/var          # Indexed log data
-      - ./splunk-etc:/opt/splunk/etc           # 🧠 Persistent config (dashboards, inputs, etc.)
-      - ./nginx/logs:/mnt/nginx-logs           # Nginx logs for Splunk to read
+      - ./splunk-data:/opt/splunk/var           # Indexed log data
+      - ./splunk-etc:/opt/splunk/etc            # 🧠 Persistent config (dashboards, inputs, etc.)
+      - ./nginx/logs:/mnt/nginx-logs            # Nginx logs for Splunk to read
     restart: unless-stopped
+
+  snort3:
+    image: ciscotalos/snort3:latest
+    container_name: snort3
+    network_mode: host
+    environment:
+      - HEC_TOKEN=${SPLUNK_HEC_TOKEN}
+    cap_add:
+      - NET_ADMIN                               # Allow snort3 to perform various network operations
+      - SYS_NICE                                
+      - NET_RAW                                 
+    volumes:
+      - ./snort3/snort.lua:/usr/local/etc/snort/snort.lua:ro        # Mount snort.lua file
+      - ./snort3/local.rules:/usr/local/etc/snort/local.rules:ro    # Rules for Snort
+      - ./snort3/logs:/var/log/snort                                # Mount shared logs
+    command:
+      - -c /usr/local/etc/snort/snort.lua                     
+      - -i ${INTERFACE}
+      - -l /var/log/snort
