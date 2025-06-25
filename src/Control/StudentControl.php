@@ -137,5 +137,16 @@ class StudentControl
 
         $this->studentRepo->updatePassword($email, $hashedNewPassword);
     }
+
+    public function get2FASecret(string $email): string
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+
+        if (!$student || !$student->is2FAEnabled()) {
+            throw new \Exception("2FA is not set up for this account.");
+        }
+
+        return $student->get2FASecret();
+    }
 }
 ?>

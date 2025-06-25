@@ -1,23 +1,18 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
+$oldPassword = $_POST['old_password'] ?? '';
+$newPassword = $_POST['new_password'] ?? '';
 
-$repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$pageController = new StudentPageController($control);
+// Store credentials temporarily
+$_SESSION['pending_pw_change'] = [
+    'old_password' => $oldPassword,
+    'new_password' => $newPassword,
+];
 
-$result = $pageController->updatePassword($_POST);
+// Redirect to the same TOTP-based verify page used for login, but in a password-update mode
+$_SESSION['2fa_context'] = 'password_update';
+$_SESSION['pending_2fa_email'] = $_SESSION['user']['email'];
 
-if ($result['success']) {
-    $_SESSION['change_pw_success'] = $result['message'];
-    header('Location: dashboard.php'); // Or settings page
-    exit;
-} else {
-    $_SESSION['change_pw_error'] = $result['message'];
-    header('Location: change_password.php');
-    exit;
-}
+header('Location: verify_2fa_pw_update.php');
 ?>

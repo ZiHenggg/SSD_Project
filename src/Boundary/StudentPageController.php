@@ -132,7 +132,7 @@ class StudentPageController
     public function updatePassword(array $postData): array
     {
         $email = $_SESSION['user']['email'] ?? null;
-        
+
         if (!$email) {
             return ['success' => false, 'message' => 'User not authenticated.'];
         }
@@ -150,6 +150,11 @@ class StudentPageController
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    public function get2FASecretForEmail(string $email): string
+    {
+        return $this->studentControl->get2FASecret($email);
     }
 }
 ?>
