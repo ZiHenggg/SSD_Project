@@ -136,7 +136,7 @@ ob_start();
                             <div class="mt-3 group-item">
                                 <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
                                 <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
-                                <span class="timestamp"><strong>Requested At: </strong><?= htmlspecialchars($request->getRequestAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span class="timestamp"><strong>Requested At: </strong><?= htmlspecialchars($request->getRequestedAt()->format('D, d M Y H:i:s')) ?></span>
                                 <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
 
                             </div>

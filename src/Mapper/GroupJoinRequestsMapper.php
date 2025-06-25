@@ -104,7 +104,19 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
             ':groupId' => $request->getGroupId(),
             ':requesterId' => $request->getRequesterId(),
             ':joinStatus' => $request->getJoinStatus(),
-            ':requestedAt' => $request->getRequestAt()->format('Y-m-d H:i:s'),
+            ':requestedAt' => $request->getRequestedAt()->format('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function removeRequest(int $groupId, int $requesterId): void 
+    {
+        $stmt = $this->dbConnection->prepare("
+            DELETE FROM groupJoinRequests
+            WHERE groupId = :groupId AND requesterId = :requesterId
+        ");
+        $stmt->execute([
+            ':groupId' => $groupId,
+            ':requesterId' => $requesterId
         ]);
     }
 

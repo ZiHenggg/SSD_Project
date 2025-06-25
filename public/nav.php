@@ -1,6 +1,7 @@
 <?php
 // Check if the user is logged in
 $isLoggedIn = isset($_SESSION['user']);
+$queryValue = $_GET['query'] ?? '';
 ?>
 
 <nav class="navbar navbar-expand-lg fixed-top">
@@ -13,9 +14,15 @@ $isLoggedIn = isset($_SESSION['user']);
         <?php if ($isLoggedIn): ?>
             <div class="nav-group">
                 <a class="nav-link" href="#">Past Groups</a>
-                <form class="search-wrapper d-flex m-0" role="search">
-                    <input class="search form-control me-2" type="search" placeholder="Search for groups"
-                        aria-label="Search" />
+                <form class="search-wrapper d-flex m-0" role="search" method="GET" action="groups.php">
+                    <input 
+                        class="search form-control me-2" 
+                        type="search" 
+                        name="query" 
+                        placeholder="Search by module name"
+                        value="<?= htmlspecialchars($queryValue) ?>"
+                        aria-label="Search" 
+                    />
                     <button type="submit"><img class="w-100" src="img/search.svg" /></button>
                 </form>
                 <!-- <a class="nav-link profile" href="#">

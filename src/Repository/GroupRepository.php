@@ -11,6 +11,7 @@ interface GroupRepository
     public function getGroup(int $groupId): ?Group;
     public function getGroupsByUser(int $studentId): array;
     public function getActiveGroupsByUser(int $studentId): array;
+    public function getGroupsByModuleName(string $moduleName): array;
     public function updateGroup(Group $group): void;
 
     public function getAllActiveGroups(): array;

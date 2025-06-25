@@ -172,7 +172,7 @@ ob_start(); // Capture the page content
                                                     <input type="hidden" name="group_id" value="<?= $group->getGroupId() ?>">
                                                     <input type="hidden" name="reviewee_id" value="<?= $member->getStudentId() ?>">
                                                     <?php if ($reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId())): ?>
-                                                        <button class="disabled reply-button">
+                                                        <button disabled class="disabled reply-button">
                                                         <?php else: ?>
                                                             <button type="submit" class="reply-button">
                                                             <?php endif; ?>

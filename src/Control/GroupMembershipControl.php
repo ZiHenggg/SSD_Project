@@ -57,7 +57,7 @@ class GroupMembershipControl
         return $this->groupMembershipRepo->getRoleForUser($groupId, $studentId);
     }
 
-    public function getGroupId(int $groupMembersId): ?string
+    public function getGroupId(int $groupMembersId): ?int
     {
         return $this->groupMembershipRepo->getGroupId($groupMembersId);
     }
@@ -101,6 +101,11 @@ class GroupMembershipControl
         );
 
         $this->groupJoinRequestsRepo->addRequest($request);
+    }
+
+    public function removeJoinRequest(int $groupId, int $studentId): void 
+    {
+        $this->groupJoinRequestsRepo->removeRequest($groupId, $studentId);
     }
 
     public function memberExists(int $groupId, int $studentId): bool
