@@ -51,7 +51,12 @@ class StudentControl
         // $student = new Student($studentId, $studentName, $email, $hashedPassword);
 
         // Create a new student object
-        $student = new Student($studentId, $studentName, $email, $password);
+        //$student = new Student($studentId, $studentName, $email, $password);
+
+        // Check if the student already exists
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $student = new Student($studentId, $studentName, $email, $hashedPassword);
+
 
         // Add the student to the repository
         $this->studentRepo->createStudentAccount($student);
@@ -61,21 +66,30 @@ class StudentControl
     {
         $student = $this->studentRepo->getStudentByEmail($email);
 
-        // if (!$student || !password_verify($password, $student->getPassword())) {
+        // // Basic password check (no hashing for now)
+        // if (!$student || $password !== $student->getPassword()) {
         //     return ['success' => false, 'message' => 'Invalid email or password.'];
         // }
 
-        if (!$student || $password !== $student->getPassword()) {
+        // Verify the password using password_verify
+        if (!$student || !password_verify($password, $student->getPassword())) {
             return ['success' => false, 'message' => 'Invalid email or password.'];
         }
 
+        // Check if 2FA is enabled
+        if (method_exists($student, 'is2FAEnabled') && $student->is2FAEnabled()) {
+            $_SESSION['pending_2fa_email'] = $student->getEmail();
+            return ['success' => true, 'redirect' => 'verify_2fa.php'];
+        }
+
+        // No 2FA — log in immediately and proceed to setup
         $_SESSION['user'] = [
             'id' => $student->getStudentId(),
             'email' => $student->getEmail(),
             'name' => $student->getStudentName()
         ];
 
-        return ['success' => true, 'user' => $student];
+        return ['success' => true, 'redirect' => 'setup_2fa.php'];
     }
 
     public function deleteStudent(string $studentId): void

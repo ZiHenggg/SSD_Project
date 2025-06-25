@@ -26,7 +26,9 @@ class StudentMapper implements StudentRepository
                 (int) $result['studentId'],
                 $result['name'],
                 $result['email'],
-                $result['password']
+                $result['password'],
+                $result['google2fa_secret'] ?? null,
+                (bool) $result['is_2fa_enabled'] ?? false
             );
         }
 
@@ -42,11 +44,13 @@ class StudentMapper implements StudentRepository
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
-            return new Student(
+              return new Student(
                 (int) $result['studentId'],
                 $result['name'],
                 $result['email'],
-                $result['password']
+                $result['password'],
+                $result['google2fa_secret'] ?? null,
+                (bool) $result['is_2fa_enabled'] ?? false
             );
         }
 
