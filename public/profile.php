@@ -52,11 +52,11 @@ $loggedInId = $_SESSION['user']['id'];
 
 try {
     if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-        $profileId = (int)$_GET['id'];
+        $profileId = (int) $_GET['id'];
     } else if (isset($_GET['id']) && !ctype_digit($_GET['id'])) {
         header("Location: /profile.php?id=" . $loggedInId);
     } else {
-        $profileId = $loggedInId; 
+        $profileId = $loggedInId;
     }
     $student = $studentController->showUserProfile($profileId);
     if (!$student) {
@@ -68,7 +68,7 @@ try {
 }
 
 $reviewResponse = $reviewController->onViewReceivedReviews($student->getStudentId());
-$reviews = $reviewResponse['reviews'] ?? []; 
+$reviews = $reviewResponse['reviews'] ?? [];
 
 $groupJoinRequestsResponse = $groupMembershipController->displayStudentJoinRequests($student->getStudentId());
 $groupJoinRequests = $groupJoinRequestsResponse['joinRequest'] ?? [];
@@ -108,7 +108,7 @@ ob_start();
     <?php displayErrorMessage(); ?>
     <?php displaySuccessMessage(); ?>
     <h2 class="mb-5">
-        <?php if ($profileId !== $loggedInId):?>
+        <?php if ($profileId !== $loggedInId): ?>
             Viewing <?= htmlspecialchars($student->getStudentName()) ?>'s Profile
         <?php else: ?>
             My Profile
@@ -121,23 +121,29 @@ ob_start();
                 <p><strong>Full Name:</strong> <?= htmlspecialchars($student->getStudentName()) ?></p>
                 <p><strong>Student ID:</strong> <?= htmlspecialchars($student->getStudentId()) ?></p>
                 <p><strong>Email:</strong> <?= htmlspecialchars($student->getEmail()) ?></p>
+
+                <p><a href="change_password.php" class="btn btn-outline-primary btn-sm mt-2">Change Password</a></p>
             </div>
-            <?php if ($profileId === $loggedInId):?>
+            <?php if ($profileId === $loggedInId): ?>
                 <div class="mt-5 pending-requests">
                     <h3>Group Request Status</h3>
                     <h4>Pending</h4>
                     <?php if (count($pendingJoinRequests) > 0): ?>
                         <?php foreach ($pendingJoinRequests as $request): ?>
                             <?php
-                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
-                                $group = $groupData['group'];
-                                $moduleData = $groupData['module'];
+                            $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                            $group = $groupData['group'];
+                            $moduleData = $groupData['module'];
                             ?>
                             <div class="mt-3 group-item">
-                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
-                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
-                                <span class="timestamp"><strong>Requested At: </strong><?= htmlspecialchars($request->getRequestedAt()->format('D, d M Y H:i:s')) ?></span>
-                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>"
+                                    class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>,
+                                    <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="timestamp"><strong>Requested At:
+                                    </strong><?= htmlspecialchars($request->getRequestedAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span
+                                    class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
 
                             </div>
                         <?php endforeach; ?>
@@ -150,15 +156,19 @@ ob_start();
                     <?php if (count($acceptedJoinRequests) > 0): ?>
                         <?php foreach ($acceptedJoinRequests as $request): ?>
                             <?php
-                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
-                                $group = $groupData['group'];
-                                $moduleData = $groupData['module'];
+                            $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                            $group = $groupData['group'];
+                            $moduleData = $groupData['module'];
                             ?>
                             <div class="mt-3 group-item">
-                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
-                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
-                                <span class="timestamp"><strong>Accepted At: </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
-                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>"
+                                    class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>,
+                                    <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="timestamp"><strong>Accepted At:
+                                    </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span
+                                    class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -170,15 +180,19 @@ ob_start();
                     <?php if (count($rejectedJoinRequests) > 0): ?>
                         <?php foreach ($rejectedJoinRequests as $request): ?>
                             <?php
-                                $groupData = $groupController->displayGroupDetails($request->getGroupId());
-                                $group = $groupData['group'];
-                                $moduleData = $groupData['module'];
+                            $groupData = $groupController->displayGroupDetails($request->getGroupId());
+                            $group = $groupData['group'];
+                            $moduleData = $groupData['module'];
                             ?>
                             <div class="mt-3 group-item">
-                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>" class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
-                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
-                                <span class="timestamp"><strong>Rejected At: </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
-                                <span class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
+                                <a href="group_info.php?groupId=<?= htmlspecialchars($group->getGroupId()) ?>"
+                                    class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
+                                <span class="module"><?= htmlspecialchars($group->getModuleCode()) ?>,
+                                    <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></span>
+                                <span class="timestamp"><strong>Rejected At:
+                                    </strong><?= htmlspecialchars($request->getReviewedAt()->format('D, d M Y H:i:s')) ?></span>
+                                <span
+                                    class="member-count"><?= htmlspecialchars($group->getNoOfMembers()) ?>/<?= htmlspecialchars($group->getMaxMembers()) ?></span>
 
                             </div>
                         <?php endforeach; ?>
@@ -198,9 +212,9 @@ ob_start();
                 <div class="d-flex flex-column align-items-center">
                     <div class="rating-stars d-flex flex-row align-items-center mb-1">
                         <?php
-                            $fullStars = floor($averageRating);
-                            $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
-                            $emptyStars = $maxStars - $fullStars - ($halfStar ? 1 : 0);
+                        $fullStars = floor($averageRating);
+                        $halfStar = ($averageRating - $fullStars) >= 0.5 ? true : false;
+                        $emptyStars = $maxStars - $fullStars - ($halfStar ? 1 : 0);
                         ?>
                         <?php for ($i = 0; $i < $fullStars; $i++): ?>
                             <img src="img/star-filled.svg" alt="Full Star Rating" />
@@ -212,7 +226,8 @@ ob_start();
                             <img src="img/star-unfilled.svg" alt="Empty Star Rating" />
                         <?php endfor; ?>
                     </div>
-                    <p class="total-reviews m-0 text-muted small">(<?= htmlspecialchars($totalReviews) . ' ' . ($totalReviews < 2 ? "review" : "reviews") ?>)</p>
+                    <p class="total-reviews m-0 text-muted small">
+                        (<?= htmlspecialchars($totalReviews) . ' ' . ($totalReviews < 2 ? "review" : "reviews") ?>)</p>
                 </div>
             </div>
             <div class="reviews-container">
@@ -222,10 +237,10 @@ ob_start();
                             <div class="top-wrapper d-flex flex-row align-items-center">
                                 <div class="rating-stars d-flex flex-row align-items-center">
                                     <?php
-                                        $rating = $review->getRating();
-                                        $fullStars = floor($rating);
-                                        $halfStar = ($rating - $fullStars) >= 0.5 ? true : false;
-                                        $emptyStars = floor(5 - ($rating));
+                                    $rating = $review->getRating();
+                                    $fullStars = floor($rating);
+                                    $halfStar = ($rating - $fullStars) >= 0.5 ? true : false;
+                                    $emptyStars = floor(5 - ($rating));
                                     ?>
                                     <?php for ($i = 0; $i < $fullStars; $i++): ?>
                                         <img src="img/star-filled.svg" alt="Full Star Rating" />
@@ -238,31 +253,34 @@ ob_start();
                                     <?php endfor; ?>
                                 </div>
                                 <div class="timestamp">
-                                    <span class="text-muted small"><?= htmlspecialchars($review->getReviewDate()->format('D, d M Y H:i:s')) ?></span>
+                                    <span
+                                        class="text-muted small"><?= htmlspecialchars($review->getReviewDate()->format('D, d M Y H:i:s')) ?></span>
                                 </div>
                             </div>
                             <div class="review-content">
                                 <div class="review-group-name mt-2">
                                     <?php
-                                        $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
-                                        $groupData = $groupController->displayGroupDetails($groupId);
-                                        $group = $groupData['group'];
-                                        $moduleData = $groupData['module'];
+                                    $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
+                                    $groupData = $groupController->displayGroupDetails($groupId);
+                                    $group = $groupData['group'];
+                                    $moduleData = $groupData['module'];
                                     ?>
-                                    <a href="group_info.php?groupId=<?=$groupId?>" class="group-name header text-decoration-none"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></a>
+                                    <a href="group_info.php?groupId=<?= $groupId ?>"
+                                        class="group-name header text-decoration-none"><strong><?= htmlspecialchars($group->getGroupName()) ?></strong></a>
                                 </div>
                                 <div class="review-text mt-2">
                                     <p class="mb-0"><?= htmlspecialchars($review->getReviewDescription()) ?></p>
                                 </div>
                                 <?php
-                                    $hasReply = $replyController->checkIfReplyExists($review->getReviewId());
-                                    if ($hasReply):
-                                        $reply = $replyController->onViewReply($review->getReviewId());
-                                ?>
+                                $hasReply = $replyController->checkIfReplyExists($review->getReviewId());
+                                if ($hasReply):
+                                    $reply = $replyController->onViewReply($review->getReviewId());
+                                    ?>
                                     <div class="reply-section borderline mt-3">
                                         <div class="reply-title">
                                             <strong>Reply</strong>
-                                            <span class="text-muted small">(<?= htmlspecialchars($reply->getReplyDate()->format('D, d M Y H:i:s')) ?>)</span>
+                                            <span
+                                                class="text-muted small">(<?= htmlspecialchars($reply->getReplyDate()->format('D, d M Y H:i:s')) ?>)</span>
                                         </div>
                                         <div class="reply-text">
                                             <p class="mb-0"><?= htmlspecialchars($reply->getJustification()) ?></p>
@@ -271,12 +289,17 @@ ob_start();
                                 <?php elseif ($student->getStudentId() === $loggedInId): ?>
                                     <div class="reply-section mt-3">
                                         <form action="process_reply_create.php" method="post">
-                                            <input type="hidden" name="review_id" value="<?= htmlspecialchars($review->getReviewId()) ?>">
-                                            <input type="hidden" name="reviewer_id" value="<?= htmlspecialchars($review->getReviewerId()) ?>">
-                                            <input type="hidden" name="responder_id" value="<?= htmlspecialchars($review->getRevieweeId()) ?>">
+                                            <input type="hidden" name="review_id"
+                                                value="<?= htmlspecialchars($review->getReviewId()) ?>">
+                                            <input type="hidden" name="reviewer_id"
+                                                value="<?= htmlspecialchars($review->getReviewerId()) ?>">
+                                            <input type="hidden" name="responder_id"
+                                                value="<?= htmlspecialchars($review->getRevieweeId()) ?>">
                                             <div class="d-flex flex-row align-items-center justify-content-around">
-                                                <textarea name="justification" class="form-control m-0" placeholder="Enter a reply" rows="1" required=""></textarea>
-                                                <button type="submit" class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
+                                                <textarea name="justification" class="form-control m-0" placeholder="Enter a reply"
+                                                    rows="1" required=""></textarea>
+                                                <button type="submit"
+                                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
                                             </div>
                                         </form>
                                     </div>

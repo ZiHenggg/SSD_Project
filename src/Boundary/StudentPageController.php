@@ -4,6 +4,8 @@ namespace App\Boundary;
 use App\Control\StudentControl;
 use App\Entity\Student;
 
+use DivineOmega\PasswordExposed\Enums\PasswordStatus;
+
 class StudentPageController
 {
     private StudentControl $studentControl;
@@ -13,6 +15,21 @@ class StudentPageController
         $this->studentControl = $studentControl;
     }
 
+    // Validate password according to NIST guidelines and check against known breaches
+    public function validatePassword(string $password): ?string
+    {
+        if (strlen($password) < 8 || strlen($password) > 64) {
+            return "Password must be between 8 and 64 characters.";
+        }
+
+        switch (password_exposed($password)) {
+            case PasswordStatus::EXPOSED:
+                return "This password has been found in a known data breach. Please choose a more secure one.";
+            case PasswordStatus::UNKNOWN:
+                return "Unable to verify password security at this time. Try again later.";
+        }
+        return null; // Password is valid
+    }
     public function validateStudentInput(array $data): ?string
     {
         $studentId = isset($data['studentId']) ? (int) $data['studentId'] : 0;
@@ -36,7 +53,44 @@ class StudentPageController
             return "Email must be a SIT address.";
         }
 
+        // TODO: Add password validation rules
+        $passwordError = $this->validatePassword($password);
+        if ($passwordError !== null) {
+            return $passwordError;
+        }
+
         return null;
+    }
+
+    public function registerStudent(array $postStudent): string
+    {
+        $error = $this->validateStudentInput($postStudent);
+        if ($error !== null) {
+            return $error;
+        }
+
+        $studentId = (int) $postStudent['studentId'];
+        $studentName = trim($postStudent['studentName']);
+        $email = trim($postStudent['email']);
+        $password = trim($postStudent['password']);
+
+        // Check if the student already exists
+        if ($this->studentControl->checkStudentExist((string) $studentId) || $this->studentControl->checkStudentExist($email)) {
+            return "Student already exists.";
+        }
+
+        // Check if Email and Student ID match
+        $prefix = explode('@', $email)[0]; // get the part before "@"
+        if ($prefix !== (string) $studentId) {
+            return "Email must begin with your Student ID.";
+        }
+
+        try {
+            $this->studentControl->registerStudentAccount($studentId, $studentName, $email, $password);
+            return "Account created successfully!";
+        } catch (\Exception $e) {
+            return "Error creating student account: " . $e->getMessage();
+        }
     }
 
     public function loginStudent(array $postLogin): array
@@ -59,4 +113,41 @@ class StudentPageController
     {
         return $this->studentControl->getStudentById($studentId);
     }
+
+    public function updatePassword(string $email, array $postData): array
+    {
+        if (!$email) {
+            return ['success' => false, 'message' => 'User not authenticated.'];
+        }
+
+        $oldPassword = trim($postData['old_password'] ?? '');
+        $newPassword = trim($postData['new_password'] ?? '');
+
+        if (!$oldPassword || !$newPassword) {
+            return ['success' => false, 'message' => 'Both fields are required.'];
+        }
+
+        if (hash_equals($oldPassword, $newPassword)) {
+            return ['success' => false, 'message' => 'New password must be different from the old password.'];
+        }
+
+        // Validate new password using NIST/breach check
+        $newPasswordError = $this->validatePassword($newPassword);
+        if ($newPasswordError !== null) {
+            return ['success' => false, 'message' => $newPasswordError];
+        }
+
+        try {
+            $this->studentControl->updatePassword($email, $oldPassword, $newPassword);
+            return ['success' => true, 'message' => 'Password updated successfully.'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function get2FASecretForEmail(string $email): string
+    {
+        return $this->studentControl->get2FASecret($email);
+    }
 }
+?>

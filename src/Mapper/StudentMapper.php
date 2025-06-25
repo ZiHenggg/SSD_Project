@@ -109,4 +109,12 @@ class StudentMapper implements StudentRepository
             isset($row['is_2fa_enabled']) ? (bool) $row['is_2fa_enabled'] : false
         );
     }
+
+    public function updatePassword(string $email, string $hashedPassword): void
+    {
+        $stmt = $this->dbConnection->prepare("UPDATE students SET password = :password WHERE email = :email");
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+    }
 }

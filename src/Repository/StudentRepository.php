@@ -15,6 +15,8 @@ interface StudentRepository
 
     public function isStudentExists(string $identifier): bool;
 
+    public function updatePassword(string $email, string $hashedPassword): void;
+
     public function verifyStudentEmail(string $email): void; // ✅ NEW method
 }
 ?>

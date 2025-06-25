@@ -105,8 +105,61 @@ class StudentControl
         return ['success' => true, 'redirect' => 'setup_2fa.php'];
     }
 
-    public function checkStudentExist(string $identifier): bool
+    public function deleteStudent(string $studentId): void
     {
-        return $this->studentRepo->isStudentExists($identifier);
+        // Check if the student exists before attempting to remove
+        if ($this->studentRepo->isStudentExists($studentId)) {
+            // $this->studentRepo->removeStudent($studentId);
+        } else {
+            throw new \Exception("Student with ID $studentId does not exist.");
+        }
+    }
+
+    // Update student profile?
+
+    // Send Reset Token
+    public function sendResetToken(string $email): void
+    {
+        // Check if the student exists by email
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student) {
+            throw new \Exception("No student found with email $email.");
+        }
+
+        // TODO: Implement logic to send reset token to the student's email
+    }
+
+    // Update Password
+    public function updatePassword(string $email, string $oldPassword, string $newPassword): void
+    {
+        // Check if the student exists by email
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student) {
+            throw new \Exception("No student found with email $email.");
+        }
+
+        // TODO: Implement logic to verify old password and update to new password
+
+        // Verify old password
+        if (!password_verify($oldPassword, $student->getPassword())) {
+            throw new \Exception("Old password is incorrect.");
+        }
+
+        // Hash the new password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $this->studentRepo->updatePassword($email, $hashedNewPassword);
+    }
+
+    public function get2FASecret(string $email): string
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+
+        if (!$student || !$student->is2FAEnabled()) {
+            throw new \Exception("2FA is not set up for this account.");
+        }
+
+        return $student->get2FASecret();
     }
 }
+?>
