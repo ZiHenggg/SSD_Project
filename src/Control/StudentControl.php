@@ -176,5 +176,22 @@ class StudentControl
         return $this->studentRepo->isStudentExists($identifier);
     }   
 
+    public function sendForgotPasswordOtp(string $email): void
+    {
+        // Check student exists
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student) {
+            throw new \Exception("No student found with email $email.");
+        }
+
+        // Generate OTP
+        $otp = strval(random_int(100000, 999999));
+        $_SESSION['otp'] = $otp;
+        $_SESSION['otp_expiry'] = time() + 600; 
+        $_SESSION['forgot_email'] = $email;
+        
+        $this->sendOtpEmail($email, $otp);
+    }
+
 }
 ?>
