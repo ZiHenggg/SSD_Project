@@ -44,8 +44,11 @@ CREATE TABLE students (
   studentId INT PRIMARY KEY CHECK (studentId BETWEEN 1000000 AND 9999999),
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL
+  password VARCHAR(255) NOT NULL,
+  google2fa_secret VARCHAR(255) DEFAULT NULL,
+  is_2fa_enabled BOOLEAN NOT NULL DEFAULT FALSE
 );
+
 
 -- studentStats table (shared PK with students)
 CREATE TABLE studentStats (

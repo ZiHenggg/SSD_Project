@@ -11,13 +11,24 @@ $pageController = new StudentPageController($control);
 
 $result = $pageController->loginStudent($_POST);
 
+// if ($result['success']) {
+//     // $_SESSION['user'] = $result['user'];  // Store student object or key details
+//     header('Location: dashboard.php');
+//     exit;
+// } else {
+//     $_SESSION['login_error'] = $result['message'];
+//     header('Location: login.php');
+//     exit;
+// }
+$result = $pageController->loginStudent($_POST);
+
 if ($result['success']) {
-    // $_SESSION['user'] = $result['user'];  // Store student object or key details
-    header('Location: dashboard.php');
+    header("Location: " . $result['redirect']);
     exit;
 } else {
     $_SESSION['login_error'] = $result['message'];
-    header('Location: login.php');
+    header("Location: login.php");
     exit;
 }
+
 ?>
