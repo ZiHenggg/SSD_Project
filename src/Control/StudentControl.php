@@ -116,8 +116,8 @@ class StudentControl
         // TODO: Implement logic to send reset token to the student's email
     }
 
-    // Reset Password
-    public function resetPassword(string $email, string $oldPassword, string $newPassword): void
+    // Update Password
+    public function updatePassword(string $email, string $oldPassword, string $newPassword): void
     {
         // Check if the student exists by email
         $student = $this->studentRepo->getStudentByEmail($email);
@@ -126,6 +126,16 @@ class StudentControl
         }
 
         // TODO: Implement logic to verify old password and update to new password
+
+        // Verify old password
+        if (!password_verify($oldPassword, $student->getPassword())) {
+            throw new \Exception("Old password is incorrect.");
+        }
+
+        // Hash the new password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $this->studentRepo->updatePassword($email, $hashedNewPassword);
     }
 }
 ?>

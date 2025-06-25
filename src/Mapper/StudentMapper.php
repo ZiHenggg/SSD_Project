@@ -112,5 +112,13 @@ class StudentMapper implements StudentRepository
 
         return $count > 0;
     }
+
+    public function updatePassword(string $email, string $hashedPassword): void
+    {
+        $stmt = $this->dbConnection->prepare("UPDATE students SET password = :password WHERE email = :email");
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+    }
 }
 ?>

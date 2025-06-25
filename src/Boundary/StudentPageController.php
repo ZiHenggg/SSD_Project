@@ -128,5 +128,28 @@ class StudentPageController
             throw new \Exception('An error occurred while fetching the student profile: ' . $e->getMessage());
         }
     }
+
+    public function updatePassword(array $postData): array
+    {
+        $email = $_SESSION['user']['email'] ?? null;
+        
+        if (!$email) {
+            return ['success' => false, 'message' => 'User not authenticated.'];
+        }
+
+        $oldPassword = trim($postData['old_password'] ?? '');
+        $newPassword = trim($postData['new_password'] ?? '');
+
+        if (!$oldPassword || !$newPassword) {
+            return ['success' => false, 'message' => 'Both fields are required.'];
+        }
+
+        try {
+            $this->studentControl->updatePassword($email, $oldPassword, $newPassword);
+            return ['success' => true, 'message' => 'Password updated successfully.'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
 }
 ?>

@@ -15,5 +15,7 @@ interface StudentRepository
     public function createStudentAccount(Student $student): void;
 
     public function isStudentExists(string $identifier): bool;
+
+    public function updatePassword(string $email, string $hashedPassword): void;
 }
 ?>
