@@ -5,6 +5,7 @@ use App\Control\StudentControl;
 use App\Entity\Student;
 
 use DivineOmega\PasswordExposed\Enums\PasswordStatus;
+use function DivineOmega\PasswordExposed\password_exposed;
 
 class StudentPageController
 {
@@ -15,21 +16,24 @@ class StudentPageController
         $this->studentControl = $studentControl;
     }
 
-    // Validate password according to NIST guidelines and check against known breaches
     public function validatePassword(string $password): ?string
     {
         if (strlen($password) < 8 || strlen($password) > 64) {
             return "Password must be between 8 and 64 characters.";
         }
 
-        switch (password_exposed($password)) {
-            case PasswordStatus::EXPOSED:
-                return "This password has been found in a known data breach. Please choose a more secure one.";
-            case PasswordStatus::UNKNOWN:
-                return "Unable to verify password security at this time. Try again later.";
-        }
-        return null; // Password is valid
+        // $status = password_exposed($password);  // ✅ correct usage for v3+
+
+        // switch ($status) {
+        //     case PasswordStatus::EXPOSED:
+        //         return "This password has been found in a known data breach. Please choose a more secure one.";
+        //     case PasswordStatus::UNKNOWN:
+        //         return "Unable to verify password security at this time. Try again later.";
+        // }
+
+        return null;
     }
+
     public function validateStudentInput(array $data): ?string
     {
         $studentId = isset($data['studentId']) ? (int) $data['studentId'] : 0;
@@ -53,7 +57,6 @@ class StudentPageController
             return "Email must be a SIT address.";
         }
 
-        // TODO: Add password validation rules
         $passwordError = $this->validatePassword($password);
         if ($passwordError !== null) {
             return $passwordError;
@@ -74,13 +77,11 @@ class StudentPageController
         $email = trim($postStudent['email']);
         $password = trim($postStudent['password']);
 
-        // Check if the student already exists
         if ($this->studentControl->checkStudentExist((string) $studentId) || $this->studentControl->checkStudentExist($email)) {
             return "Student already exists.";
         }
 
-        // Check if Email and Student ID match
-        $prefix = explode('@', $email)[0]; // get the part before "@"
+        $prefix = explode('@', $email)[0];
         if ($prefix !== (string) $studentId) {
             return "Email must begin with your Student ID.";
         }
@@ -131,7 +132,6 @@ class StudentPageController
             return ['success' => false, 'message' => 'New password must be different from the old password.'];
         }
 
-        // Validate new password using NIST/breach check
         $newPasswordError = $this->validatePassword($newPassword);
         if ($newPasswordError !== null) {
             return ['success' => false, 'message' => $newPasswordError];
@@ -150,4 +150,3 @@ class StudentPageController
         return $this->studentControl->get2FASecret($email);
     }
 }
-?>

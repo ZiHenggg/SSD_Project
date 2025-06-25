@@ -161,5 +161,11 @@ class StudentControl
 
         return $student->get2FASecret();
     }
+
+    public function checkStudentExist(string $identifier): bool
+    {
+        return $this->studentRepo->isStudentExists($identifier);
+    }   
+
 }
 ?>
