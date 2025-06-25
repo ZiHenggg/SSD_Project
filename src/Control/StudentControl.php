@@ -15,6 +15,15 @@ class StudentControl
         $this->studentRepo = $studentRepo;
     }
 
+    public function getStudentById(string $studentId): ?Student
+    {
+        $student = $this->studentRepo->getStudentById($studentId);
+        if (!$student) {
+            return null;
+        }
+        return $student;
+    }
+
     public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
     {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
