@@ -1,7 +1,10 @@
 <?php
 namespace App\Control;
+
 use App\Entity\Student;
 use App\Repository\StudentRepository;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class StudentControl
 {
@@ -12,82 +15,92 @@ class StudentControl
         $this->studentRepo = $studentRepo;
     }
 
-    public function getStudentById(string $studentId): ?Student
-    {
-        // Retrieve the student by ID
-        $student = $this->studentRepo->getStudentById($studentId);
-
-        // If student does not exist, return null
-        if (!$student) {
-            return null;
-        }
-
-        // Return the student object
-        return $student;
-    }
-
-    public function getStudentByEmail(string $email): ?Student
-    {
-        // Retrieve the student by email
-        $student = $this->studentRepo->getStudentByEmail($email);
-
-        // If student does not exist, return null
-        if (!$student) {
-            return null;
-        }
-
-        // Return the student object
-        return $student;
-    }
-
-    public function checkStudentExist(string $identifier): bool
-    {
-        return $this->studentRepo->isStudentExists($identifier);
-    }
-
     public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
     {
-        // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        // $student = new Student($studentId, $studentName, $email, $hashedPassword);
-
-        // Create a new student object
-        //$student = new Student($studentId, $studentName, $email, $password);
-
-        // Check if the student already exists
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $student = new Student($studentId, $studentName, $email, $hashedPassword);
+        $otp = strval(random_int(100000, 999999));
+        $otpExpiry = (new \DateTime('+10 minutes'))->format('Y-m-d H:i:s');
 
+        $_SESSION['pending_registration'] = [
+            'studentId' => $studentId,
+            'studentName' => $studentName,
+            'email' => $email,
+            'password' => $hashedPassword
+        ];
+        $_SESSION['otp'] = $otp;
+        $_SESSION['otp_expiry'] = strtotime($otpExpiry);
 
-        // Add the student to the repository
+        $this->sendOtpEmail($email, $otp);
+    }
+
+    private function sendOtpEmail(string $to, string $otp): void
+    {
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'groupmatesxyz@gmail.com';
+            $mail->Password = 'eiqbpffjricorpvi';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            $mail->setFrom('groupmatesxyz@gmail.com', 'SSD App');
+            $mail->addAddress($to);
+            $mail->Subject = 'Your OTP Code';
+            $mail->Body = "Your OTP is: $otp\nIt expires in 10 minutes.";
+
+            $mail->send();
+        } catch (Exception $e) {
+            throw new \Exception("OTP email failed: {$mail->ErrorInfo}");
+        }
+    }
+
+    public function verifyOtp(string $inputOtp): array
+    {
+        if (!isset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['pending_registration'])) {
+            return ['success' => false, 'message' => 'Session expired. Please try again.'];
+        }
+
+        if (time() > $_SESSION['otp_expiry']) {
+            return ['success' => false, 'message' => 'OTP expired.'];
+        }
+
+        if ($_SESSION['otp'] !== $inputOtp) {
+            return ['success' => false, 'message' => 'Invalid OTP.'];
+        }
+
+        $data = $_SESSION['pending_registration'];
+        $student = new Student($data['studentId'], $data['studentName'], $data['email'], $data['password']);
         $this->studentRepo->createStudentAccount($student);
+
+        // ✅ Mark email as verified
+        $this->studentRepo->verifyStudentEmail($student->getEmail());
+
+        unset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['pending_registration']);
+
+        return ['success' => true, 'message' => 'Registration complete!'];
     }
 
     public function loginStudent(string $email, string $password): array
     {
         $student = $this->studentRepo->getStudentByEmail($email);
 
-        // // Basic password check (no hashing for now)
-        // if (!$student || $password !== $student->getPassword()) {
-        //     return ['success' => false, 'message' => 'Invalid email or password.'];
-        // }
-
-        // Verify the password using password_verify
         if (!$student || !password_verify($password, $student->getPassword())) {
             return ['success' => false, 'message' => 'Invalid email or password.'];
         }
 
-        // Check if 2FA is enabled
-        if (method_exists($student, 'is2FAEnabled') && $student->is2FAEnabled()) {
+        if ($student->is2FAEnabled()) {
             $_SESSION['pending_2fa_email'] = $student->getEmail();
             return ['success' => true, 'redirect' => 'verify_2fa.php'];
         }
 
-        // No 2FA — log in immediately and proceed to setup
         $_SESSION['user'] = [
             'id' => $student->getStudentId(),
             'email' => $student->getEmail(),
             'name' => $student->getStudentName()
         ];
+        $_SESSION['pending_2fa_secret'] = null;
 
         return ['success' => true, 'redirect' => 'setup_2fa.php'];
     }
@@ -116,8 +129,8 @@ class StudentControl
         // TODO: Implement logic to send reset token to the student's email
     }
 
-    // Reset Password
-    public function resetPassword(string $email, string $oldPassword, string $newPassword): void
+    // Update Password
+    public function updatePassword(string $email, string $oldPassword, string $newPassword): void
     {
         // Check if the student exists by email
         $student = $this->studentRepo->getStudentByEmail($email);
@@ -126,6 +139,33 @@ class StudentControl
         }
 
         // TODO: Implement logic to verify old password and update to new password
+
+        // Verify old password
+        if (!password_verify($oldPassword, $student->getPassword())) {
+            throw new \Exception("Old password is incorrect.");
+        }
+
+        // Hash the new password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $this->studentRepo->updatePassword($email, $hashedNewPassword);
     }
+
+    public function get2FASecret(string $email): string
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+
+        if (!$student || !$student->is2FAEnabled()) {
+            throw new \Exception("2FA is not set up for this account.");
+        }
+
+        return $student->get2FASecret();
+    }
+
+    public function checkStudentExist(string $identifier): bool
+    {
+        return $this->studentRepo->isStudentExists($identifier);
+    }   
+
 }
 ?>

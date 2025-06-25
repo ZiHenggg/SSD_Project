@@ -6,6 +6,8 @@
         "php": ">=8.2",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
+        "divineomega/password_exposed": "^3.2",
+        "phpmailer/phpmailer": "^6.6",
         "robthree/twofactorauth": "^2.0"
     },
     "require-dev": {
@@ -24,7 +26,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "minimum-stability": "stable",
     "prefer-stable": true

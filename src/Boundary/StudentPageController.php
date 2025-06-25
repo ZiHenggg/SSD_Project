@@ -1,15 +1,37 @@
 <?php
 namespace App\Boundary;
+
 use App\Control\StudentControl;
 use App\Entity\Student;
+
+use DivineOmega\PasswordExposed\Enums\PasswordStatus;
+use function DivineOmega\PasswordExposed\password_exposed;
+
 class StudentPageController
 {
-    private string $studentId;
     private StudentControl $studentControl;
 
     public function __construct(StudentControl $studentControl)
     {
         $this->studentControl = $studentControl;
+    }
+
+    public function validatePassword(string $password): ?string
+    {
+        if (strlen($password) < 8 || strlen($password) > 64) {
+            return "Password must be between 8 and 64 characters.";
+        }
+
+        // $status = password_exposed($password);  // ✅ correct usage for v3+
+
+        // switch ($status) {
+        //     case PasswordStatus::EXPOSED:
+        //         return "This password has been found in a known data breach. Please choose a more secure one.";
+        //     case PasswordStatus::UNKNOWN:
+        //         return "Unable to verify password security at this time. Try again later.";
+        // }
+
+        return null;
     }
 
     public function validateStudentInput(array $data): ?string
@@ -22,24 +44,23 @@ class StudentPageController
         if (!preg_match('/^\d{7}$/', (string) $studentId)) {
             return "Invalid student ID. It must be 7 digits long.";
         }
+
         if (empty($studentName) || empty($email) || empty($password)) {
             return "All fields are required.";
         }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return "Invalid email format.";
         }
+
         if (!preg_match('/^[\w\.\-]+@sit\.singaporetech\.edu\.sg$/', $email)) {
-            /*
-            Email must be a SIT address.
-            The email must: 
-                - Start with one or more allowed characters:
-                - Letters, digits, underscores, hyphens, or dots
-                - Must then end with @sit.singaporetech.edu.sg
-            */
             return "Email must be a SIT address.";
         }
 
-        // TODO: Add password validation rules
+        $passwordError = $this->validatePassword($password);
+        if ($passwordError !== null) {
+            return $passwordError;
+        }
 
         return null;
     }
@@ -56,13 +77,11 @@ class StudentPageController
         $email = trim($postStudent['email']);
         $password = trim($postStudent['password']);
 
-        // Check if the student already exists
         if ($this->studentControl->checkStudentExist((string) $studentId) || $this->studentControl->checkStudentExist($email)) {
             return "Student already exists.";
         }
 
-        // Check if Email and Student ID match
-        $prefix = explode('@', $email)[0]; // get the part before "@"
+        $prefix = explode('@', $email)[0];
         if ($prefix !== (string) $studentId) {
             return "Email must begin with your Student ID.";
         }
@@ -75,31 +94,6 @@ class StudentPageController
         }
     }
 
-    // public function loginStudent(array $postLogin): string {
-    // $email = trim($postLogin['email'] ?? '');
-    // $password = trim($postLogin['password'] ?? '');
-
-    // if (empty($email) || empty($password)) {
-    //     return "Email and password are required.";
-    // }
-
-    // // Validate email format
-    // if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    //     return "Invalid email format.";
-    // }
-
-    // // Retrieve student by email
-    // $student = $this->studentControl->getStudentByEmail($email);
-    // if (!$student || !password_verify($password, $student->getPassword())) {
-    //     return "Invalid email or password.";
-    // }
-
-    // // Set session variables
-    // $_SESSION['email'] = (string)$email;
-    // $_SESSION['studentName'] = $student->getStudentName();
-
-    //     return "Login successful. Welcome, " . htmlspecialchars($student->getStudentName()) . "!";
-    // }
     public function loginStudent(array $postLogin): array
     {
         $email = trim($postLogin['email'] ?? '');
@@ -118,15 +112,41 @@ class StudentPageController
 
     public function showUserProfile(int $studentId): ?Student
     {
+        return $this->studentControl->getStudentById($studentId);
+    }
+
+    public function updatePassword(string $email, array $postData): array
+    {
+        if (!$email) {
+            return ['success' => false, 'message' => 'User not authenticated.'];
+        }
+
+        $oldPassword = trim($postData['old_password'] ?? '');
+        $newPassword = trim($postData['new_password'] ?? '');
+
+        if (!$oldPassword || !$newPassword) {
+            return ['success' => false, 'message' => 'Both fields are required.'];
+        }
+
+        if (hash_equals($oldPassword, $newPassword)) {
+            return ['success' => false, 'message' => 'New password must be different from the old password.'];
+        }
+
+        $newPasswordError = $this->validatePassword($newPassword);
+        if ($newPasswordError !== null) {
+            return ['success' => false, 'message' => $newPasswordError];
+        }
+
         try {
-            $student = $this->studentControl->getStudentById($studentId);
-            if (!$student) {
-                return null; // Student not found
-            }
-            return $student;
+            $this->studentControl->updatePassword($email, $oldPassword, $newPassword);
+            return ['success' => true, 'message' => 'Password updated successfully.'];
         } catch (\Exception $e) {
-            throw new \Exception('An error occurred while fetching the student profile: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
+
+    public function get2FASecretForEmail(string $email): string
+    {
+        return $this->studentControl->get2FASecret($email);
+    }
 }
-?>
