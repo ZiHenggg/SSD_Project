@@ -79,8 +79,8 @@ jobs:
             echo "DB_PASS=$DB_PASS" >> .env.prod
             echo "EMAIL_USERNAME=$EMAIL_USERNAME" >> .env.prod
             echo "EMAIL_PASSWORD=$EMAIL_PASSWORD" >> .env.prod
-            # echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
-            # echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
+            echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
+            echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
 
 
             echo "🛑 Stopping existing containers"
