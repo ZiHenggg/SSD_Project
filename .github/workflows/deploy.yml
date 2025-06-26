@@ -61,6 +61,9 @@ jobs:
             echo "📁 Listing project files..."
             ls -la
 
+            echo "📄 Showing Docker Compose file snippet (debug check)"
+            grep redis docker-compose-prod.yml || echo "⚠️ Redis not found in compose file!"
+
             if [ ! -f "docker-compose-prod.yml" ]; then
               echo "❌ docker-compose-prod.yml not found!"
               exit 1
@@ -81,13 +84,13 @@ jobs:
             echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
             echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
 
-            echo "🛑 Stopping existing containers"
-            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v || true
+            echo "🛑 Stopping and cleaning up existing containers"
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v --remove-orphans || true
 
             echo "📦 Installing PHP dependencies using the actual app container"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml run --rm web composer install --ignore-platform-req=ext-pdo_mysql
 
-            echo "🚀 Starting containers (rebuilding everything)"
+            echo "🚀 Starting containers (with rebuild and force recreate)"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --force-recreate
 
             echo "✅ Deployment completed successfully."
