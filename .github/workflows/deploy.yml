@@ -52,9 +52,8 @@ jobs:
               echo "✅ Project directory exists."
               cd $HOME/ssd-project
               echo "🔄 Pulling latest changes from production branch..."
-              git fetch origin production
-              git reset --hard origin/production
-              git clean -fdx
+              git pull https://$GH_PAT@github.com/mogaman/SSD_Project.git production
+
             fi
 
             cd $HOME/ssd-project
