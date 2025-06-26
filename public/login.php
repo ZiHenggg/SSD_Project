@@ -30,6 +30,8 @@ ob_start();
             <input type="password" class="form-control" name="password" required>
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
+
+        <p class="mt-3">Forgot Password? <a href="forgot_password.php">Reset it here</a></p>
     </form>
 </div>
 <?php

@@ -17,6 +17,8 @@ jobs:
       GH_PAT: ${{ secrets.GH_PAT }}
       EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
+      SPLUNK_PASSWORD: ${{ secrets.SPLUNK_PASSWORD }}
 
 
     steps:
@@ -26,13 +28,15 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          envs: DB_HOST,DB_NAME,DB_USER,DB_PASS,GH_PAT,EMAIL_USERNAME,EMAIL_PASSWORD
+          envs: DB_HOST,DB_NAME,DB_USER,DB_PASS,GH_PAT,EMAIL_USERNAME,EMAIL_PASSWORD,SPLUNK_HEC_TOKEN,SPLUNK_PASSWORD
           script: |
             echo "🔒 Masking sensitive values for logs"
             echo "::add-mask::$DB_PASS"
             echo "::add-mask::$EMAIL_PASSWORD"
             echo "::add-mask::$EMAIL_USERNAME"
             echo "::add-mask::$GH_PAT"
+            echo "::add-mask::$SPLUNK_HEC_TOKEN"
+            echo "::add-mask::$SPLUNK_PASSWORD"
 
             echo "🔎 Verifying essential environment variables..."
             echo "DB_HOST=$DB_HOST"
@@ -75,6 +79,8 @@ jobs:
             echo "DB_PASS=$DB_PASS" >> .env.prod
             echo "EMAIL_USERNAME=$EMAIL_USERNAME" >> .env.prod
             echo "EMAIL_PASSWORD=$EMAIL_PASSWORD" >> .env.prod
+            echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
+            echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
 
 
             echo "🛑 Stopping existing containers"
@@ -88,3 +94,7 @@ jobs:
 
             echo "🚀 Starting containers"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build
+            
+            echo "📦 Installing PHP dependencies including vlucas/phpdotenv"
+            docker run --rm -v $(pwd):/app -w /app composer require vlucas/phpdotenv --ignore-platform-req=ext-pdo_mysql
+
