@@ -49,12 +49,12 @@ class StudentControl
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'groupmatesxyz@gmail.com';
-            $mail->Password = 'eiqbpffjricorpvi';
+            $mail->Username = $_ENV['EMAIL_USERNAME'];
+            $mail->Password = $_ENV['EMAIL_PASSWORD'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
-            $mail->setFrom('groupmatesxyz@gmail.com', 'SSD App');
+            $mail->setFrom($_ENV['EMAIL_USERNAME'], 'SSD App');
             $mail->addAddress($to);
             $mail->Subject = 'Your OTP Code';
             $mail->Body = "Your OTP is: $otp\nIt expires in 10 minutes.";

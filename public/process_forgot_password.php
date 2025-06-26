@@ -67,6 +67,8 @@ if (isset($_POST['email'])) {
         $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
         $repo->updatePassword($email, $hashed);
 
+        $repo->disable2FA($email);
+
         unset($_SESSION['forgot_email']);
         $_SESSION['forgot_step'] = 'done';
         $_SESSION['forgot_message'] = "Your password has been reset successfully.";
