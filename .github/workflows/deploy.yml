@@ -93,4 +93,4 @@ jobs:
             echo "🚀 Starting containers (with rebuild and force recreate)"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --force-recreate
 
-            echo "✅ Deployment completed successfully."
+            echo "✅ Deployment completed successfully!"
