@@ -93,7 +93,7 @@ jobs:
             docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
 
             echo "🚀 Starting containers"
-            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --no-cache
             
             echo "📦 Installing PHP dependencies including vlucas/phpdotenv"
             docker run --rm -v $(pwd):/app -w /app composer require vlucas/phpdotenv --ignore-platform-req=ext-pdo_mysql
