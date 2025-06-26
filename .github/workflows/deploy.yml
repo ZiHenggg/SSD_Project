@@ -52,9 +52,9 @@ jobs:
               echo "✅ Project directory exists."
               cd $HOME/ssd-project
               echo "🔄 Pulling latest changes from production branch..."
-              git reset --hard
-              git clean -fd
-              git pull origin production
+              git fetch origin production
+              git reset --hard origin/production
+              git clean -fdx
             fi
 
             cd $HOME/ssd-project
@@ -84,10 +84,10 @@ jobs:
             echo "🛑 Stopping existing containers"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v || true
 
-            echo "📦 Installing PHP dependencies including predis and dotenv"
-            docker run --rm -v $(pwd):/app -w /app composer require vlucas/phpdotenv predis/predis --ignore-platform-req=ext-pdo_mysql
+            echo "📦 Installing PHP dependencies using the actual app container"
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml run --rm web composer install --ignore-platform-req=ext-pdo_mysql
 
             echo "🚀 Starting containers (rebuilding everything)"
-            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --force-recreate --no-cache
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --force-recreate
 
             echo "✅ Deployment completed successfully."
