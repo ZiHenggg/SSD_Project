@@ -25,7 +25,7 @@ function displaySuccessMessage(): void {
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // ✅ Load environment variables from .env
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../', '.env.prod');
 $dotenv->load();
 
 require_once __DIR__ . '/db.php';
