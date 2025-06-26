@@ -43,18 +43,27 @@ ob_start();
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
+
     <?php elseif ($step === 'otp'): ?>
         <!-- OTP Form -->
-        <form method="POST" action="process_register.php">
-            <div class="mb-3">
-                <label for="otp" class="form-label">Enter OTP sent to your email</label>
-                <input type="text" id="otp" name="otp" class="form-control" required maxlength="6">
-            </div>
-            <button type="submit" class="btn btn-success">Verify & Create Account</button>
-        </form>
-    <?php endif; ?>
+        <form method="POST" action="process_register.php" class="mb-3">
+            <label for="otp" class="form-label">Enter OTP sent to your email</label>
+            <input type="text" id="otp" name="otp" class="form-control mb-3" required maxlength="6">
 
-    <p class="mt-3">Already have an account? <a href="login.php">Login here</a></p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Verify</button>
+        </form>
+
+        <form method="POST" action="process_register.php">
+            <input type="hidden" name="resend_otp" value="1">
+            <button type="submit" class="btn btn-danger">Resend OTP</button>
+        </form>
+                </div>
+
+                <p class="mb-0">Already have an account? <a href="login.php">Login here</a></p>
+            </div>
+    <?php endif; ?>
 
     <!-- Modal -->
     <div class="modal fade" id="registerSuccessModal" tabindex="-1" aria-labelledby="registerSuccessLabel" aria-hidden="true">

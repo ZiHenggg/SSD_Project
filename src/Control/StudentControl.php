@@ -193,5 +193,27 @@ class StudentControl
         $this->sendOtpEmail($email, $otp);
     }
 
+    public function resendOtp(string $email): void
+    {
+        // Get existing session data
+        if (!isset($_SESSION['pending_registration'])) {
+            throw new \Exception("No pending registration found for this session.");
+        }
+
+        if ($_SESSION['pending_registration']['email'] !== $email) {
+            throw new \Exception("Email mismatch for pending registration.");
+        }
+
+        // Generate new OTP
+        $otp = strval(random_int(100000, 999999));
+        $otpExpiry = (new \DateTime('+10 minutes'))->format('Y-m-d H:i:s');
+
+        $_SESSION['otp'] = $otp;
+        $_SESSION['otp_expiry'] = strtotime($otpExpiry);
+
+        // Resend OTP email
+        $this->sendOtpEmail($email, $otp);
+    }
+
 }
 ?>
