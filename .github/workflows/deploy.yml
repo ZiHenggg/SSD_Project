@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_NAME: ${{ secrets.DB_NAME }}
@@ -19,7 +19,6 @@ jobs:
       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       SPLUNK_HEC_TOKEN: ${{ secrets.SPLUNK_HEC_TOKEN }}
       SPLUNK_PASSWORD: ${{ secrets.SPLUNK_PASSWORD }}
-
 
     steps:
       - name: SSH to EC2 and deploy with Docker Compose
@@ -73,28 +72,23 @@ jobs:
             fi
 
             echo "✅ Creating .env.prod file"
-            echo "DB_HOST=$DB_HOST" > .env.prod
-            echo "DB_NAME=$DB_NAME" >> .env.prod
-            echo "DB_USER=$DB_USER" >> .env.prod
-            echo "DB_PASS=$DB_PASS" >> .env.prod
-            echo "EMAIL_USERNAME=$EMAIL_USERNAME" >> .env.prod
-            echo "EMAIL_PASSWORD=$EMAIL_PASSWORD" >> .env.prod
-            echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
-            echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
-
+            cat <<EOF > .env.prod
+            DB_HOST=$DB_HOST
+            DB_NAME=$DB_NAME
+            DB_USER=$DB_USER
+            DB_PASS=$DB_PASS
+            EMAIL_USERNAME=$EMAIL_USERNAME
+            EMAIL_PASSWORD=$EMAIL_PASSWORD
+            SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN
+            SPLUNK_PASSWORD=$SPLUNK_PASSWORD
 
             echo "🛑 Stopping existing containers"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v || true
 
-            echo "🧹 Cleaning composer.lock"
-            docker run --rm -v $(pwd):/app -w /app alpine sh -c "rm -f /app/composer.lock"
+            echo "📦 Installing PHP dependencies including predis and dotenv"
+            docker run --rm -v $(pwd):/app -w /app composer require vlucas/phpdotenv predis/predis --ignore-platform-req=ext-pdo_mysql
 
-            echo "📦 Running composer update"
-            docker run --rm -v $(pwd):/app -w /app composer update --ignore-platform-req=ext-pdo_mysql
+            echo "🚀 Starting containers (rebuilding everything)"
+            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --force-recreate --no-cache
 
-            echo "🚀 Starting containers"
-            sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml up -d --build --no-cache
-            
-            echo "📦 Installing PHP dependencies including vlucas/phpdotenv"
-            docker run --rm -v $(pwd):/app -w /app composer require vlucas/phpdotenv --ignore-platform-req=ext-pdo_mysql
-
+            echo "✅ Deployment completed successfully."
