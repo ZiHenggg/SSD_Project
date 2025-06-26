@@ -72,15 +72,14 @@ jobs:
             fi
 
             echo "✅ Creating .env.prod file"
-            cat <<EOF > .env.prod
-            DB_HOST=$DB_HOST
-            DB_NAME=$DB_NAME
-            DB_USER=$DB_USER
-            DB_PASS=$DB_PASS
-            EMAIL_USERNAME=$EMAIL_USERNAME
-            EMAIL_PASSWORD=$EMAIL_PASSWORD
-            SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN
-            SPLUNK_PASSWORD=$SPLUNK_PASSWORD
+            echo "DB_HOST=$DB_HOST" > .env.prod
+            echo "DB_NAME=$DB_NAME" >> .env.prod
+            echo "DB_USER=$DB_USER" >> .env.prod
+            echo "DB_PASS=$DB_PASS" >> .env.prod
+            echo "EMAIL_USERNAME=$EMAIL_USERNAME" >> .env.prod
+            echo "EMAIL_PASSWORD=$EMAIL_PASSWORD" >> .env.prod
+            echo "SPLUNK_HEC_TOKEN=$SPLUNK_HEC_TOKEN" >> .env.prod
+            echo "SPLUNK_PASSWORD=$SPLUNK_PASSWORD" >> .env.prod
 
             echo "🛑 Stopping existing containers"
             sudo docker-compose --env-file .env.prod -f docker-compose-prod.yml down -v || true
