@@ -19,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
 use App\Entity\Student;
+use App\SessionManager;
 
 class OtpFlowTest extends TestCase
 {
@@ -32,14 +33,13 @@ class OtpFlowTest extends TestCase
 
     public function testValidOtpVerifiesAccountAndCreatesStudent()
     {
-        $_SESSION['otp'] = '654321';
-        $_SESSION['otp_expiry'] = time() + 600;
-        $_SESSION['pending_registration'] = [
+        SessionManager::setOTP('654321', time() + 600);
+        SessionManager::setRegistration([
             'studentId' => 7654321,
             'studentName' => 'Alice Tan',
             'email' => '7654321@sit.singaporetech.edu.sg',
             'password' => password_hash('testpass123', PASSWORD_DEFAULT)
-        ];
+        ]);
 
         $mockRepo = $this->createMock(StudentRepository::class);
         $mockRepo->expects($this->once())->method('createStudentAccount');
@@ -51,15 +51,14 @@ class OtpFlowTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertArrayNotHasKey('otp', $_SESSION);
-        $this->assertArrayNotHasKey('pending_registration', $_SESSION);
+        $this->assertNull(SessionManager::getOTP());
+        $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testExpiredOtpFailsVerification()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() - 1; // already expired
-        $_SESSION['pending_registration'] = [];
+        SessionManager::setOTP('123456', time() - 1); // already expired
+        SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('123456');
@@ -70,9 +69,8 @@ class OtpFlowTest extends TestCase
 
     public function testInvalidOtpFailsVerification()
     {
-        $_SESSION['otp'] = '111111';
-        $_SESSION['otp_expiry'] = time() + 600;
-        $_SESSION['pending_registration'] = [];
+        SessionManager::setOTP('111111', time() + 600);
+        SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('999999');
@@ -83,12 +81,12 @@ class OtpFlowTest extends TestCase
 
     public function testResendOtpGeneratesNewCode()
     {
-        $_SESSION['pending_registration'] = [
+        SessionManager::setRegistration([
             'studentId' => 7654321,
             'studentName' => 'Alice Tan',
             'email' => '7654321@sit.singaporetech.edu.sg',
             'password' => 'hashedpass'
-        ];
+        ]);
 
         $mockRepo = $this->createMock(StudentRepository::class);
 
@@ -101,14 +99,13 @@ class OtpFlowTest extends TestCase
             ->method('sendOtpEmail')
             ->with(
                 '7654321@sit.singaporetech.edu.sg',
-                $this->callback(function ($otp) {
-                    return (bool) preg_match('/^\d{6}$/', $otp);
-                })
+                $this->callback(fn($otp) => preg_match('/^\d{6}$/', $otp))
             );
 
         $mockControl->resendOtp('7654321@sit.singaporetech.edu.sg');
 
-        $this->assertNotEmpty($_SESSION['otp']);
-        $this->assertGreaterThan(time(), $_SESSION['otp_expiry']);
+        $otpData = SessionManager::getOTP();
+        $this->assertNotEmpty($otpData['code']);
+        $this->assertGreaterThan(time(), $otpData['expiry']);
     }
 }
