@@ -31,7 +31,7 @@ class StudentPageControllerTest extends TestCase
     public function testInvalidEmailValidation()
     {
         $data = [
-            'studentId' => '12345678',
+            'studentId' => '1234567',
             'studentName' => 'John Doe',
             'email' => 'not-an-email',
             'password' => 'pass123',
@@ -44,7 +44,7 @@ class StudentPageControllerTest extends TestCase
     public function testValidInputPassesValidation()
     {
         $data = [
-            'studentId' => '12345678',
+            'studentId' => '1234567',
             'studentName' => 'Jane Doe',
             'email' => '12345678@example.com',
             'password' => 'securePass1!',
