@@ -2,6 +2,7 @@
 // Check if the user is logged in
 $isLoggedIn = isset($_SESSION['user']);
 $queryValue = $_GET['query'] ?? '';
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <nav class="navbar navbar-expand-lg fixed-top">
@@ -45,10 +46,12 @@ $queryValue = $_GET['query'] ?? '';
                     </ul>
                 </div>
             </div>
-        <?php else: ?>
             <div class="nav-group ms-auto">
+            <?php elseif ($currentPage == 'register.php'): ?>
+                <a class="btn btn-outline-primary" href="login.php">Login</a>
+            <?php else: ?>
                 <a class="btn btn-outline-primary" href="register.php">No account? Register</a>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </nav>
