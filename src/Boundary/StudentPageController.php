@@ -21,7 +21,7 @@ class StudentPageController
             return "Password must be between 8 and 64 characters.";
         }
 
-        $status = password_exposed($password);  // ✅ correct usage for v3+
+        $status = password_exposed($password);
 
         switch ($status) {
             case PasswordStatus::EXPOSED:

@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $formData['password']
             );
             $_SESSION['register_message'] = "OTP has been sent to your email.";
+            $_SESSION['register_message_type'] = 'success';
             $_SESSION['register_step'] = 'otp';
         }
 
@@ -80,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resends = (int) $redis->get($resendKey);
         if ($resends >= $maxResends) {
             $_SESSION['register_message'] = "OTP resend limit reached. Please try again later in 15 minutes.";
+            $_SESSION['register_message_type'] = 'danger';
             $_SESSION['register_step'] = 'otp';
             header("Location: register.php");
             exit;
@@ -96,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['register_message'] = "A new OTP has been sent to your email.";
+        $_SESSION['register_message_type'] = 'success';
         $_SESSION['register_step'] = 'otp';
         header("Location: register.php");
         exit;
@@ -110,11 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $otpAttempts = (int) $redis->get($otpKey);
         if ($otpAttempts >= $maxOtpAttempts) {
             $_SESSION['register_message'] = "Too many failed OTP attempts. Please try again later in 5 minutes.";
+            $_SESSION['register_message_type'] = 'danger';
             $_SESSION['register_step'] = 'otp';
             header("Location: register.php");
             exit;
         }
-
+        
         $result = $control->verifyOtp($otp);
         if ($result['success']) {
             $redis->del($otpKey);
@@ -127,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redis->expire($otpKey, $otpLockout);
             }
             $_SESSION['register_message'] = $result['message'];
+            $_SESSION['register_message_type'] = 'danger';
             $_SESSION['register_step'] = 'otp';
         }
     }
