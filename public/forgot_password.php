@@ -4,9 +4,45 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 $title = "Forgot Password";
 
+// ⏳ Timeout duration (in seconds)
+$timeout = 600;
+
+// Reset session if forgot flow expired
+if (isset($_SESSION['forgot_started_at']) && time() - $_SESSION['forgot_started_at'] > $timeout) {
+    unset(
+        $_SESSION['forgot_step'],
+        $_SESSION['forgot_message'],
+        $_SESSION['forgot_email'],
+        $_SESSION['otp'],
+        $_SESSION['otp_expiry'],
+        $_SESSION['forgot_started_at']
+    );
+}
+
+// Step assignment before conditional session reset
 $step = $_SESSION['forgot_step'] ?? 'form';
+
+// ✅ Preserve forgot_message before wiping session
 $message = $_SESSION['forgot_message'] ?? null;
-unset($_SESSION['forgot_message']);
+
+// Reset full flow on GET unless we're in an active step
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'done'])) {
+    if (!$message) {
+        unset(
+            $_SESSION['forgot_step'],
+            $_SESSION['forgot_email'],
+            $_SESSION['otp'],
+            $_SESSION['otp_expiry'],
+            $_SESSION['forgot_started_at']
+        );
+        $step = 'form';
+    }
+}
+
+// ✅ Unset message after displaying it (except 'done')
+if ($message && $step !== 'done') {
+    unset($_SESSION['forgot_message']);
+}
 
 ob_start();
 ?>
@@ -24,17 +60,25 @@ ob_start();
                 <label for="email" class="form-label">Student Email</label>
                 <input type="email" name="email" id="email" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary">Send OTP</button>
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary">Send OTP</button>
+            </div>
         </form>
 
     <?php elseif ($step === 'otp'): ?>
-        <form method="post" action="process_forgot_password.php">
-            <div class="mb-3">
-                <label for="otp" class="form-label">Enter the OTP sent to your email</label>
-                <input type="text" name="otp" id="otp" class="form-control" required pattern="\d{6}">
-            </div>
-            <button type="submit" class="btn btn-primary">Verify OTP</button>
+        <form method="post" action="process_forgot_password.php" class="mb-3">
+            <label for="otp" class="form-label">Enter the OTP sent to your email</label>
+            <input type="text" name="otp" id="otp" class="form-control mb-3" required pattern="\d{6}">
+
+            <div class="d-flex justify-content-start gap-2">
+                <button type="submit" class="btn btn-success">Verify</button>
         </form>
+
+        <form method="post" action="process_forgot_password.php">
+            <input type="hidden" name="resend_otp" value="1">
+            <button type="submit" class="btn btn-danger">Resend OTP</button>
+        </form>
+            </div>
 
     <?php elseif ($step === 'reset'): ?>
         <form method="post" action="process_forgot_password.php">
@@ -42,14 +86,27 @@ ob_start();
                 <label for="new_password" class="form-label">Enter New Password</label>
                 <input type="password" name="new_password" id="new_password" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary">Reset Password</button>
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary">Reset Password</button>
+            </div>
         </form>
 
     <?php elseif ($step === 'done'): ?>
         <div class="alert alert-success text-center">
             Your password has been reset.<br>
-            <a href="login.php" class="btn btn-primary">Go to Login</a>
+            <a href="login.php" class="btn btn-primary mt-3">Go to Login</a>
         </div>
+        <?php
+        // ✅ Full cleanup after success
+        unset(
+            $_SESSION['forgot_step'],
+            $_SESSION['forgot_message'],
+            $_SESSION['forgot_email'],
+            $_SESSION['forgot_started_at'],
+            $_SESSION['otp'],
+            $_SESSION['otp_expiry']
+        );
+        ?>
     <?php endif; ?>
 </div>
 
