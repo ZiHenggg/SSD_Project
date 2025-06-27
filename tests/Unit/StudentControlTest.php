@@ -1,5 +1,22 @@
 <?php
 
+/**
+ * ✅ StudentControlTest
+ *
+ * This test suite verifies the registration logic in StudentControl::registerStudentAccount().
+ *
+ * Covers:
+ * - Secure password hashing
+ * - OTP generation and session storage
+ * - Invocation of OTP email sending logic
+ *
+ * 🔐 Ensures:
+ * - Session contains the pending registration data
+ * - OTP is a valid 6-digit code
+ * - Password is securely hashed before storing
+ * - Email is passed correctly to the email dispatch method
+ */
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
@@ -14,7 +31,6 @@ class StudentControlTest extends TestCase
             session_start();
         }
 
-        // Clear session before each test
         $_SESSION = [];
     }
 
