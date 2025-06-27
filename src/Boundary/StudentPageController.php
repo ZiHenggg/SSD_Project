@@ -5,7 +5,6 @@ use App\Control\StudentControl;
 use App\Entity\Student;
 
 use DivineOmega\PasswordExposed\Enums\PasswordStatus;
-use function DivineOmega\PasswordExposed\password_exposed;
 
 class StudentPageController
 {
@@ -22,14 +21,14 @@ class StudentPageController
             return "Password must be between 8 and 64 characters.";
         }
 
-        // $status = password_exposed($password);  // ✅ correct usage for v3+
+        $status = password_exposed($password);  // ✅ correct usage for v3+
 
-        // switch ($status) {
-        //     case PasswordStatus::EXPOSED:
-        //         return "This password has been found in a known data breach. Please choose a more secure one.";
-        //     case PasswordStatus::UNKNOWN:
-        //         return "Unable to verify password security at this time. Try again later.";
-        // }
+        switch ($status) {
+            case PasswordStatus::EXPOSED:
+                return "This password has been found in a known data breach. Please choose a more secure one.";
+            case PasswordStatus::UNKNOWN:
+                return "Unable to verify password security at this time. Try again later.";
+        }
 
         return null;
     }
