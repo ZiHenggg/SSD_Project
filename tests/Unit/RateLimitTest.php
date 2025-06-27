@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
+use App\Entity\Student;
 
 class RateLimitTest extends TestCase
 {
@@ -18,47 +19,69 @@ class RateLimitTest extends TestCase
 
     public function testRegistrationRateLimitExceeded()
     {
-        $_SESSION['registration_attempts'] = [
-            time() - 5, time() - 4, time() - 3, time() - 2, time() - 1
-        ];
+        // Simulate rate limit exceeded
+        $_SESSION['registration_attempts'] = 5;
 
-        $mockControl = $this->getMockBuilder(StudentControl::class)
-            ->setConstructorArgs([$this->createMock(StudentRepository::class)])
+        $mockRepo = $this->createMock(StudentRepository::class);
+
+        $control = $this->getMockBuilder(StudentControl::class)
+            ->setConstructorArgs([$mockRepo])
             ->onlyMethods(['sendOtpEmail'])
             ->getMock();
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Too many registration attempts. Please try again later.");
-        $mockControl->registerStudentAccount(1234567, 'John Doe', 'john@sit.singaporetech.edu.sg', 'password');
+        $this->expectExceptionMessage('Too many registration attempts. Please try again later.');
+
+        $control->registerStudentAccount(
+            1234567,
+            'Rate Limit',
+            'limit@sit.singaporetech.edu.sg',
+            'StrongPass!123'
+        );
     }
 
     public function testOtpVerificationRateLimitExceeded()
     {
-        $_SESSION['otp_attempts'] = [time() - 3, time() - 2, time() - 1];
+        // Simulate rate limit exceeded
+        $_SESSION['otp_attempts'] = 5;
         $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['pending_registration'] = ['email' => 'test@sit.singaporetech.edu.sg'];
+        $_SESSION['otp_expiry'] = time() + 600;
+        $_SESSION['pending_registration'] = [
+            'studentId' => 7654321,
+            'studentName' => 'Rate Limit',
+            'email' => 'limit@sit.singaporetech.edu.sg',
+            'password' => password_hash('StrongPass!123', PASSWORD_DEFAULT)
+        ];
 
-        $control = new StudentControl($this->createMock(StudentRepository::class));
+        $mockRepo = $this->createMock(StudentRepository::class);
+        $control = new StudentControl($mockRepo);
+
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Too many OTP attempts. Please try again later.");
+        $this->expectExceptionMessage('Too many OTP verification attempts. Please try again later.');
+
         $control->verifyOtp('123456');
     }
 
     public function testResendOtpRateLimitExceeded()
     {
-        $_SESSION['resend_attempts'] = [
-            time() - 5, time() - 4, time() - 3
+        $_SESSION['pending_registration'] = [
+            'studentId' => 1010101,
+            'studentName' => 'Test User',
+            'email' => 'limit@sit.singaporetech.edu.sg',
+            'password' => password_hash('password', PASSWORD_DEFAULT)
         ];
-        $_SESSION['pending_registration'] = ['email' => 'jane@sit.singaporetech.edu.sg'];
 
-        $mockControl = $this->getMockBuilder(StudentControl::class)
-            ->setConstructorArgs([$this->createMock(StudentRepository::class)])
+        $_SESSION['resend_otp_attempts'] = 3;
+
+        $mockRepo = $this->createMock(StudentRepository::class);
+        $control = $this->getMockBuilder(StudentControl::class)
+            ->setConstructorArgs([$mockRepo])
             ->onlyMethods(['sendOtpEmail'])
             ->getMock();
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Too many OTP resend attempts. Please wait before trying again.");
-        $mockControl->resendOtp('jane@sit.singaporetech.edu.sg');
+        $this->expectExceptionMessage('Too many OTP resend attempts. Please wait before trying again.');
+
+        $control->resendOtp('limit@sit.singaporetech.edu.sg');
     }
 }
