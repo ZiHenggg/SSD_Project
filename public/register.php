@@ -7,10 +7,11 @@ $title = "Register";
 // Get current step
 $step = $_SESSION['register_step'] ?? 'form';
 $message = $_SESSION['register_message'] ?? '';
+$otpStatus = $_SESSION['register_message_type'] ?? 'info';
 $isSuccessModal = $_SESSION['register_success'] ?? false;
 
 // Clear once shown
-unset($_SESSION['register_step'], $_SESSION['register_message'], $_SESSION['register_success']);
+unset($_SESSION['register_step'], $_SESSION['register_message'], $_SESSION['register_success'], $_SESSION['register_message_type']);
 
 ob_start();
 ?>
@@ -18,8 +19,10 @@ ob_start();
 <div class="w-50 m-auto">
     <h2 class="mb-4">Register</h2>
 
-    <?php if ($message && !$isSuccessModal): ?>
+    <?php if ($message && !$isSuccessModal && $step != 'otp'): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($message) ?></div>
+    <?php elseif ($message && !$isSuccessModal && $step == 'otp'): ?>
+        <div class="alert alert-<?= htmlspecialchars($otpStatus) ?>"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
 
     <?php if ($step === 'form'): ?>
