@@ -34,8 +34,16 @@ $groupController = new GroupPageController($groupControl, $groupMembershipContro
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 
 $hasRequested = $groupMembershipController->onCheckIfRequested($groupId, $studentId);
+$joinStatus = $groupMembershipController->displayRequestStatus($groupId, $studentId);
 $isMember = $groupMembershipController->onCheckIfMember($groupId, $studentId);
 $groupData = $groupController->displayGroupDetails($groupId);
+
+if (!$groupData) {
+    echo "<p>Group not found.</p>";
+    $content = ob_get_clean();
+    header("Location: groups.php");
+}
+
 $group = $groupData['group'];
 $members = $groupData['members'];
 $moduleData = $groupData['module'];
@@ -51,11 +59,11 @@ $moduleData = $groupData['module'];
             <p><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></p>
         </div>
         <?php if (!$isMember && count($members) < $group->getMaxMembers()): ?>
-            <form method="POST" action="<?= $hasRequested ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
+            <form method="POST" action="<?= ($hasRequested && ($joinStatus === 'pending')) ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
                 <input type="hidden" name="groupId" value="<?= $groupId ?>">
-                <?php if ($hasRequested): ?>
+                <?php if ($hasRequested && ($joinStatus === 'pending')): ?>
                     <button class="join-button" type="submit">Cancel Request</button>
-                <?php else: ?>
+                <?php elseif ((!$hasRequested) || ($joinStatus === 'rejected')): ?>
                     <button class="join-button" type="submit">Request to Join</button>
                 <?php endif; ?>
             </form>

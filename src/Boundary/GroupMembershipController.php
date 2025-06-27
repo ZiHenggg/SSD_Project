@@ -51,11 +51,22 @@ class GroupMembershipController
             return ['error' => 'An error occurred while fetching student join requests: ' . $e->getMessage()];
         }
     }
+    
+    public function displayRequestStatus(int $groupId, int $studentId): ?string
+    {
+        return $this->groupMembershipControl->getRequestStatus($groupId, $studentId);
+    }
 
     public function onJoinGroupRequest(int $groupId, int $studentId): void
     {
+        $currentStatus = $this->groupMembershipControl->getRequestStatus($groupId, $studentId);
         if ($this->groupMembershipControl->requestExists($groupId, $studentId)) {
-            throw new Exception("You have already requested to join this group.");
+            if ($currentStatus === 'accepted') {
+                throw new \Exception("You are already a member of this group.");
+            }
+            elseif ($currentStatus === 'pending') {
+                throw new Exception("You have already requested to join this group.");
+            }        
         }
 
         $this->groupMembershipControl->submitJoinRequest($groupId, $studentId);

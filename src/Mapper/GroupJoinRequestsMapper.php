@@ -112,7 +112,15 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
     {
         $stmt = $this->dbConnection->prepare("
             DELETE FROM groupJoinRequests
-            WHERE groupId = :groupId AND requesterId = :requesterId
+            WHERE requestId = (
+                SELECT requestId FROM (
+                    SELECT requestId
+                    FROM groupJoinRequests
+                    WHERE groupId = :groupId AND requesterId = :requesterId
+                    ORDER BY requestedAt DESC
+                    LIMIT 1
+                ) AS latest
+            )
         ");
         $stmt->execute([
             ':groupId' => $groupId,
@@ -152,6 +160,17 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
             ':reviewedBy' => $reviewerId,
             ':requestId' => $requestId
         ]);
+    }
+
+    public function getRequestStatus(int $groupId, int $requesterId): ?string
+    {
+        $stmt = $this->dbConnection->prepare("SELECT joinStatus FROM groupJoinRequests WHERE groupId = :groupId AND requesterId = :requesterId ORDER BY requestedAt DESC LIMIT 1");
+        $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
+        $stmt->bindParam(':requesterId', $requesterId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['joinStatus'] : null;
     }
 
 }
