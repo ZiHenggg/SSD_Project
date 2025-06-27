@@ -27,14 +27,14 @@ class OtpVerificationTest extends TestCase
 
         $mockRepo->expects($this->once())
             ->method('verifyStudentEmail')
-            ->with('test@student.edu.sg');
+            ->with('test@sit.singaporetech.edu.sg');
 
         $_SESSION['otp'] = '123456';
         $_SESSION['otp_expiry'] = time() + 300;
         $_SESSION['pending_registration'] = [
             'studentId' => 1234567,
             'studentName' => 'Jane Doe',
-            'email' => 'test@student.edu.sg',
+            'email' => 'test@sit.singaporetech.edu.sg',
             'password' => password_hash('securePassword!', PASSWORD_DEFAULT)
         ];
 
@@ -50,7 +50,9 @@ class OtpVerificationTest extends TestCase
     {
         $_SESSION['otp'] = '123456';
         $_SESSION['otp_expiry'] = time() - 1;
-        $_SESSION['pending_registration'] = ['email' => 'test@student.edu.sg'];
+        $_SESSION['pending_registration'] = [
+            'email' => 'test@sit.singaporetech.edu.sg'
+        ];
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('123456');
@@ -63,7 +65,9 @@ class OtpVerificationTest extends TestCase
     {
         $_SESSION['otp'] = '123456';
         $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['pending_registration'] = ['email' => 'test@student.edu.sg'];
+        $_SESSION['pending_registration'] = [
+            'email' => 'test@sit.singaporetech.edu.sg'
+        ];
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('000000');
