@@ -89,7 +89,7 @@ class OtpFlowTest extends TestCase
             ->with(
                 '7654321@sit.singaporetech.edu.sg',
                 $this->callback(function ($otp) {
-                    return preg_match('/^\d{6}$/', $otp); // ensure it's 6 digits
+                    return (bool) preg_match('/^\d{6}$/', $otp);
                 })
             );
 
