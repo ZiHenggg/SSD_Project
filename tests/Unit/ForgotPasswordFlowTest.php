@@ -76,7 +76,7 @@ class ForgotPasswordFlowTest extends TestCase
         $inputOtp = '123456';
 
         $this->assertEquals($_SESSION['otp'], $inputOtp);
-        $this->assertLessThan($_SESSION['otp_expiry'], time() + 600);
+        $this->assertGreaterThan(time(), $_SESSION['otp_expiry']); // ✅ fixed
 
         unset($_SESSION['otp'], $_SESSION['otp_expiry']);
         $_SESSION['forgot_step'] = 'reset';
@@ -112,7 +112,10 @@ class ForgotPasswordFlowTest extends TestCase
 
     public function testResetPasswordUpdatesRepository()
     {
-        $mockRepo = $this->createMock(StudentRepository::class);
+        $mockRepo = $this->getMockBuilder(StudentRepository::class)
+            ->onlyMethods(['updatePassword', 'disable2FA']) // ✅ fix: declare method
+            ->getMock();
+
         $mockRepo->expects($this->once())
             ->method('updatePassword')
             ->with(
