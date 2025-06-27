@@ -23,6 +23,7 @@ use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
 use App\Entity\Student;
+use App\SessionManager;
 
 class StudentControlLoginTest extends TestCase
 {
@@ -31,9 +32,13 @@ class StudentControlLoginTest extends TestCase
 
     protected function setUp(): void
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
         $this->studentRepoMock = $this->createMock(StudentRepository::class);
         $this->studentControl = new StudentControl($this->studentRepoMock);
-        $_SESSION = []; // Reset session before each test
     }
 
     public function testLoginFailsWithInvalidEmail()
@@ -79,7 +84,7 @@ class StudentControlLoginTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('verify_2fa.php', $result['redirect']);
-        $this->assertEquals('user2fa@sit.singaporetech.edu.sg', $_SESSION['pending_2fa_email']);
+        $this->assertEquals('user2fa@sit.singaporetech.edu.sg', SessionManager::get2FA()['pending_email']);
     }
 
     public function testLoginWith2FANotEnabled()
@@ -105,8 +110,8 @@ class StudentControlLoginTest extends TestCase
             'id' => 2001,
             'email' => 'jane@sit.singaporetech.edu.sg',
             'name' => 'Jane SIT'
-        ], $_SESSION['user']);
+        ], SessionManager::getUser());
 
-        $this->assertNull($_SESSION['pending_2fa_secret']);
+        $this->assertNull(SessionManager::get2FA()['secret']);
     }
 }
