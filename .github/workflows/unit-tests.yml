@@ -1,4 +1,4 @@
-name: Run PHPUnit Unit Tests for Registration and Validation
+name: Run PHPUnit Unit Tests for Registration and Input Validation
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Run PHPUnit Tests for Registration + OTP
     runs-on: ubuntu-latest
 
     services:
@@ -43,3 +44,10 @@ jobs:
 
       - name: Run PHPUnit tests
         run: ./vendor/bin/phpunit --configuration phpunit.xml
+
+      - name: ✅ Write Unit Test Summary
+        run: |
+          echo "### ✅ Unit Tests Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- StudentPageController: Input validation" >> $GITHUB_STEP_SUMMARY
+          echo "- StudentControl: Session storage, password hashing, OTP generation + email" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All tests executed via GitHub Actions with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
