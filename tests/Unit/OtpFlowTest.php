@@ -99,7 +99,9 @@ class OtpFlowTest extends TestCase
             ->method('sendOtpEmail')
             ->with(
                 '7654321@sit.singaporetech.edu.sg',
-                $this->callback(fn($otp) => preg_match('/^\d{6}$/', $otp))
+                $this->callback(function ($otp) {
+                    return preg_match('/^\d{6}$/', $otp) === 1;
+                })
             );
 
         $mockControl->resendOtp('7654321@sit.singaporetech.edu.sg');
