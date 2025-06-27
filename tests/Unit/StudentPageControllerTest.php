@@ -1,4 +1,15 @@
 <?php
+/**
+ * Class StudentPageControllerTest
+ *
+ * ✅ Unit tests for validating student registration input
+ * Covers `validateStudentInput` from StudentPageController:
+ *
+ * - ❌ Detects missing fields
+ * - ❌ Catches invalid email format
+ * - ✔️ Accepts valid SIT email and matching Student ID
+ */
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
@@ -15,6 +26,7 @@ class StudentPageControllerTest extends TestCase
         $this->controller = new StudentPageController($mockControl);
     }
 
+    /** ❌ Fails if required fields are left empty */
     public function testEmptyFieldsValidation()
     {
         $data = [
@@ -28,6 +40,7 @@ class StudentPageControllerTest extends TestCase
         $this->assertNotEmpty($error, "Validation should fail with empty fields.");
     }
 
+    /** ❌ Fails if email is not a valid format */
     public function testInvalidEmailValidation()
     {
         $data = [
@@ -41,12 +54,13 @@ class StudentPageControllerTest extends TestCase
         $this->assertStringContainsString('email', $error);
     }
 
+    /** ✔️ Passes when all inputs are valid (SIT email + strong password) */
     public function testValidInputPassesValidation()
     {
         $data = [
             'studentId' => '1234567',
             'studentName' => 'Jane Doe',
-            'email' => '12345678@sit.singaporetech.edu.sg',
+            'email' => '1234567@sit.singaporetech.edu.sg',
             'password' => 'securePass1!',
         ];
 

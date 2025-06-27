@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * Tests OTP verification logic via StudentControl::verifyOtp():
+ *
+ * ✅ testVerifyOtpSuccess()
+ * - Accepts correct OTP and verifies student email
+ * - Creates student account and clears session
+ *
+ * ✅ testVerifyOtpFailsIfExpired()
+ * - Fails if OTP has expired
+ *
+ * ✅ testVerifyOtpFailsIfIncorrect()
+ * - Fails if provided OTP does not match session
+ */
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;

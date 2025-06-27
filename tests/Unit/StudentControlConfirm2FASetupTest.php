@@ -1,4 +1,18 @@
 <?php
+/**
+ * ✅ StudentControlConfirm2FASetupTest
+ *
+ * This test suite verifies the logic for confirming 2FA setup after scanning the QR code.
+ *
+ * Covers:
+ * - confirm2FASetup() with valid TOTP code
+ * - confirm2FASetup() with invalid code
+ *
+ * 🔐 Ensures:
+ * - Correct codes trigger persistence of 2FA secret
+ * - Incorrect codes are rejected and nothing is persisted
+ */
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
@@ -26,7 +40,6 @@ class StudentControlConfirm2FASetupTest extends TestCase
         $code = $this->tfa->getCode($secret);
         $email = 'user@sit.singaporetech.edu.sg';
 
-        // Expect enable2FAForUser to be called once with correct values
         $this->studentRepoMock->expects($this->once())
             ->method('enable2FAForUser')
             ->with($email, $secret);
@@ -38,10 +51,9 @@ class StudentControlConfirm2FASetupTest extends TestCase
     public function testConfirm2FASetupWithInvalidCode()
     {
         $secret = $this->tfa->createSecret();
-        $invalidCode = '000000'; // Shouldn't match unless by coincidence
+        $invalidCode = '000000';
         $email = 'user@sit.singaporetech.edu.sg';
 
-        // enable2FAForUser should NOT be called
         $this->studentRepoMock->expects($this->never())
             ->method('enable2FAForUser');
 

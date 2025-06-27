@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * Tests the OTP registration flow logic in StudentControl:
+ *
+ * ✅ verifyOtp()
+ * - Successfully registers student with valid OTP
+ * - Fails for expired OTP
+ * - Fails for invalid OTP
+ *
+ * ✅ resendOtp()
+ * - Regenerates new 6-digit OTP and updates expiry
+ * - Sends new OTP email to student's SIT email
+ */
+
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
