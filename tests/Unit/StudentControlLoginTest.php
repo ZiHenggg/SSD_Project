@@ -1,3 +1,6 @@
+<?php
+namespace Tests\Unit;
+
 use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
