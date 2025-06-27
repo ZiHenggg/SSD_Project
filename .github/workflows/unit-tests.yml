@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run PHPUnit Tests for Registration + OTP
+    name: Run PHPUnit Tests for Registration + OTP + Login
     runs-on: ubuntu-latest
 
     services:
@@ -71,4 +71,20 @@ jobs:
           echo "  • 5 incorrect OTP attempts per email (5 min lockout)" >> $GITHUB_STEP_SUMMARY
           echo "  • 3 OTP resends per email (15 min lockout)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✔️ All tests passed using GitHub Actions CI with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All registration-related tests passed using GitHub Actions CI with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Login Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies all backend logic for the user login process:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚫 Invalid Credentials**" >> $GITHUB_STEP_SUMMARY
+          echo "- Login fails with non-existent SIT email" >> $GITHUB_STEP_SUMMARY
+          echo "- Login fails with incorrect password" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 Valid Login**" >> $GITHUB_STEP_SUMMARY
+          echo "- Login succeeds when credentials are valid" >> $GITHUB_STEP_SUMMARY
+          echo "- Session data is initialized for the user" >> $GITHUB_STEP_SUMMARY
+          echo "- User is redirected to the appropriate page based on 2FA status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_✅ More tests coming soon: 2FA, session expiry, brute-force protection, etc._" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All login-related tests passed using GitHub Actions CI with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
