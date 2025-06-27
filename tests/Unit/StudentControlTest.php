@@ -30,23 +30,21 @@ class StudentControlTest extends TestCase
         $mockControl->expects($this->once())
             ->method('sendOtpEmail')
             ->with(
-                $this->equalTo('1234567@student.edu.sg'),
-                $this->callback(function ($otp) {
-                    return preg_match('/^\d{6}$/', $otp); // OTP is 6 digits
-                })
+                $this->equalTo('1234567@sit.singaporetech.edu.sg'),
+                $this->callback(fn($otp) => is_string($otp) && preg_match('/^\d{6}$/', $otp) === 1)
             );
 
         $mockControl->registerStudentAccount(
             1234567,
             'Jane Doe',
-            '1234567@student.edu.sg',
+            '1234567@sit.singaporetech.edu.sg',
             'securePassword!'
         );
 
         $pending = $_SESSION['pending_registration'];
         $this->assertEquals(1234567, $pending['studentId']);
         $this->assertEquals('Jane Doe', $pending['studentName']);
-        $this->assertEquals('1234567@student.edu.sg', $pending['email']);
+        $this->assertEquals('1234567@sit.singaporetech.edu.sg', $pending['email']);
         $this->assertTrue(password_verify('securePassword!', $pending['password']));
 
         $this->assertNotEmpty($_SESSION['otp']);
