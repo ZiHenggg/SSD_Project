@@ -66,7 +66,7 @@ jobs:
           echo "- Regenerates and resends OTP if valid session exists" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🚫 Rate Limiting Protection**" >> $GITHUB_STEP_SUMMARY
-          echo "- (Planned) Block excessive OTP/resend/registration attempts to prevent abuse" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks excessive registration, OTP verification, and resend attempts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All registration-related tests passed using GitHub Actions CI with MySQL & Redis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -81,6 +81,10 @@ jobs:
           echo "**🔐 Valid Login**" >> $GITHUB_STEP_SUMMARY
           echo "- 2FA enabled → session stores pending email & redirects to verify_2fa.php" >> $GITHUB_STEP_SUMMARY
           echo "- 2FA not enabled → redirects to setup_2fa.php & initializes session" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚫 Login Rate Limiting**" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks login if user or IP exceeds failed attempt threshold" >> $GITHUB_STEP_SUMMARY
+          echo "- Resets counters after successful login" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All login-related tests passed successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
