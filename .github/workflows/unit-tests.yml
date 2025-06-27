@@ -50,4 +50,5 @@ jobs:
           echo "### ✅ Unit Tests Summary" >> $GITHUB_STEP_SUMMARY
           echo "- StudentPageController: Input validation" >> $GITHUB_STEP_SUMMARY
           echo "- StudentControl: Session storage, password hashing, OTP generation + email" >> $GITHUB_STEP_SUMMARY
+          echo "- OtpFlowTest: OTP resend generates new code & sends email" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All tests executed via GitHub Actions with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
