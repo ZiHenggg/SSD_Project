@@ -18,6 +18,19 @@ use App\Boundary\GroupPageController;
 use App\Boundary\GroupMembershipController;
 use App\Boundary\StudentPageController;
 use App\Boundary\ReviewPageController;
+use App\SessionManager;
+
+// ===== SESSION STUFF =====
+// Session check is handled in auth_check.php
+
+// We assume SessionManager::start() has been called
+$student = SessionManager::getUser() ?? [];
+$studentId = (int)($student['id'] ?? 0);
+$studentName = $student['name'] ?? 'Unknown';
+
+
+
+
 
 // Instantiate mappers and controls
 $groupRepo = new GroupMapper($pdo);
@@ -36,11 +49,6 @@ $groupController = new GroupPageController($groupControl, $groupMembershipContro
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 $studentPageController = new StudentPageController($studentControl);
 $reviewPageController = new ReviewPageController($reviewControl, $pdo);
-
-// Get student from session
-$student = $_SESSION['user'] ?? [];
-$studentId = isset($student['id']) ? (int)$student['id'] : 0;
-$studentName = $student['name'] ?? 'Unknown';
 
 // Fetch student groups
 $groups = $groupController->listActiveUserGroups($studentId);

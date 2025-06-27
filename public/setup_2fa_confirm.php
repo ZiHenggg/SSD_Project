@@ -4,25 +4,39 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 use App\Mapper\StudentMapper;
 use App\Control\StudentControl;
+use App\SessionManager;
 
-if (!isset($_SESSION['user']['email'], $_SESSION['pending_2fa_secret'])) {
-    header('Location: login.php');
-    exit;
-}
+// ===== SESSION STUFF =====
+SessionManager::start();
 
-$email = $_SESSION['user']['email'];
-$secret = $_SESSION['pending_2fa_secret'];
+// Get current user and 2FA data from session (via SessionManager)
+$user = SessionManager::getUser();
+$twoFA = SessionManager::get2FA();
+
+$email = $user['email'] ?? null;
+$secret = $twoFA['secret'] ?? null;
 $code = $_POST['code'] ?? '';
 $title = "Confirm 2FA Setup";
 
-// ✅ Use controller to handle the logic
+// Redirect if session data is missing
+if (!$email || !$secret) {
+    header('Location: login.php');
+    exit;
+}
+// ==========================
+
+
+
+// ===== CONFIRMATION LOGIC =====
 $control = new StudentControl(new StudentMapper($pdo));
 
 if ($control->confirm2FASetup($email, $code, $secret)) {
-    unset($_SESSION['pending_2fa_secret']);
+    // Clear 2FA session data after successful setup
+    SessionManager::set2FA(null, null);
     header('Location: dashboard.php');
     exit;
 }
+// ===============================
 
 ob_start();
 ?>

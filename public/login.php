@@ -1,22 +1,30 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-if (isset($_SESSION['user'])) {
-    // Redirect to dashboard or home
+use App\SessionManager;
+
+SessionManager::start();
+
+// ===== SESSION STUFF =====
+// If already logged in, redirect to dashboard
+if (SessionManager::getUser()) {
     header("Location: dashboard.php");
     exit();
 }
+
 $title = "Login";
 ob_start();
 ?>
-<div class="w-50 m-auto">
 
+<div class="w-50 m-auto">
     <h2 class="mb-4">Login</h2>
 
     <?php
-    if (isset($_SESSION['login_error'])) {
-        echo '<div class="alert alert-danger">' . $_SESSION['login_error'] . '</div>';
-        unset($_SESSION['login_error']);
+    // ===== DISPLAY LOGIN ERROR IF SET =====
+    $error = SessionManager::getLoginError();
+    if ($error) {
+        echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>';
+        SessionManager::setLoginError(null); // Clear after showing
     }
     ?>
 
@@ -34,7 +42,7 @@ ob_start();
         <p class="mt-3">Forgot Password? <a href="forgot_password.php">Reset it here</a></p>
     </form>
 </div>
+
 <?php
 $content = ob_get_clean();
 include '_layout.php';
-?>

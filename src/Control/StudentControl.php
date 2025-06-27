@@ -3,6 +3,7 @@ namespace App\Control;
 
 use App\Entity\Student;
 use App\Repository\StudentRepository;
+use App\SessionManager;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use RobThree\Auth\TwoFactorAuth;
@@ -18,24 +19,23 @@ class StudentControl
 
     public function getStudentById(string $studentId): ?Student
     {
-        $student = $this->studentRepo->getStudentById($studentId);
-        return $student ?: null;
+        return $this->studentRepo->getStudentById($studentId) ?: null;
     }
 
     public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
     {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $otp = strval(random_int(100000, 999999));
-        $otpExpiry = (new \DateTime('+10 minutes'))->format('Y-m-d H:i:s');
+        $otpExpiry = (new \DateTime('+10 minutes'))->getTimestamp();
 
-        $_SESSION['pending_registration'] = [
+        SessionManager::setRegistration([
             'studentId' => $studentId,
             'studentName' => $studentName,
             'email' => $email,
-            'password' => $hashedPassword
-        ];
-        $_SESSION['otp'] = $otp;
-        $_SESSION['otp_expiry'] = strtotime($otpExpiry);
+            'password' => $hashedPassword,
+        ]);
+
+        SessionManager::setOTP($otp, $otpExpiry);
 
         $this->sendOtpEmail($email, $otp);
     }
@@ -65,24 +65,33 @@ class StudentControl
 
     public function verifyOtp(string $inputOtp): array
     {
-        if (!isset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['pending_registration'])) {
+        $otpSession = SessionManager::getOTP();
+        $registration = SessionManager::getRegistration();
+
+        if (!$otpSession || !$registration) {
             return ['success' => false, 'message' => 'Session expired. Please try again.'];
         }
 
-        if (time() > $_SESSION['otp_expiry']) {
+        if (time() > $otpSession['expiry']) {
             return ['success' => false, 'message' => 'OTP expired.'];
         }
 
-        if ($_SESSION['otp'] !== $inputOtp) {
+        if ($otpSession['code'] !== $inputOtp) {
             return ['success' => false, 'message' => 'Invalid OTP.'];
         }
 
-        $data = $_SESSION['pending_registration'];
-        $student = new Student($data['studentId'], $data['studentName'], $data['email'], $data['password']);
+        $student = new Student(
+            $registration['studentId'],
+            $registration['studentName'],
+            $registration['email'],
+            $registration['password']
+        );
+
         $this->studentRepo->createStudentAccount($student);
         $this->studentRepo->verifyStudentEmail($student->getEmail());
 
-        unset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['pending_registration']);
+        SessionManager::remove('otp');
+        SessionManager::remove('registration');
 
         return ['success' => true, 'message' => 'Registration complete!'];
     }
@@ -96,16 +105,17 @@ class StudentControl
         }
 
         if ($student->is2FAEnabled()) {
-            $_SESSION['pending_2fa_email'] = $student->getEmail();
+            SessionManager::set2FA($student->getEmail());
             return ['success' => true, 'redirect' => 'verify_2fa.php'];
         }
 
-        $_SESSION['user'] = [
+        SessionManager::setUser([
             'id' => $student->getStudentId(),
             'email' => $student->getEmail(),
-            'name' => $student->getStudentName()
-        ];
-        $_SESSION['pending_2fa_secret'] = null;
+            'name' => $student->getStudentName(),
+        ]);
+
+        SessionManager::set2FA(null, null);
 
         return ['success' => true, 'redirect' => 'setup_2fa.php'];
     }
@@ -119,12 +129,12 @@ class StudentControl
 
         $tfa = new TwoFactorAuth('SSD App');
         if ($tfa->verifyCode($student->get2FASecret(), $code)) {
-            $_SESSION['user'] = [
-                'id'    => $student->getStudentId(),
+            SessionManager::setUser([
+                'id' => $student->getStudentId(),
                 'email' => $student->getEmail(),
-                'name'  => $student->getStudentName()
-            ];
-            unset($_SESSION['pending_2fa_email']);
+                'name' => $student->getStudentName()
+            ]);
+            SessionManager::remove('2fa');
 
             return ['success' => true, 'redirect' => 'dashboard.php'];
         }
@@ -141,7 +151,6 @@ class StudentControl
     public function confirm2FASetup(string $email, string $code, string $secret): bool
     {
         $tfa = new TwoFactorAuth('SSD App');
-
         if (!$tfa->verifyCode($secret, $code)) {
             return false;
         }
@@ -164,7 +173,7 @@ class StudentControl
             throw new \Exception("No student found with email $email.");
         }
 
-        // TODO: Implement logic to send reset token to the student's email
+        // TODO: Implement logic to send reset token
     }
 
     public function updatePassword(string $email, string $oldPassword, string $newPassword): void
@@ -205,28 +214,29 @@ class StudentControl
         }
 
         $otp = strval(random_int(100000, 999999));
-        $_SESSION['otp'] = $otp;
-        $_SESSION['otp_expiry'] = time() + 600;
-        $_SESSION['forgot_email'] = $email;
+        $expiry = time() + 600;
+
+        SessionManager::setOTP($otp, $expiry);
+        SessionManager::setForgotPasswordEmail($email);
 
         $this->sendOtpEmail($email, $otp);
     }
 
     public function resendOtp(string $email): void
     {
-        if (!isset($_SESSION['pending_registration'])) {
+        $registration = SessionManager::getRegistration();
+        if (!$registration) {
             throw new \Exception("No pending registration found for this session.");
         }
 
-        if ($_SESSION['pending_registration']['email'] !== $email) {
+        if ($registration['email'] !== $email) {
             throw new \Exception("Email mismatch for pending registration.");
         }
 
         $otp = strval(random_int(100000, 999999));
-        $otpExpiry = (new \DateTime('+10 minutes'))->format('Y-m-d H:i:s');
+        $otpExpiry = (new \DateTime('+10 minutes'))->getTimestamp();
 
-        $_SESSION['otp'] = $otp;
-        $_SESSION['otp_expiry'] = strtotime($otpExpiry);
+        SessionManager::setOTP($otp, $otpExpiry);
 
         $this->sendOtpEmail($email, $otp);
     }

@@ -3,21 +3,44 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
 
 use App\Control\StudentControl;
-use App\Mapper\StudentMapper; // ✅ Use concrete class
+use App\Mapper\StudentMapper;
+use App\SessionManager;
 
-if (!isset($_SESSION['pending_2fa_email'])) {
+SessionManager::start();
+
+// Prevent caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+
+// ==== Session Management ====
+$twoFA = SessionManager::get2FA();
+$email = $twoFA['pending_email'] ?? null;
+
+// Already fully logged in — block access
+if ($user && !$email) {
+    header("Location: dashboard.php");
+    exit;
+}
+
+// Not even mid-login
+if (!$email) {
     header("Location: login.php");
     exit;
 }
 
-$email = $_SESSION['pending_2fa_email'];
+// =====================
+
 $error = '';
+
+
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['code'] ?? '';
 
-    $control = new StudentControl(new StudentMapper($pdo)); // ✅ Correct class
+    $control = new StudentControl(new StudentMapper($pdo));
     $result = $control->verify2FACode($email, $code);
 
     if ($result['success']) {
