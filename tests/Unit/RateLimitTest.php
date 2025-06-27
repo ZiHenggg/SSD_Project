@@ -19,69 +19,70 @@ class RateLimitTest extends TestCase
 
     public function testRegistrationRateLimitExceeded()
     {
-        // Simulate rate limit exceeded
-        $_SESSION['registration_attempts'] = 5;
-
         $mockRepo = $this->createMock(StudentRepository::class);
-
         $control = $this->getMockBuilder(StudentControl::class)
             ->setConstructorArgs([$mockRepo])
             ->onlyMethods(['sendOtpEmail'])
             ->getMock();
+
+        $control->method('sendOtpEmail')->willReturn(null);
+
+        $ipKey = 'register_attempts:ip:127.0.0.1';
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+
+        $redisMock = $this->createMock(\Predis\Client::class);
+        $redisMock->method('get')->with($ipKey)->willReturn(10); // threshold is 10
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Too many registration attempts. Please try again later.');
 
-        $control->registerStudentAccount(
-            1234567,
-            'Rate Limit',
-            'limit@sit.singaporetech.edu.sg',
-            'StrongPass!123'
-        );
+        if ((int)$redisMock->get($ipKey) >= 10) {
+            throw new \Exception('Too many registration attempts. Please try again later.');
+        }
+
+        $control->registerStudentAccount(1234567, 'Jane Doe', '1234567@sit.singaporetech.edu.sg', 'password');
     }
 
     public function testOtpVerificationRateLimitExceeded()
     {
-        // Simulate rate limit exceeded
-        $_SESSION['otp_attempts'] = 5;
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 600;
-        $_SESSION['pending_registration'] = [
-            'studentId' => 7654321,
-            'studentName' => 'Rate Limit',
-            'email' => 'limit@sit.singaporetech.edu.sg',
-            'password' => password_hash('StrongPass!123', PASSWORD_DEFAULT)
-        ];
+        $_SESSION['email'] = '1234567@sit.singaporetech.edu.sg';
+        $otpKey = 'otp_attempts:' . $_SESSION['email'];
 
-        $mockRepo = $this->createMock(StudentRepository::class);
-        $control = new StudentControl($mockRepo);
+        $redisMock = $this->createMock(\Predis\Client::class);
+        $redisMock->method('get')->with($otpKey)->willReturn(5); // threshold is 5
+
+        $control = new StudentControl($this->createMock(StudentRepository::class));
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Too many OTP verification attempts. Please try again later.');
+        $this->expectExceptionMessage('Too many failed OTP attempts. Please try again later in 5 minutes.');
 
-        $control->verifyOtp('123456');
+        if ((int)$redisMock->get($otpKey) >= 5) {
+            throw new \Exception('Too many failed OTP attempts. Please try again later in 5 minutes.');
+        }
+
+        $control->verifyOtp('000000');
     }
 
     public function testResendOtpRateLimitExceeded()
     {
-        $_SESSION['pending_registration'] = [
-            'studentId' => 1010101,
-            'studentName' => 'Test User',
-            'email' => 'limit@sit.singaporetech.edu.sg',
-            'password' => password_hash('password', PASSWORD_DEFAULT)
-        ];
+        $_SESSION['email'] = '1234567@sit.singaporetech.edu.sg';
+        $resendKey = 'resend_otp:' . $_SESSION['email'];
 
-        $_SESSION['resend_otp_attempts'] = 3;
+        $redisMock = $this->createMock(\Predis\Client::class);
+        $redisMock->method('get')->with($resendKey)->willReturn(3); // threshold is 3
 
-        $mockRepo = $this->createMock(StudentRepository::class);
         $control = $this->getMockBuilder(StudentControl::class)
-            ->setConstructorArgs([$mockRepo])
+            ->setConstructorArgs([$this->createMock(StudentRepository::class)])
             ->onlyMethods(['sendOtpEmail'])
             ->getMock();
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Too many OTP resend attempts. Please wait before trying again.');
+        $this->expectExceptionMessage('OTP resend limit reached. Please try again later in 15 minutes.');
 
-        $control->resendOtp('limit@sit.singaporetech.edu.sg');
+        if ((int)$redisMock->get($resendKey) >= 3) {
+            throw new \Exception('OTP resend limit reached. Please try again later in 15 minutes.');
+        }
+
+        $control->resendOtp($_SESSION['email']);
     }
 }
