@@ -42,7 +42,7 @@ class StudentControl
         $this->sendOtpEmail($email, $otp);
     }
 
-    private function sendOtpEmail(string $to, string $otp): void
+    protected function sendOtpEmail(string $to, string $otp): void
     {
         $mail = new PHPMailer(true);
         try {
