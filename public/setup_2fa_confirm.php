@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
 
-use RobThree\Auth\TwoFactorAuth;
+use App\Mapper\StudentMapper;
+use App\Control\StudentControl;
 
 if (!isset($_SESSION['user']['email'], $_SESSION['pending_2fa_secret'])) {
     header('Location: login.php');
@@ -12,14 +13,12 @@ if (!isset($_SESSION['user']['email'], $_SESSION['pending_2fa_secret'])) {
 $email = $_SESSION['user']['email'];
 $secret = $_SESSION['pending_2fa_secret'];
 $code = $_POST['code'] ?? '';
-
-$tfa = new TwoFactorAuth('SSD App');
 $title = "Confirm 2FA Setup";
 
-if ($tfa->verifyCode($secret, $code)) {
-    $stmt = $pdo->prepare("UPDATE students SET google2fa_secret = ?, is_2fa_enabled = 1 WHERE email = ?");
-    $stmt->execute([$secret, $email]);
+// ✅ Use controller to handle the logic
+$control = new StudentControl(new StudentMapper($pdo));
 
+if ($control->confirm2FASetup($email, $code, $secret)) {
     unset($_SESSION['pending_2fa_secret']);
     header('Location: dashboard.php');
     exit;

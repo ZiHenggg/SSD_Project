@@ -5,6 +5,7 @@ use App\Entity\Student;
 use App\Repository\StudentRepository;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use RobThree\Auth\TwoFactorAuth;
 
 class StudentControl
 {
@@ -18,10 +19,7 @@ class StudentControl
     public function getStudentById(string $studentId): ?Student
     {
         $student = $this->studentRepo->getStudentById($studentId);
-        if (!$student) {
-            return null;
-        }
-        return $student;
+        return $student ?: null;
     }
 
     public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
@@ -82,8 +80,6 @@ class StudentControl
         $data = $_SESSION['pending_registration'];
         $student = new Student($data['studentId'], $data['studentName'], $data['email'], $data['password']);
         $this->studentRepo->createStudentAccount($student);
-
-        // ✅ Mark email as verified
         $this->studentRepo->verifyStudentEmail($student->getEmail());
 
         unset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['pending_registration']);
@@ -114,22 +110,55 @@ class StudentControl
         return ['success' => true, 'redirect' => 'setup_2fa.php'];
     }
 
+    public function verify2FACode(string $email, string $code): array
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+        if (!$student || !$student->is2FAEnabled()) {
+            return ['success' => false, 'message' => '2FA is not set up for this account.'];
+        }
+
+        $tfa = new TwoFactorAuth('SSD App');
+        if ($tfa->verifyCode($student->get2FASecret(), $code)) {
+            $_SESSION['user'] = [
+                'id'    => $student->getStudentId(),
+                'email' => $student->getEmail(),
+                'name'  => $student->getStudentName()
+            ];
+            unset($_SESSION['pending_2fa_email']);
+
+            return ['success' => true, 'redirect' => 'dashboard.php'];
+        }
+
+        return ['success' => false, 'message' => 'Invalid 2FA code.'];
+    }
+
+    public function verify2FACodeWithSecret(string $secret, string $code): bool
+    {
+        $tfa = new TwoFactorAuth('SSD App');
+        return $tfa->verifyCode($secret, $code);
+    }
+
+    public function confirm2FASetup(string $email, string $code, string $secret): bool
+    {
+        $tfa = new TwoFactorAuth('SSD App');
+
+        if (!$tfa->verifyCode($secret, $code)) {
+            return false;
+        }
+
+        $this->studentRepo->enable2FAForUser($email, $secret);
+        return true;
+    }
+
     public function deleteStudent(string $studentId): void
     {
-        // Check if the student exists before attempting to remove
-        if ($this->studentRepo->isStudentExists($studentId)) {
-            // $this->studentRepo->removeStudent($studentId);
-        } else {
+        if (!$this->studentRepo->isStudentExists($studentId)) {
             throw new \Exception("Student with ID $studentId does not exist.");
         }
     }
 
-    // Update student profile?
-
-    // Send Reset Token
     public function sendResetToken(string $email): void
     {
-        // Check if the student exists by email
         $student = $this->studentRepo->getStudentByEmail($email);
         if (!$student) {
             throw new \Exception("No student found with email $email.");
@@ -138,32 +167,24 @@ class StudentControl
         // TODO: Implement logic to send reset token to the student's email
     }
 
-    // Update Password
     public function updatePassword(string $email, string $oldPassword, string $newPassword): void
     {
-        // Check if the student exists by email
         $student = $this->studentRepo->getStudentByEmail($email);
         if (!$student) {
             throw new \Exception("No student found with email $email.");
         }
 
-        // TODO: Implement logic to verify old password and update to new password
-
-        // Verify old password
         if (!password_verify($oldPassword, $student->getPassword())) {
             throw new \Exception("Old password is incorrect.");
         }
 
-        // Hash the new password
         $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
         $this->studentRepo->updatePassword($email, $hashedNewPassword);
     }
 
     public function get2FASecret(string $email): string
     {
         $student = $this->studentRepo->getStudentByEmail($email);
-
         if (!$student || !$student->is2FAEnabled()) {
             throw new \Exception("2FA is not set up for this account.");
         }
@@ -174,28 +195,25 @@ class StudentControl
     public function checkStudentExist(string $identifier): bool
     {
         return $this->studentRepo->isStudentExists($identifier);
-    }   
+    }
 
     public function sendForgotPasswordOtp(string $email): void
     {
-        // Check student exists
         $student = $this->studentRepo->getStudentByEmail($email);
         if (!$student) {
             throw new \Exception("No student found with email $email.");
         }
 
-        // Generate OTP
         $otp = strval(random_int(100000, 999999));
         $_SESSION['otp'] = $otp;
-        $_SESSION['otp_expiry'] = time() + 600; 
+        $_SESSION['otp_expiry'] = time() + 600;
         $_SESSION['forgot_email'] = $email;
-        
+
         $this->sendOtpEmail($email, $otp);
     }
 
     public function resendOtp(string $email): void
     {
-        // Get existing session data
         if (!isset($_SESSION['pending_registration'])) {
             throw new \Exception("No pending registration found for this session.");
         }
@@ -204,16 +222,12 @@ class StudentControl
             throw new \Exception("Email mismatch for pending registration.");
         }
 
-        // Generate new OTP
         $otp = strval(random_int(100000, 999999));
         $otpExpiry = (new \DateTime('+10 minutes'))->format('Y-m-d H:i:s');
 
         $_SESSION['otp'] = $otp;
         $_SESSION['otp_expiry'] = strtotime($otpExpiry);
 
-        // Resend OTP email
         $this->sendOtpEmail($email, $otp);
     }
-
 }
-?>

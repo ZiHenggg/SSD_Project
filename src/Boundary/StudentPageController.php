@@ -3,7 +3,6 @@ namespace App\Boundary;
 
 use App\Control\StudentControl;
 use App\Entity\Student;
-
 use DivineOmega\PasswordExposed\Enums\PasswordStatus;
 
 class StudentPageController
@@ -147,5 +146,11 @@ class StudentPageController
     public function get2FASecretForEmail(string $email): string
     {
         return $this->studentControl->get2FASecret($email);
+    }
+
+    // ✅ NEW: Verifies a 2FA code using a secret (for password update context)
+    public function verify2FACodeForPasswordUpdate(string $secret, string $code): bool
+    {
+        return $this->studentControl->verify2FACodeWithSecret($secret, $code);
     }
 }
