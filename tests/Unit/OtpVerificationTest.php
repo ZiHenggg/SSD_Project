@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
 use App\Entity\Student;
+use App\SessionManager;
 
 class OtpVerificationTest extends TestCase
 {
@@ -28,6 +29,7 @@ class OtpVerificationTest extends TestCase
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
         $_SESSION = [];
     }
 
@@ -43,30 +45,29 @@ class OtpVerificationTest extends TestCase
             ->method('verifyStudentEmail')
             ->with('test@sit.singaporetech.edu.sg');
 
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['pending_registration'] = [
+        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setRegistration([
             'studentId' => 1234567,
             'studentName' => 'Jane Doe',
             'email' => 'test@sit.singaporetech.edu.sg',
             'password' => password_hash('securePassword!', PASSWORD_DEFAULT)
-        ];
+        ]);
 
         $control = new StudentControl($mockRepo);
         $result = $control->verifyOtp('123456');
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertArrayNotHasKey('otp', $_SESSION);
+        $this->assertNull(SessionManager::getOTP());
+        $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testVerifyOtpFailsIfExpired()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() - 1;
-        $_SESSION['pending_registration'] = [
+        SessionManager::setOTP('123456', time() - 1);
+        SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
-        ];
+        ]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('123456');
@@ -77,11 +78,10 @@ class OtpVerificationTest extends TestCase
 
     public function testVerifyOtpFailsIfIncorrect()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['pending_registration'] = [
+        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
-        ];
+        ]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
         $result = $control->verifyOtp('000000');

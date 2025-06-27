@@ -22,6 +22,7 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
+use App\SessionManager;
 
 class StudentControlTest extends TestCase
 {
@@ -57,14 +58,16 @@ class StudentControlTest extends TestCase
             'securePassword!'
         );
 
-        $pending = $_SESSION['pending_registration'];
+        $pending = SessionManager::getRegistration();
+        $otpData = SessionManager::getOTP();
+
         $this->assertEquals(1234567, $pending['studentId']);
         $this->assertEquals('Jane Doe', $pending['studentName']);
         $this->assertEquals('1234567@sit.singaporetech.edu.sg', $pending['email']);
         $this->assertTrue(password_verify('securePassword!', $pending['password']));
 
-        $this->assertNotEmpty($_SESSION['otp']);
-        $this->assertIsNumeric($_SESSION['otp']);
-        $this->assertGreaterThan(time(), $_SESSION['otp_expiry']);
+        $this->assertNotEmpty($otpData['code']);
+        $this->assertIsNumeric($otpData['code']);
+        $this->assertGreaterThan(time(), $otpData['expiry']);
     }
 }

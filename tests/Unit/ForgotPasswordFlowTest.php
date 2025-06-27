@@ -31,6 +31,7 @@ namespace Tests\Unit;
 use App\Control\StudentControl;
 use App\Entity\Student;
 use App\Repository\StudentRepository;
+use App\SessionManager;
 use PHPUnit\Framework\TestCase;
 
 class ForgotPasswordFlowTest extends TestCase
@@ -40,16 +41,14 @@ class ForgotPasswordFlowTest extends TestCase
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
         $_SESSION = [];
     }
-
-    // --- STEP 1: Email Submission ---
 
     public function testSendForgotPasswordOtpStoresSessionAndCallsMailer()
     {
         $mockRepo = $this->createMock(StudentRepository::class);
-        $mockRepo->method('getStudentByEmail')->willReturn(new Student(1, 'Test User', 'test@sit.singaporetech.edu.sg', 'hashedpass'));
+        $mockRepo->method('getStudentByEmail')
+            ->willReturn(new Student(1, 'Test User', 'test@sit.singaporetech.edu.sg', 'hashedpass'));
 
         $mockControl = $this->getMockBuilder(StudentControl::class)
             ->setConstructorArgs([$mockRepo])
@@ -62,57 +61,56 @@ class ForgotPasswordFlowTest extends TestCase
 
         $mockControl->sendForgotPasswordOtp('test@sit.singaporetech.edu.sg');
 
-        $this->assertEquals('test@sit.singaporetech.edu.sg', $_SESSION['forgot_email']);
-        $this->assertMatchesRegularExpression('/^\d{6}$/', $_SESSION['otp']);
-        $this->assertGreaterThan(time(), $_SESSION['otp_expiry']);
+        $this->assertEquals('test@sit.singaporetech.edu.sg', SessionManager::getForgotPasswordEmail());
+        $otpData = SessionManager::getOTP();
+        $this->assertMatchesRegularExpression('/^\d{6}$/', $otpData['code']);
+        $this->assertGreaterThan(time(), $otpData['expiry']);
     }
 
     public function testOtpVerificationSucceedsAndProceedsToReset()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['forgot_email'] = 'test@sit.singaporetech.edu.sg';
+        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setForgotPasswordEmail('test@sit.singaporetech.edu.sg');
 
         $inputOtp = '123456';
+        $otpData = SessionManager::getOTP();
 
-        $this->assertEquals($_SESSION['otp'], $inputOtp);
-        $this->assertGreaterThan(time(), $_SESSION['otp_expiry']); // ✅ fixed
+        $this->assertEquals($otpData['code'], $inputOtp);
+        $this->assertGreaterThan(time(), $otpData['expiry']);
 
-        unset($_SESSION['otp'], $_SESSION['otp_expiry']);
-        $_SESSION['forgot_step'] = 'reset';
+        SessionManager::remove('otp');
+        SessionManager::set('forgot_step', 'reset');
 
-        $this->assertEquals('reset', $_SESSION['forgot_step']);
+        $this->assertEquals('reset', SessionManager::get('forgot_step'));
     }
 
     public function testOtpVerificationFailsOnExpiredOtp()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() - 1;
-        $_SESSION['forgot_email'] = 'test@sit.singaporetech.edu.sg';
+        SessionManager::setOTP('123456', time() - 1);
+        SessionManager::setForgotPasswordEmail('test@sit.singaporetech.edu.sg');
 
-        $this->assertTrue(time() > $_SESSION['otp_expiry']);
-        unset($_SESSION['otp'], $_SESSION['otp_expiry']);
-        $_SESSION['forgot_step'] = 'form';
+        $this->assertTrue(time() > SessionManager::getOTP()['expiry']);
+        SessionManager::remove('otp');
+        SessionManager::set('forgot_step', 'form');
 
-        $this->assertEquals('form', $_SESSION['forgot_step']);
+        $this->assertEquals('form', SessionManager::get('forgot_step'));
     }
 
     public function testOtpVerificationFailsOnInvalidOtp()
     {
-        $_SESSION['otp'] = '123456';
-        $_SESSION['otp_expiry'] = time() + 300;
-        $_SESSION['forgot_email'] = 'test@sit.singaporetech.edu.sg';
+        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setForgotPasswordEmail('test@sit.singaporetech.edu.sg');
 
         $inputOtp = '999999';
-        $this->assertNotEquals($_SESSION['otp'], $inputOtp);
-        $_SESSION['forgot_step'] = 'otp';
+        $this->assertNotEquals(SessionManager::getOTP()['code'], $inputOtp);
+        SessionManager::set('forgot_step', 'otp');
 
-        $this->assertEquals('otp', $_SESSION['forgot_step']);
+        $this->assertEquals('otp', SessionManager::get('forgot_step'));
     }
 
     public function testResetPasswordUpdatesRepository()
     {
-        $mockRepo = $this->getMockBuilder(\App\Repository\StudentRepository::class)
+        $mockRepo = $this->getMockBuilder(StudentRepository::class)
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
@@ -137,28 +135,27 @@ class ForgotPasswordFlowTest extends TestCase
             ->method('disable2FA')
             ->with('test@sit.singaporetech.edu.sg');
 
-        $_SESSION['forgot_email'] = 'test@sit.singaporetech.edu.sg';
+        SessionManager::setForgotPasswordEmail('test@sit.singaporetech.edu.sg');
 
-        $control = new \App\Control\StudentControl($mockRepo);
+        $control = new StudentControl($mockRepo);
         $hashed = password_hash('newpass123', PASSWORD_DEFAULT);
-        $mockRepo->updatePassword($_SESSION['forgot_email'], $hashed);
-        $mockRepo->disable2FA($_SESSION['forgot_email']);
+        $mockRepo->updatePassword(SessionManager::getForgotPasswordEmail(), $hashed);
+        $mockRepo->disable2FA(SessionManager::getForgotPasswordEmail());
 
-        unset($_SESSION['otp'], $_SESSION['otp_expiry']);
-        $_SESSION['forgot_step'] = 'done';
+        SessionManager::remove('otp');
+        SessionManager::set('forgot_step', 'done');
 
-        $this->assertEquals('done', $_SESSION['forgot_step']);
+        $this->assertEquals('done', SessionManager::get('forgot_step'));
     }
-
 
     public function testResetFailsWithoutSession()
     {
-        $_SESSION['forgot_email'] = null;
+        SessionManager::remove('forgot_password');
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Session expired. Please restart.");
 
-        if (!$_SESSION['forgot_email']) {
+        if (!SessionManager::getForgotPasswordEmail()) {
             throw new \Exception("Session expired. Please restart.");
         }
     }
