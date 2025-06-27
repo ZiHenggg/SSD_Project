@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
 
-use RobThree\Auth\TwoFactorAuth;
+use App\Control\StudentControl;
+use App\Mapper\StudentMapper; // ✅ Use concrete class
 
 if (!isset($_SESSION['pending_2fa_email'])) {
     header("Location: login.php");
@@ -10,33 +11,20 @@ if (!isset($_SESSION['pending_2fa_email'])) {
 }
 
 $email = $_SESSION['pending_2fa_email'];
-
-$stmt = $pdo->prepare("SELECT * FROM students WHERE email = ?");
-$stmt->execute([$email]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$user || !$user['is_2fa_enabled']) {
-    echo "2FA is not set up for this account.";
-    exit;
-}
-
-$tfa = new TwoFactorAuth('SSD App');
 $error = '';
 
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['code'] ?? '';
 
-    if ($tfa->verifyCode($user['google2fa_secret'], $code)) {
-        $_SESSION['user'] = [
-            'id'    => $user['studentId'],
-            'email' => $user['email'],
-            'name'  => $user['name'],
-        ];
-        unset($_SESSION['pending_2fa_email']);
-        header('Location: dashboard.php');
+    $control = new StudentControl(new StudentMapper($pdo)); // ✅ Correct class
+    $result = $control->verify2FACode($email, $code);
+
+    if ($result['success']) {
+        header('Location: ' . $result['redirect']);
         exit;
     } else {
-        $error = 'Invalid code. Please try again.';
+        $error = $result['message'];
     }
 }
 

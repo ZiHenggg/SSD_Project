@@ -69,7 +69,7 @@ ob_start();
 <div class="container">
     <div class="group-wrapper">
         <div class="title d-flex justify-content-between mb-4">
-            <h2 class="m-0">Available Groups<?= $query ? ' for "' . htmlspecialchars($query) . '"' : '' ?></h2>
+            <h2 class="m-0">Groups<?= $query ? ' for "' . htmlspecialchars($query) . '"' : '' ?></h2>
             <a href="group_create.php" class="text-decoration-none d-flex">
                 <img src="img/plus.svg" alt="Add Group" class="w-100 add-group" />
             </a>

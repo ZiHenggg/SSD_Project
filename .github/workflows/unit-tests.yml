@@ -1,0 +1,100 @@
+name: Run PHPUnit Unit Tests for Registration Flow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run PHPUnit Tests for Registration + OTP + Login
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, redis
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit tests
+        run: ./vendor/bin/phpunit --configuration phpunit.xml
+
+      - name: ✅ Write Unit Test Summary
+        run: |
+          echo "### ✅ Registration Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies all backend logic for the user registration process:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🧾 Input Validation**" >> $GITHUB_STEP_SUMMARY
+          echo "- Validates student ID, name, password strength, and SIT email format" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 Registration Process**" >> $GITHUB_STEP_SUMMARY
+          echo "- Stores registration data in session" >> $GITHUB_STEP_SUMMARY
+          echo "- Hashes password before storage" >> $GITHUB_STEP_SUMMARY
+          echo "- Generates and sends 6-digit OTP to SIT email address" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ OTP Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Accepts correct OTP and completes registration" >> $GITHUB_STEP_SUMMARY
+          echo "- Fails on expired or invalid OTP" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔁 OTP Resend**" >> $GITHUB_STEP_SUMMARY
+          echo "- Regenerates and resends OTP if valid session exists" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚫 Rate Limiting Protection**" >> $GITHUB_STEP_SUMMARY
+          echo "- (Planned) Block excessive OTP/resend/registration attempts to prevent abuse" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All registration-related tests passed using GitHub Actions CI with MySQL & Redis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Login Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow validates the student login process under different scenarios:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚫 Invalid Credentials**" >> $GITHUB_STEP_SUMMARY
+          echo "- Login fails with non-existent SIT email" >> $GITHUB_STEP_SUMMARY
+          echo "- Login fails with incorrect password" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 Valid Login**" >> $GITHUB_STEP_SUMMARY
+          echo "- 2FA enabled → session stores pending email & redirects to verify_2fa.php" >> $GITHUB_STEP_SUMMARY
+          echo "- 2FA not enabled → redirects to setup_2fa.php & initializes session" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All login-related tests passed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Two-Factor Authentication (2FA) Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This ensures correct setup and validation of TOTP-based 2FA with Google Authenticator:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🧷 2FA Setup Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Generates a secret and QR code image" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifies the scanned code from user input" >> $GITHUB_STEP_SUMMARY
+          echo "- Enables 2FA by storing the secret in DB" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 2FA Code Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Validates submitted code using TOTP secret" >> $GITHUB_STEP_SUMMARY
+          echo "- Grants access on correct code, shows error otherwise" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ 2FA setup & verification tested via StudentControl logic" >> $GITHUB_STEP_SUMMARY

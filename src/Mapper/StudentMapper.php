@@ -124,4 +124,18 @@ class StudentMapper implements StudentRepository
         $stmt->execute(['email' => $email]);
     }
 
+    public function enable2FAForUser(string $email, string $secret): void
+    {
+        $stmt = $this->dbConnection->prepare("
+            UPDATE students 
+            SET google2fa_secret = :secret, is_2fa_enabled = 1 
+            WHERE email = :email
+        ");
+        $stmt->execute([
+            ':secret' => $secret,
+            ':email' => $email
+        ]);
+    }
+
+
 }

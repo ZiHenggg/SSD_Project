@@ -18,9 +18,14 @@ class ReviewControl
         $this->studentStatsRepo = $studentStatsRepo;
     }
 
-    public function getReviewsByUser(int $studentId): array
+    public function getReviewsByReviewee(int $studentId): array
     {
         return $this->reviewRepo->getReviewsForReviewee($studentId);
+    }
+
+    public function getReviewsByReviewer ($studentId): array
+    {
+        return $this->reviewRepo->getReviewsByReviewer($studentId);
     }
      
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool

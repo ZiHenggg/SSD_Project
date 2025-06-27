@@ -37,3 +37,7 @@ mysql-data/
 
 # Node (if applicable)
 /node_modules/
+
+# PHPUnit
+.phpunit.result.cache
+coverage/
