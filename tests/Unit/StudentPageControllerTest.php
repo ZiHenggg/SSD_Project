@@ -46,7 +46,7 @@ class StudentPageControllerTest extends TestCase
         $data = [
             'studentId' => '1234567',
             'studentName' => 'Jane Doe',
-            'email' => '12345678@example.com',
+            'email' => '12345678@sit.singaporetech.edu.sg',
             'password' => 'securePass1!',
         ];
 
