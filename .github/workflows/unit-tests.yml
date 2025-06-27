@@ -1,4 +1,4 @@
-name: Run PHPUnit Unit Tests for Registration and Input Validation
+name: Run PHPUnit Unit Tests for Registration Flow
 
 on:
   push:
@@ -47,13 +47,28 @@ jobs:
 
       - name: ✅ Write Unit Test Summary
         run: |
-          echo "### ✅ Unit Tests Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- StudentPageController: Input validation for registration fields" >> $GITHUB_STEP_SUMMARY
-          echo "- StudentControl: Session storage, password hashing, and OTP generation" >> $GITHUB_STEP_SUMMARY
-          echo "- OtpVerificationTest: OTP verification with valid, expired, and invalid inputs" >> $GITHUB_STEP_SUMMARY
-          echo "- OtpFlowTest: OTP resend regenerates new OTP and calls sendOtpEmail()" >> $GITHUB_STEP_SUMMARY
-          echo "- RateLimitTest: Blocks after:" >> $GITHUB_STEP_SUMMARY
-          echo "  • 10 registration attempts (per IP)" >> $GITHUB_STEP_SUMMARY
-          echo "  • 5 OTP verification failures (per email)" >> $GITHUB_STEP_SUMMARY
-          echo "  • 3 OTP resend requests (per email)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✔️ All tests executed in CI with MySQL & Redis containers" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Registration Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies all backend logic for the user registration process:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🧾 Input Validation**" >> $GITHUB_STEP_SUMMARY
+          echo "- StudentPageController: Validates student ID, name, password, and SIT email format" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 Registration Process**" >> $GITHUB_STEP_SUMMARY
+          echo "- StudentControl: Stores registration data in session" >> $GITHUB_STEP_SUMMARY
+          echo "- Hashes password before storage" >> $GITHUB_STEP_SUMMARY
+          echo "- Generates and sends 6-digit OTP to SIT email address" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ OTP Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Accepts correct OTP and completes registration" >> $GITHUB_STEP_SUMMARY
+          echo "- Fails on expired or invalid OTP" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔁 OTP Resend**" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggers new OTP generation and email on resend" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚫 Rate Limiting Protection**" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks after exceeding the following thresholds:" >> $GITHUB_STEP_SUMMARY
+          echo "  • 10 registration attempts per IP (10 min lockout)" >> $GITHUB_STEP_SUMMARY
+          echo "  • 5 incorrect OTP attempts per email (5 min lockout)" >> $GITHUB_STEP_SUMMARY
+          echo "  • 3 OTP resends per email (15 min lockout)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All tests passed using GitHub Actions CI with MySQL & Redis services" >> $GITHUB_STEP_SUMMARY
