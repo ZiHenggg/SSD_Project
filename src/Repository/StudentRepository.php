@@ -19,6 +19,8 @@ interface StudentRepository
 
     public function verifyStudentEmail(string $email): void;
 
-    // ✅ Add this line
     public function enable2FAForUser(string $email, string $secret): void;
+
+    public function disable2FA(string $email): void;
+
 }
