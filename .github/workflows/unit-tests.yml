@@ -102,3 +102,27 @@ jobs:
           echo "- Grants access on correct code, shows error otherwise" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ 2FA setup & verification tested via StudentControl logic" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Forgot Password Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This section covers the complete password recovery process with OTP and Redis limits:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📧 Email Submission**" >> $GITHUB_STEP_SUMMARY
+          echo "- Validates email format and account existence" >> $GITHUB_STEP_SUMMARY
+          echo "- Sends 6-digit OTP and sets session state" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks excessive attempts by IP address" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔁 OTP Resend Logic**" >> $GITHUB_STEP_SUMMARY
+          echo "- Resends OTP if under 3-attempt limit" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks excessive resend attempts per email" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 OTP Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Accepts correct OTP and transitions to password reset" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks incorrect OTP after 5 tries with Redis TTL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔒 Password Reset**" >> $GITHUB_STEP_SUMMARY
+          echo "- Updates password in database securely" >> $GITHUB_STEP_SUMMARY
+          echo "- Disables 2FA to require re-setup after reset" >> $GITHUB_STEP_SUMMARY
+          echo "- Clears OTP + resend rate limits post-reset" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Forgot password flow tested with session and Redis logic simulation" >> $GITHUB_STEP_SUMMARY
