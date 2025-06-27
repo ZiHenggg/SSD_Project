@@ -20,9 +20,23 @@ class ReviewPageController
     {
         try {
             // Fetch reviews for the user
-            $reviews = $this->reviewControl->getReviewsByUser($studentId);
+            $reviews = $this->reviewControl->getReviewsByReviewee($studentId);
             if (empty($reviews)) {
                 return ['message' => 'No reviews found for this user.'];
+            }
+            return ['reviews' => $reviews];
+        } catch (Exception $e) {
+            return ['error' => 'An error occurred while fetching reviews: ' . $e->getMessage()];
+        }
+    }
+
+    public function onViewMyReviews(int $studentId): array
+    {
+        try {
+            // Fetch reviews for the user
+            $reviews = $this->reviewControl->getReviewsByReviewer($studentId);
+            if (empty($reviews)) {
+                return ['message' => 'No reviews made by this user.'];
             }
             return ['reviews' => $reviews];
         } catch (Exception $e) {

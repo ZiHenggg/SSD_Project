@@ -66,6 +66,44 @@
     margin-left: 3%;
 }
 
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 1rem;
+    min-width: 220px;
+    height: 48px;
+    box-sizing: border-box;
+    transition: border 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    /* Use a chevron-down SVG, color #333 (dark gray, like nav icons) */
+    background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='%23333' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2em;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--support1-color-400);
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
+}
+
 @media screen and (max-width: 1280px) {
     .profile .info-pending-wrapper, .profile .review-wrapper {
         width: 100%;

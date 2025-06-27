@@ -13,7 +13,6 @@ $queryValue = $_GET['query'] ?? '';
 
         <?php if ($isLoggedIn): ?>
             <div class="nav-group">
-                <a class="nav-link" href="#">Past Groups</a>
                 <form class="search-wrapper d-flex m-0" role="search" method="GET" action="groups.php">
                     <input 
                         class="search form-control me-2" 
