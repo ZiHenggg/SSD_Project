@@ -2,6 +2,8 @@
 require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
+
+header("Location: dashboard.php");
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +25,7 @@ require_once __DIR__ . '/../src/auth_check.php';
 <body>
     <?php include 'nav.php'; ?>
 
-    <div class="content-container m-5">
+    <!-- <div class="content-container m-5">
         <div class="group-container">
             <div class="group-wrapper">
                 <div class="title d-flex justify-content-between">
@@ -203,7 +205,7 @@ require_once __DIR__ . '/../src/auth_check.php';
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
 </body>
 <script src="js/home.js"></script>

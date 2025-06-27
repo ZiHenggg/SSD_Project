@@ -14,7 +14,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand logo-wrapper" href="index.php">
+        <a class="navbar-brand logo-wrapper" href="dashboard.php">
             <img class="logo" src="img/logo.svg" alt="Logo" />
             <span class="text">GROUPMATES</span>
         </a>
