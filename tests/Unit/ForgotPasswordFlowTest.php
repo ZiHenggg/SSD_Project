@@ -112,8 +112,18 @@ class ForgotPasswordFlowTest extends TestCase
 
     public function testResetPasswordUpdatesRepository()
     {
-        $mockRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['updatePassword', 'disable2FA']) // ✅ fix: declare method
+        $mockRepo = $this->getMockBuilder(\App\Repository\StudentRepository::class)
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA'
+            ])
             ->getMock();
 
         $mockRepo->expects($this->once())
@@ -129,7 +139,7 @@ class ForgotPasswordFlowTest extends TestCase
 
         $_SESSION['forgot_email'] = 'test@sit.singaporetech.edu.sg';
 
-        $control = new StudentControl($mockRepo);
+        $control = new \App\Control\StudentControl($mockRepo);
         $hashed = password_hash('newpass123', PASSWORD_DEFAULT);
         $mockRepo->updatePassword($_SESSION['forgot_email'], $hashed);
         $mockRepo->disable2FA($_SESSION['forgot_email']);
@@ -139,6 +149,7 @@ class ForgotPasswordFlowTest extends TestCase
 
         $this->assertEquals('done', $_SESSION['forgot_step']);
     }
+
 
     public function testResetFailsWithoutSession()
     {
