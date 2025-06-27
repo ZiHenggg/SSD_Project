@@ -1,4 +1,4 @@
-name: Run PHP Unit Tests
+name: Run PHPUnit Unit Tests for Registration and Validation
 
 on:
   push:
