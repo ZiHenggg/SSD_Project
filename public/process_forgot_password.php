@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $emailKey = strtolower($email);
 
         $ipAttempts = (int) $redis->get($ipKey);
-        if ($ipAttempts >= 3) {
+        if ($ipAttempts >= 10) {
             $_SESSION['forgot_message'] = "Too many attempts from your IP. Please wait 10 minutes.";
             $_SESSION['forgot_step'] = 'form';
             header("Location: forgot_password.php");
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['forgot_step'] = 'form';
             $redis->incr($ipKey);
             if ($redis->ttl($ipKey) <= 0) {
-                $redis->expire($ipKey, 120);
+                $redis->expire($ipKey, 600);
             }
             header("Location: forgot_password.php");
             exit;

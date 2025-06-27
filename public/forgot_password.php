@@ -22,10 +22,10 @@ if (isset($_SESSION['forgot_started_at']) && time() - $_SESSION['forgot_started_
 // Step assignment before conditional session reset
 $step = $_SESSION['forgot_step'] ?? 'form';
 
-// ✅ FIX: Preserve forgot_message before wiping session
+// ✅ Preserve forgot_message before wiping session
 $message = $_SESSION['forgot_message'] ?? null;
 
-// Reset full flow on GET unless we're already in a stateful step
+// Reset full flow on GET unless we're in an active step
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'done'])) {
     if (!$message) {
         unset(
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'd
     }
 }
 
-// ✅ Unset the message after displaying it (except 'done' flow)
+// ✅ Unset message after displaying it (except 'done')
 if ($message && $step !== 'done') {
     unset($_SESSION['forgot_message']);
 }
@@ -97,11 +97,14 @@ ob_start();
             <a href="login.php" class="btn btn-primary mt-3">Go to Login</a>
         </div>
         <?php
+        // ✅ Full cleanup after success
         unset(
             $_SESSION['forgot_step'],
             $_SESSION['forgot_message'],
             $_SESSION['forgot_email'],
-            $_SESSION['forgot_started_at']
+            $_SESSION['forgot_started_at'],
+            $_SESSION['otp'],
+            $_SESSION['otp_expiry']
         );
         ?>
     <?php endif; ?>
