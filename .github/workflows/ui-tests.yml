@@ -33,18 +33,7 @@ jobs:
         run: |
           docker build -t php-webapp .
           docker run -d -p 8080:80 --name php-webapp php-webapp
-
-      - name: ⏳ Wait for register.php to be reachable
-        run: |
-          for i in {1..20}; do
-            echo "⏳ Checking app on localhost:8080/register.php (try $i)..."
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8080/register.php || echo 000)
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ register.php is reachable (HTTP 200)!"
-              break
-            fi
-            sleep 2
-          done
+          sleep 5 # allow PHP container to start up
 
       - name: 🧪 Run RegisterTest
         run: php tests/ui/RegisterTest.php

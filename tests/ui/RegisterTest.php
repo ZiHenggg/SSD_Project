@@ -30,8 +30,8 @@ use Facebook\WebDriver\WebDriverBy;
 $driver = RemoteWebDriver::create('http://localhost:4444/wd/hub', DesiredCapabilities::chrome());
 
 try {
-    // STEP 1: Open registration page (back to localhost)
-    $driver->get('http://host.docker.internal:8080/register.php');
+    // STEP 1: Open registration page
+    $driver->get('http://localhost:8080/register.php');
 
     // STEP 2: Fill out the registration form
     $driver->findElement(WebDriverBy::id('studentId'))->sendKeys('1234567');
