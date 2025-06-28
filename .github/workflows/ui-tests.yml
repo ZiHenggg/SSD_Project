@@ -50,6 +50,9 @@ jobs:
       - name: 🧪 Run RegisterTest
         run: php tests/ui/RegisterTest.php
 
+      - name: 🧪 Run Login and 2FA Tests
+        run: php tests/ui/LoginAnd2FATest.php
+
       - name: 🧹 Stop WebApp Container
         run: docker stop php-webapp
 
@@ -74,3 +77,24 @@ jobs:
           echo "- Verifies that success modal is visible or redirects to login" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All registration-related UI tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Login and 2FA UI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies the UI behavior for Login and Two-Factor Authentication (2FA):" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📝 Login Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Valid email and password submission" >> $GITHUB_STEP_SUMMARY
+          echo "- Redirects to the 2FA setup or dashboard based on user status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 2FA Setup Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Displays QR code for Google Authenticator" >> $GITHUB_STEP_SUMMARY
+          echo "- Simulates OTP entry and redirects to verify 2FA" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ 2FA Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Simulates entering the correct 6-digit OTP for verification" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifies successful login and redirection to dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**❌ Invalid Login and 2FA Error Handling**" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests invalid login credentials and incorrect OTP handling" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All login and 2FA-related UI tests passed successfully!" >> $GITHUB_STEP_SUMMARY
