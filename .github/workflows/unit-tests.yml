@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run PHPUnit Tests for Registration + OTP + Login + Group + Review & Reply Flow
+    name: Run PHPUnit Tests for Registration + OTP + Login + Group + Review & Reply Flow + Update Password
     runs-on: ubuntu-latest
 
     services:
@@ -176,4 +176,13 @@ jobs:
           echo "- Proper exception handling for invalid submissions" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All review and reply-related tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Update Password Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies the password update functionality including:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Successful password update with correct old password and SIT email validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Throws exceptions when student email not found or old password is incorrect" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All update password-related tests passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
