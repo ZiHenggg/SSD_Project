@@ -91,9 +91,9 @@ try {
     try {
         $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
         if ($errorMessage->isDisplayed()) {
-            echo "✅ Error message displayed: " . $errorMessage->getText() . "\n";
-        } else {
-            echo "❌ No error message displayed.\n";
+            // Check if error message is an array and convert to string if needed
+            $message = (is_array($errorMessage->getText())) ? implode(', ', $errorMessage->getText()) : $errorMessage->getText();
+            echo "✅ Error message displayed: " . $message . "\n";
         }
     } catch (Exception $e) {
         echo "❌ Error message not found: " . $e->getMessage() . "\n";
@@ -110,9 +110,9 @@ try {
     try {
         $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
         if ($errorMessage->isDisplayed()) {
-            echo "✅ Error message displayed for invalid 2FA code: " . $errorMessage->getText() . "\n";
-        } else {
-            echo "❌ No error message displayed for invalid 2FA code.\n";
+            // Check if error message is an array and convert to string if needed
+            $message = (is_array($errorMessage->getText())) ? implode(', ', $errorMessage->getText()) : $errorMessage->getText();
+            echo "✅ Error message displayed for invalid 2FA code: " . $message . "\n";
         }
     } catch (Exception $e) {
         echo "❌ Error message for invalid 2FA code not found: " . $e->getMessage() . "\n";
