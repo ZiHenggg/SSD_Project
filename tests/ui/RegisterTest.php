@@ -19,25 +19,31 @@ try {
     $driver->findElement(WebDriverBy::id('password'))->sendKeys('TestPassword123!');
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
 
-    // STEP 3: Wait for OTP page
-    sleep(2); // Let PHP session redirect and render new state
+    // STEP 3: Wait for OTP input field to appear
+    sleep(2); // Allow time for page to reload
 
     $otpInput = $driver->findElement(WebDriverBy::id('otp'));
     if ($otpInput) {
         echo "✅ OTP input is visible — form step success.\n";
     }
 
-    // STEP 4: Enter OTP (we simulate with correct format, real value mocked)
-    $driver->findElement(WebDriverBy::id('otp'))->sendKeys('123456'); // Adjust if mocking OTP
+    // STEP 4: Simulate entering OTP
+    $driver->findElement(WebDriverBy::id('otp'))->sendKeys('123456'); // Simulated OTP
     $driver->findElement(WebDriverBy::cssSelector('button.btn-success'))->click();
 
-    // STEP 5: Wait for success modal or redirect
+    // STEP 5: Wait for redirect or success modal
     sleep(2);
 
     $currentUrlRaw = $driver->getCurrentURL();
-    $currentUrl = is_array($currentUrlRaw) && isset($currentUrlRaw['value']) 
-        ? $currentUrlRaw['value'] 
-        : (string) $currentUrlRaw;
+
+    // Safely extract actual URL string
+    if (is_array($currentUrlRaw) && isset($currentUrlRaw['value'])) {
+        $currentUrl = $currentUrlRaw['value'];
+    } else if (is_string($currentUrlRaw)) {
+        $currentUrl = $currentUrlRaw;
+    } else {
+        $currentUrl = '';
+    }
 
     if (strpos($currentUrl, 'login.php') !== false) {
         echo "✅ Registration completed → redirected to login.\n";
