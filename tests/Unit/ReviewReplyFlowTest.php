@@ -5,7 +5,7 @@
  * ✅ testSubmitReviewMissingContext – Safe call with no context (now passes)
  * ✅ testSubmitReviewInvalidRating – Rejects invalid rating or empty description
  * ✅ testSubmitReplyDuplicate – Rejects duplicate reply attempt
- * ✅ testSubmitReplyNotInSameGroup – Rejects if not in same group
+ * ✅ testSubmitReplyNotInSameGroup – Rejects if not in same group (simulated)
  * ✅ testSubmitReplyMissingFields – Rejects if any required input is missing
  */
 
@@ -16,14 +16,10 @@ use App\Boundary\ReviewPageController;
 use App\Boundary\ReplyPageController;
 use App\Control\ReviewControl;
 use App\Control\ReplyControl;
-use App\Control\GroupMembershipControl;
 use App\Repository\ReviewRepository;
 use App\Repository\ReplyRepository;
 use App\Repository\StudentRepository;
 use App\Repository\StudentStatsRepository;
-use App\Repository\GroupMembershipRepository;
-use App\Repository\GroupRepository;
-use App\Repository\GroupJoinRequestsRepository;
 use App\Entity\Review;
 use App\Entity\Reply;
 use App\Entity\Student;
@@ -33,7 +29,6 @@ class ReviewReplyFlowTest extends TestCase
 {
     private $reviewController;
     private $replyController;
-    private $groupMembershipController;
     private $replyRepo;
 
     protected function setUp(): void
@@ -76,9 +71,6 @@ class ReviewReplyFlowTest extends TestCase
         $studentRepo->method('getStudentById')->willReturn($mockStudent);
 
         $studentStatsRepo = $this->createMock(StudentStatsRepository::class);
-        $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
-        $groupRepo = $this->createMock(GroupRepository::class);
-        $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
         $reviewRepo->method('addReview')->willReturnCallback(function () {});
         $reviewRepo->method('getReview')->willReturn(
@@ -96,14 +88,6 @@ class ReviewReplyFlowTest extends TestCase
 
         $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(PDO::class));
         $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class));
-
-        $groupMembershipControl = new GroupMembershipControl(
-            $groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo
-        );
-
-        $this->groupMembershipController = new \App\Boundary\GroupMembershipController(
-            $groupMembershipControl, $this->createMock(PDO::class)
-        );
     }
 
     public function testSubmitReviewSuccess(): void
@@ -151,7 +135,7 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        $this->replyRepo->method('hasReply')->willReturn(true);
+        $this->replyRepo->method('hasReply')->willReturn(true); // simulate duplicate
         $this->replyRepo->method('getReplyByReviewId')->willReturn(
             new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
         );
@@ -166,6 +150,19 @@ class ReviewReplyFlowTest extends TestCase
 
         $this->replyRepo->method('hasReply')->willReturn(false);
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
+
+        $mockReviewRepo = $this->getMockBuilder(ReviewRepository::class)
+            ->onlyMethods(['getReview'])
+            ->getMock();
+        $mockReviewRepo->method('getReview')->willReturn(null); // simulate review missing
+
+        $mockStudentRepo = $this->getMockBuilder(StudentRepository::class)
+            ->onlyMethods(['getStudentById'])
+            ->getMock();
+        $mockStudentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
+
+        $replyControl = new \App\Control\ReplyControl($this->replyRepo, $mockReviewRepo, $mockStudentRepo);
+        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class));
 
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
     }

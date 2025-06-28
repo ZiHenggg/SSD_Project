@@ -42,9 +42,16 @@ class ReplyControl
             throw new \Exception("Invalid responder ID: $responderId");
         }
 
-        if (!$this->reviewRepo->getReview($reviewId)) {
+        $review = $this->reviewRepo->getReview($reviewId);
+        if (!$review) {
             throw new \Exception("Review not found with ID: $reviewId");
         }
+
+        if ($this->replyRepo->hasReply($reviewId)) {
+            throw new \Exception("You have already replied to this review.");
+        }
+
+        // Optional: group check, e.g. same group logic here
 
         $reply = new Reply(
             null,
@@ -56,5 +63,6 @@ class ReplyControl
 
         $this->replyRepo->addReply($reply);
     }
+
 }
 ?>
