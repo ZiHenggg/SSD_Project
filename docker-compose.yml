@@ -37,20 +37,20 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
 
-  redis:                              # New Redis Service for rate-limiting
+  redis:                              # Redis Service for rate-limiting
     image: redis:alpine
     container_name: redis
     restart: always
     expose:
       - "6379"                        # Only internal access; no external port needed
 
-  adminer:                            
+  adminer:                            # Optional DB GUI
     image: adminer
     restart: always
     ports:
-      - 8081:8080
+      - "8081:8080"
 
-  splunk: 
+  splunk:                             # Optional Log Collection
     image: splunk/splunk:latest
     container_name: splunk            
     hostname: splunk
@@ -65,6 +65,13 @@ services:
     volumes: 
       - splunk_data:/opt/splunk/var
       - splunk_etc:/opt/splunk/etc
+
+  selenium:                           # Selenium Server for UI Testing
+    image: selenium/standalone-chrome
+    container_name: selenium-ui
+    ports:
+      - "4444:4444"
+    shm_size: "2g"
 
 volumes:
   splunk_data: 

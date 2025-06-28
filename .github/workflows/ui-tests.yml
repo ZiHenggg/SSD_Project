@@ -1,0 +1,42 @@
+name: 🧪 Selenium UI Tests (Docker)
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  ui-test:
+    name: Run Selenium UI Tests against Docker WebApp
+    runs-on: ubuntu-latest
+
+    services:
+      selenium:
+        image: selenium/standalone-chrome
+        ports:
+          - 4444:4444
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐘 Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-progress
+
+      - name: 🏗️ Build and Run WebApp Container
+        run: |
+          docker build -t php-webapp .
+          docker run -d -p 8080:80 --name php-webapp php-webapp
+          sleep 5 # allow PHP container to start up
+
+      - name: 🧪 Run RegisterTest
+        run: php tests/ui/RegisterTest.php
+
+      - name: 🧹 Stop WebApp Container
+        run: docker stop php-webapp
