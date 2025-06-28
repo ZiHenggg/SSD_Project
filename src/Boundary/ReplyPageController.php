@@ -42,11 +42,17 @@ class ReplyPageController
             throw new Exception("Justification cannot be empty.");
         }
 
+        // 🛑 NEW: Check for duplicate reply
+        if ($this->replyControl->hasUserReplied($reviewId)) {
+            throw new Exception("You have already replied to this review.");
+        }
+
         try {
             $this->replyControl->submitReply($reviewId, $responderId, $justification);
         } catch (Exception $e) {
             throw new Exception('An error occurred while submitting the reply: ' . $e->getMessage());
         }
     }
+
 }
 ?>
