@@ -114,11 +114,21 @@ class GroupFlowTest extends TestCase
 
     private function fakeGroupEntity(): Group
     {
-        $group = new Group();
-        $reflection = new \ReflectionClass($group);
-        $prop = $reflection->getProperty('groupId');
+        $group = new Group(
+            '2025',
+            'T1',
+            'ICT2206',
+            4,
+            99,
+            'G1'
+        );
+
+        $ref = new \ReflectionClass($group);
+        $prop = $ref->getProperty('groupId');
         $prop->setAccessible(true);
-        $prop->setValue($group, 1); // Assign a fake ID
+        $prop->setValue($group, 1);
+
         return $group;
     }
+
 }
