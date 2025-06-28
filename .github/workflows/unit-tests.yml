@@ -1,4 +1,4 @@
-name: Run PHPUnit Unit Tests for Registration Flow
+name: Run PHPUnit Unit Tests for WebApp
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run PHPUnit Tests for Registration + OTP + Login + Group
+    name: Run PHPUnit Tests for Registration + OTP + Login + Group + Review & Reply Flow
     runs-on: ubuntu-latest
 
     services:
@@ -166,3 +166,14 @@ jobs:
           echo "- Student can cancel pending join request" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ All group join request scenarios validated in isolation" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Review & Reply Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies the Review and Reply functionalities including:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Submitting valid reviews and replies" >> $GITHUB_STEP_SUMMARY
+          echo "- Handling missing or invalid input gracefully" >> $GITHUB_STEP_SUMMARY
+          echo "- Rejecting duplicate replies and replies from outside groups" >> $GITHUB_STEP_SUMMARY
+          echo "- Proper exception handling for invalid submissions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All review and reply-related tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
