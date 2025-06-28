@@ -48,7 +48,7 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
             ->getMock();
 
-        $studentRepo = $this->createMock(StudentRepository::class);
+        $studentRepo = $this->getMockForAbstractClass(StudentRepository::class);
         $studentStatsRepo = $this->createMock(StudentStatsRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupRepo = $this->createMock(GroupRepository::class);
@@ -61,10 +61,6 @@ class ReviewReplyFlowTest extends TestCase
 
         $review = new Review(1, 2, 123, 456, 5, 'Great teammate!', date('Y-m-d H:i:s'));
         $reviewRepo->method('getReview')->willReturn($review);
-        $studentRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['getStudentById'])
-            ->getMock();
-
         $studentRepo->method('getStudentById')->willReturn(['id' => 2]);
 
         $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
@@ -81,6 +77,7 @@ class ReviewReplyFlowTest extends TestCase
             $groupMembershipControl, $this->createMock(PDO::class)
         );
     }
+
 
     public function testSubmitReviewSuccess(): void
     {
