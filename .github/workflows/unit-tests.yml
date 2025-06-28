@@ -144,3 +144,25 @@ jobs:
           echo "- Handles invalid delete inputs gracefully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ Group create/delete + rate-limit tests passed using mock repositories" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Group Join Request Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This section covers group join requests from members and approvers:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📨 Send Join Request**" >> $GITHUB_STEP_SUMMARY
+          echo "- Submits valid join request from student to group" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks duplicate or accepted requests" >> $GITHUB_STEP_SUMMARY
+          echo "- Simulates Redis-based rate limit for requests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ Accept Join Request**" >> $GITHUB_STEP_SUMMARY
+          echo "- Approver accepts join request" >> $GITHUB_STEP_SUMMARY
+          echo "- Adds student to group, updates group count" >> $GITHUB_STEP_SUMMARY
+          echo "- Removes remaining requests if group becomes full" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**❌ Reject Join Request**" >> $GITHUB_STEP_SUMMARY
+          echo "- Rejects request and sets appropriate status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🗑️ Remove Join Request**" >> $GITHUB_STEP_SUMMARY
+          echo "- Student can cancel pending join request" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All group join request scenarios validated in isolation" >> $GITHUB_STEP_SUMMARY
