@@ -38,7 +38,7 @@ try {
     
     // Wait for redirection
     $wait = new WebDriverWait($driver, 10);  // 10 seconds timeout
-    $wait->until(WebDriverExpectedCondition::urlContains('setup_2fa.php'));  // wait until the URL contains 2FA setup page
+    $wait->until(WebDriverExpectedCondition::urlToBe('http://localhost:8080/setup_2fa.php'));  // wait until the URL is the 2FA setup page
     
     // STEP 3: Check if redirected to the 2FA setup page
     $url = $driver->getCurrentURL();
@@ -60,7 +60,7 @@ try {
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
 
         // Wait for redirection to verify 2FA
-        $wait->until(WebDriverExpectedCondition::urlContains('verify_2fa.php'));
+        $wait->until(WebDriverExpectedCondition::urlToBe('http://localhost:8080/verify_2fa.php'));
     }
 
     // --- 2FA Verification Flow ---
@@ -70,7 +70,7 @@ try {
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
     
     // STEP 6: Verify successful redirection to dashboard
-    $wait->until(WebDriverExpectedCondition::urlContains('dashboard.php'));
+    $wait->until(WebDriverExpectedCondition::urlToBe('http://localhost:8080/dashboard.php'));
     $url = $driver->getCurrentURL();
     if (strpos($url, 'dashboard.php') !== false) {
         echo "✅ 2FA verification successful, redirected to dashboard\n";
