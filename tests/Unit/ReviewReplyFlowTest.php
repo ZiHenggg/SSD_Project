@@ -86,7 +86,7 @@ class ReviewReplyFlowTest extends TestCase
             'group_id' => 123
         ];
 
-        $this->reviewController->onSubmitReview(1, 2, 123, 5, 'Well done!', date('Y-m-d H:i:s'));
+        $this->reviewController->onSubmitReview(1, 2, 123, 5, 'Well done!');
         $this->assertTrue(true);
     }
 
@@ -94,7 +94,7 @@ class ReviewReplyFlowTest extends TestCase
     {
         $_SESSION['user']['id'] = 3;
 
-        $this->replyController->onSubmitReply(1, 3, 'Thanks!', date('Y-m-d H:i:s'));
+        $this->replyController->onSubmitReply(1, 3, 'Thanks!');
         $this->assertTrue(true);
     }
 
@@ -103,7 +103,7 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         unset($_SESSION['review_context']);
 
-        $this->reviewController->onSubmitReview(1, 2, 123, 4, 'Nice', date('Y-m-d H:i:s'));
+        $this->reviewController->onSubmitReview(1, 2, 123, 4, 'Nice');
     }
 
     public function testSubmitReviewInvalidRating(): void
@@ -116,7 +116,7 @@ class ReviewReplyFlowTest extends TestCase
             'group_id' => 123
         ];
 
-        $this->reviewController->onSubmitReview(1, 2, 123, 6, '', date('Y-m-d H:i:s'));
+        $this->reviewController->onSubmitReview(1, 2, 123, 6, '');
     }
 
     public function testSubmitReplyDuplicate(): void
@@ -126,7 +126,7 @@ class ReviewReplyFlowTest extends TestCase
 
         $this->replyRepo->method('hasReply')->willReturn(true);
 
-        $this->replyController->onSubmitReply(1, 3, 'Already replied.', date('Y-m-d H:i:s'));
+        $this->replyController->onSubmitReply(1, 3, 'Already replied.');
     }
 
     public function testSubmitReplyNotInSameGroup(): void
@@ -137,7 +137,7 @@ class ReviewReplyFlowTest extends TestCase
         $mockGroupCtrl = $this->createMock(\App\Boundary\GroupMembershipController::class);
         $mockGroupCtrl->method('OnCheckIfMember')->willReturn(false);
 
-        $this->replyController->onSubmitReply(1, 3, 'Invalid group.', date('Y-m-d H:i:s'));
+        $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
     }
 
     public function testSubmitReplyMissingFields(): void
@@ -145,6 +145,6 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        $this->replyController->onSubmitReply(0, 0, '', date('Y-m-d H:i:s'));
+        $this->replyController->onSubmitReply(0, 0, '');
     }
 }
