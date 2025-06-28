@@ -38,17 +38,7 @@ class ReviewReplyFlowTest extends TestCase
         }
         $_SESSION = [];
 
-        $reviewRepo = $this->getMockBuilder(ReviewRepository::class)
-            ->onlyMethods([
-                'addReview',
-                'getReview',
-                'resolveGroupMembersId',
-                'getReviewsForReviewee',
-                'getReviewsByReviewer',
-                'hasUserReviewed'
-            ])
-            ->getMock();
-
+        $reviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
         $this->replyRepo = $this->getMockBuilder(ReplyRepository::class)
             ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
             ->getMock();
@@ -151,9 +141,7 @@ class ReviewReplyFlowTest extends TestCase
         $this->replyRepo->method('hasReply')->willReturn(false);
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
 
-        $mockReviewRepo = $this->getMockBuilder(ReviewRepository::class)
-            ->onlyMethods(['getReview'])
-            ->getMock();
+        $mockReviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
         $mockReviewRepo->method('getReview')->willReturn(null); // simulate review missing
 
         $mockStudentRepo = $this->getMockBuilder(StudentRepository::class)
