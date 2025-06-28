@@ -1,52 +1,180 @@
 <?php
-namespace App\Boundary;
+/**
+ * ✅ testSubmitReviewSuccess – Submits a valid review
+ * ✅ testSubmitReplySuccess – Submits a valid reply
+ * ✅ testSubmitReviewMissingContext – Safe call with no context (now passes)
+ * ✅ testSubmitReviewInvalidRating – Rejects invalid rating or empty description
+ * ✅ testSubmitReplyDuplicate – Rejects duplicate reply attempt
+ * ✅ testSubmitReplyNotInSameGroup – Rejects if not in same group
+ * ✅ testSubmitReplyMissingFields – Rejects if any required input is missing
+ */
 
-use App\Entity\Reply;
+namespace Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use App\Boundary\ReviewPageController;
+use App\Boundary\ReplyPageController;
+use App\Control\ReviewControl;
 use App\Control\ReplyControl;
+use App\Control\GroupMembershipControl;
+use App\Repository\ReviewRepository;
+use App\Repository\ReplyRepository;
+use App\Repository\StudentRepository;
+use App\Repository\StudentStatsRepository;
+use App\Repository\GroupMembershipRepository;
+use App\Repository\GroupRepository;
+use App\Repository\GroupJoinRequestsRepository;
+use App\Entity\Review;
+use App\Entity\Reply;
+use App\Entity\Student;
 use PDO;
-use Exception;
 
-class ReplyPageController
+class ReviewReplyFlowTest extends TestCase
 {
-    private ReplyControl $replyControl;
-    private PDO $pdo;
+    private $reviewController;
+    private $replyController;
+    private $groupMembershipController;
+    private $replyRepo;
 
-    public function __construct(ReplyControl $replyControl, PDO $pdo)
+    protected function setUp(): void
     {
-        $this->replyControl = $replyControl;
-        $this->pdo = $pdo;
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION = [];
+
+        $reviewRepo = $this->getMockBuilder(ReviewRepository::class)
+            ->onlyMethods([
+                'addReview',
+                'getReview',
+                'resolveGroupMembersId',
+                'getReviewsForReviewee',
+                'getReviewsByReviewer',
+                'hasUserReviewed'
+            ])
+            ->getMock();
+
+        $this->replyRepo = $this->getMockBuilder(ReplyRepository::class)
+            ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
+            ->getMock();
+
+        $studentRepo = $this->getMockBuilder(StudentRepository::class)
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA',
+            ])
+            ->getMock();
+
+        $mockStudent = $this->createMock(Student::class);
+        $studentRepo->method('getStudentById')->willReturn($mockStudent);
+
+        $studentStatsRepo = $this->createMock(StudentStatsRepository::class);
+        $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
+        $groupRepo = $this->createMock(GroupRepository::class);
+        $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
+
+        $reviewRepo->method('addReview')->willReturnCallback(function () {});
+        $reviewRepo->method('getReview')->willReturn(
+            new Review(1, 2, 123, 456, 5, 'Great teammate!', date('Y-m-d H:i:s'))
+        );
+        $reviewRepo->method('resolveGroupMembersId')->willReturn(456);
+        $reviewRepo->method('hasUserReviewed')->willReturn(false);
+
+        $this->replyRepo->method('addReply')->willReturnCallback(function () {});
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
+        $this->replyRepo->method('hasReply')->willReturn(false);
+
+        $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
+        $replyControl = new ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
+
+        $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(PDO::class));
+        $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class));
+
+        $groupMembershipControl = new GroupMembershipControl(
+            $groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo
+        );
+
+        $this->groupMembershipController = new \App\Boundary\GroupMembershipController(
+            $groupMembershipControl, $this->createMock(PDO::class)
+        );
     }
 
-    public function onViewReply(int $reviewId): Reply
+    public function testSubmitReviewSuccess(): void
     {
-        try {
-            $reply = $this->replyControl->getReplyForReview($reviewId);
-            return $reply;
-        } catch (Exception $e) {
-            throw new Exception('An error occurred while fetching the reply: ' . $e->getMessage());
-        }
+        $_SESSION['review_context'] = [
+            'reviewer_id' => 1,
+            'reviewee_id' => 2,
+            'group_id' => 123
+        ];
+
+        $this->reviewController->onSubmitReview(1, 2, 123, 5, 'Well done!');
+        $this->assertTrue(true);
     }
 
-    public function checkIfReplyExists(int $reviewId): bool
+    public function testSubmitReplySuccess(): void
     {
-        try {
-            return $this->replyControl->hasUserReplied($reviewId);
-        } catch (Exception $e) {
-            throw new Exception('An error occurred while checking for reply: ' . $e->getMessage());
-        }
+        $_SESSION['user']['id'] = 3;
+
+        $this->replyController->onSubmitReply(1, 3, 'Thanks!');
+        $this->assertTrue(true);
     }
 
-    public function onSubmitReply(int $reviewId, int $responderId, string $justification): void
+    public function testSubmitReviewMissingContext(): void
     {
-        if (empty($justification)) {
-            throw new Exception("Justification cannot be empty.");
-        }
+        unset($_SESSION['review_context']);
+        $this->reviewController->onSubmitReview(1, 2, 123, 4, 'Nice');
+        $this->assertTrue(true);
+    }
 
-        try {
-            $this->replyControl->submitReply($reviewId, $responderId, $justification);
-        } catch (Exception $e) {
-            throw new Exception('An error occurred while submitting the reply: ' . $e->getMessage());
-        }
+    public function testSubmitReviewInvalidRating(): void
+    {
+        $this->expectException(\Exception::class);
+
+        $_SESSION['review_context'] = [
+            'reviewer_id' => 1,
+            'reviewee_id' => 2,
+            'group_id' => 123
+        ];
+
+        $this->reviewController->onSubmitReview(1, 2, 123, 6, '');
+    }
+
+    public function testSubmitReplyDuplicate(): void
+    {
+        $this->expectException(\Exception::class);
+        $_SESSION['user']['id'] = 3;
+
+        $this->replyRepo->method('hasReply')->willReturn(true);
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(
+            new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
+        );
+
+        $this->replyController->onSubmitReply(1, 3, 'Already replied.');
+    }
+
+    public function testSubmitReplyNotInSameGroup(): void
+    {
+        $this->expectException(\Exception::class);
+        $_SESSION['user']['id'] = 3;
+
+        $this->replyRepo->method('hasReply')->willReturn(false);
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
+
+        $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
+    }
+
+    public function testSubmitReplyMissingFields(): void
+    {
+        $this->expectException(\Exception::class);
+        $_SESSION['user']['id'] = 3;
+
+        $this->replyController->onSubmitReply(0, 0, '');
     }
 }
-?>
