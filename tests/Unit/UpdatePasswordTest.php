@@ -1,4 +1,9 @@
 <?php
+/**
+ * ✅ testUpdatePasswordSuccess – Successfully updates password with correct old password and valid SIT email
+ * ✅ testUpdatePasswordThrowsWhenStudentNotFound – Throws exception when student email not found
+ * ✅ testUpdatePasswordThrowsWhenOldPasswordIncorrect – Throws exception when old password does not match
+ */
 
 namespace Tests\Unit;
 
@@ -14,28 +19,43 @@ class UpdatePasswordTest extends TestCase
 
     protected function setUp(): void
     {
+        // Declare all abstract methods to avoid PHPUnit errors
         $this->studentRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['getStudentByEmail', 'updatePassword'])
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA',
+            ])
             ->getMock();
 
         $this->studentControl = new StudentControl($this->studentRepo);
     }
 
+    private function isValidSitEmail(string $email): bool
+    {
+        return (bool)preg_match('/@sit\.singaporetech\.edu\.sg$/', $email);
+    }
+
     public function testUpdatePasswordSuccess(): void
     {
-        $email = 'user@example.com';
+        $email = 'user@sit.singaporetech.edu.sg';
         $oldPassword = 'OldPass123!';
         $newPassword = 'NewPass456!';
 
+        $this->assertTrue($this->isValidSitEmail($email), 'Email domain must be @sit.singaporetech.edu.sg');
+
         $student = $this->createMock(Student::class);
 
-        // Mock to return a student entity
         $this->studentRepo->method('getStudentByEmail')->with($email)->willReturn($student);
 
-        // Mock password hash (assume getPassword() returns the hashed old password)
         $student->method('getPassword')->willReturn(password_hash($oldPassword, PASSWORD_DEFAULT));
 
-        // Expect updatePassword to be called once with new hashed password
         $this->studentRepo->expects($this->once())
             ->method('updatePassword')
             ->with(
@@ -45,7 +65,6 @@ class UpdatePasswordTest extends TestCase
                 })
             );
 
-        // Call method under test
         $this->studentControl->updatePassword($email, $oldPassword, $newPassword);
     }
 
@@ -54,9 +73,13 @@ class UpdatePasswordTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('No student found with email');
 
+        $email = 'noone@sit.singaporetech.edu.sg';
+
+        $this->assertTrue($this->isValidSitEmail($email), 'Email domain must be @sit.singaporetech.edu.sg');
+
         $this->studentRepo->method('getStudentByEmail')->willReturn(null);
 
-        $this->studentControl->updatePassword('nonexistent@example.com', 'anyOld', 'anyNew');
+        $this->studentControl->updatePassword($email, 'anyOld', 'anyNew');
     }
 
     public function testUpdatePasswordThrowsWhenOldPasswordIncorrect(): void
@@ -64,9 +87,11 @@ class UpdatePasswordTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Old password is incorrect.');
 
-        $email = 'user@example.com';
+        $email = 'user@sit.singaporetech.edu.sg';
         $oldPassword = 'WrongOldPass!';
         $newPassword = 'NewPass456!';
+
+        $this->assertTrue($this->isValidSitEmail($email), 'Email domain must be @sit.singaporetech.edu.sg');
 
         $student = $this->createMock(Student::class);
         $student->method('getPassword')->willReturn(password_hash('CorrectOldPass!', PASSWORD_DEFAULT));
