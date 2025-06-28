@@ -16,6 +16,7 @@ use App\Boundary\GroupMembershipController;
 use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
+use App\Entity\Group;
 use PDO;
 
 class GroupRequestFlowTest extends TestCase
@@ -29,10 +30,23 @@ class GroupRequestFlowTest extends TestCase
         }
         $_SESSION = [];
 
-        // Mock repositories
+        // Mocks
         $groupRepo = $this->createMock(GroupRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
+
+        // 🔧 Fake Group object for getGroupById
+        $group = new Group('2025', 'T1', 'ICT2206', 4, 88, 10);
+        $ref = new \ReflectionClass($group);
+        $prop = $ref->getProperty('groupId');
+        $prop->setAccessible(true);
+        $prop->setValue($group, 10);
+        $groupRepo->method('getGroupById')->willReturn($group);
+
+        // 🔧 Fake join request object for getJoinRequestById
+        $joinRequest = new \stdClass();
+        $joinRequest->groupId = 10;
+        $groupJoinRequestsRepo->method('getJoinRequestById')->willReturn($joinRequest);
 
         $membershipControl = new GroupMembershipControl(
             $groupMembershipRepo,
@@ -86,7 +100,7 @@ class GroupRequestFlowTest extends TestCase
         SessionManager::set('user', ['id' => $approverId]);
 
         $this->controller->onAcceptJoinRequest($requestId, $requesterId, $approverId);
-        $this->assertTrue(true); // if no exception, it's a pass
+        $this->assertTrue(true); // No exception thrown
     }
 
     public function testRejectJoinRequestSuccess(): void
