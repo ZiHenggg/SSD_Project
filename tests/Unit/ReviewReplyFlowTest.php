@@ -42,19 +42,20 @@ class ReviewReplyFlowTest extends TestCase
 
         $reviewRepo = $this->createMock(ReviewRepository::class);
         $replyRepo = $this->createMock(ReplyRepository::class);
-        $studentRepo = $this->createMock(StudentRepository::class);
+        $studentStatsRepo = $this->createMock(StudentStatsRepository::class); // ✅ FIXED
         $groupRepo = $this->createMock(GroupRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
-        $reviewControl = new ReviewControl($reviewRepo, $studentRepo);
-        $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
+        $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo); // ✅ FIXED
+        $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentStatsRepo);
         $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 
         $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(PDO::class));
         $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class));
         $this->groupMembershipController = new GroupMembershipController($groupMembershipControl, $this->createMock(PDO::class));
     }
+
 
     public function testSubmitReviewSuccess(): void
     {
