@@ -14,7 +14,6 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Boundary\ReviewPageController;
 use App\Boundary\ReplyPageController;
-use App\Boundary\GroupMembershipController;
 use App\Control\ReviewControl;
 use App\Control\ReplyControl;
 use App\Control\GroupMembershipControl;
@@ -26,6 +25,7 @@ use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Entity\Review;
+use App\Entity\Reply;
 use DateTime;
 use PDO;
 
@@ -33,8 +33,8 @@ class ReviewReplyFlowTest extends TestCase
 {
     private $reviewController;
     private $replyController;
-    private $replyRepo;
     private $groupMembershipController;
+    private $replyRepo;
 
     protected function setUp(): void
     {
@@ -54,8 +54,8 @@ class ReviewReplyFlowTest extends TestCase
         $groupRepo = $this->createMock(GroupRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
-        $reviewRepo->method('addReview')->willReturn(null);
-        $this->replyRepo->method('addReply')->willReturn(null);
+        $reviewRepo->method('addReview')->willReturnCallback(function () {});
+        $this->replyRepo->method('addReply')->willReturnCallback(function () {});
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
         $this->replyRepo->method('hasReply')->willReturn(false);
 
@@ -73,7 +73,7 @@ class ReviewReplyFlowTest extends TestCase
             $groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo
         );
 
-        $this->groupMembershipController = new GroupMembershipController(
+        $this->groupMembershipController = new \App\Boundary\GroupMembershipController(
             $groupMembershipControl, $this->createMock(PDO::class)
         );
     }
@@ -134,10 +134,9 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        $mockGroupController = $this->createMock(GroupMembershipController::class);
-        $mockGroupController->method('OnCheckIfMember')->willReturn(false);
+        $mockGroupCtrl = $this->createMock(\App\Boundary\GroupMembershipController::class);
+        $mockGroupCtrl->method('OnCheckIfMember')->willReturn(false);
 
-        // Inject into reply controller if needed or adapt control flow accordingly.
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.', date('Y-m-d H:i:s'));
     }
 
