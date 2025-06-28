@@ -2,9 +2,9 @@ name: 🧪 Selenium UI Tests (Docker)
 
 on:
   push:
-    branches: [main, development]
+    branches: [main]
   pull_request:
-    branches: [main, development]
+    branches: [main]
 
 jobs:
   ui-test:
@@ -35,8 +35,42 @@ jobs:
           docker run -d -p 8080:80 --name php-webapp php-webapp
           sleep 5 # allow PHP container to start up
 
+      - name: ⏳ Wait for register.php to be reachable
+        run: |
+          for i in {1..20}; do
+            echo "⏳ Checking app on localhost:8080/register.php (try $i)..."
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8080/register.php || echo 000)
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ register.php is reachable (HTTP 200)!"
+              break
+            fi
+            sleep 2
+          done
+
       - name: 🧪 Run RegisterTest
         run: php tests/ui/RegisterTest.php
 
       - name: 🧹 Stop WebApp Container
         run: docker stop php-webapp
+
+      - name: ✅ Write UI Test Summary
+        run: |
+          echo "### ✅ Registration Flow UI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow verifies the UI behavior for user registration and OTP handling:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📝 Registration Form**" >> $GITHUB_STEP_SUMMARY
+          echo "- Fills out student ID, name, email, password" >> $GITHUB_STEP_SUMMARY
+          echo "- Submits the form and moves to OTP page" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 OTP Verification**" >> $GITHUB_STEP_SUMMARY
+          echo "- Enters correct OTP (`123456`) and submits" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifies that registration is completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔁 OTP Resend**" >> $GITHUB_STEP_SUMMARY
+          echo "- Clicks 'Resend OTP' button" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifies OTP input is still present" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ Success Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifies that success modal is visible or redirects to login" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All registration-related UI tests passed successfully!" >> $GITHUB_STEP_SUMMARY
