@@ -10,13 +10,19 @@
  */
 
 require 'vendor/autoload.php';
+
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\WebDriverBy;
+use RobThree\Auth\TwoFactorAuth;
 
-error_reporting(E_ALL & ~E_WARNING); // Optional: hide noisy warnings
+error_reporting(E_ALL & ~E_WARNING & ~E_DEPRECATED); // suppress noise
 
 $driver = RemoteWebDriver::create('http://localhost:4444/wd/hub', DesiredCapabilities::chrome());
+
+// Use the fixed secret used by your test user (must match what's in DB)
+$test2FASecret = 'S3CR3T4U53R';
+$tfa = new TwoFactorAuth('SSD App');
 
 try {
     // STEP 1: Open login page
@@ -44,14 +50,16 @@ try {
             echo "❌ QR Code not found: " . $e->getMessage() . "\n";
         }
 
-        $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
+        $code = $tfa->getCode($test2FASecret); // Generate valid OTP
+        $driver->findElement(WebDriverBy::name('code'))->sendKeys($code);
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
         sleep(2);
 
     } elseif (strpos($url, 'verify_2fa.php') !== false) {
         echo "📥 Redirected to 2FA verification page\n";
 
-        $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
+        $code = $tfa->getCode($test2FASecret); // Generate valid OTP
+        $driver->findElement(WebDriverBy::name('code'))->sendKeys($code);
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
         sleep(2);
     }
@@ -82,7 +90,7 @@ try {
         echo "❌ Error message not found: " . $e->getMessage() . "\n";
     }
 
-    // STEP 6: Invalid 2FA test (only attempt if 2FA page is reachable)
+    // STEP 6: Invalid 2FA test
     $driver->get('http://localhost:8080/login.php');
     $driver->findElement(WebDriverBy::name('email'))->sendKeys('valid_email@sit.singaporetech.edu.sg');
     $driver->findElement(WebDriverBy::name('password'))->sendKeys('validPassword123');
@@ -93,7 +101,7 @@ try {
     $url = is_array($urlRaw) ? '' : (string) $urlRaw;
 
     if (strpos($url, 'verify_2fa.php') !== false) {
-        $driver->findElement(WebDriverBy::name('code'))->sendKeys('999999'); // invalid OTP
+        $driver->findElement(WebDriverBy::name('code'))->sendKeys('999999'); // Invalid OTP
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
         sleep(2);
 
