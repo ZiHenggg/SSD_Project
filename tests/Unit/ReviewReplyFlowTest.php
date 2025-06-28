@@ -59,7 +59,7 @@ class ReviewReplyFlowTest extends TestCase
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
         $this->replyRepo->method('hasReply')->willReturn(false);
 
-        $review = new Review(1, 2, 123, 5, 'Great teammate!', new DateTime());
+        $review = new Review(1, 2, 123, 456, 5, 'Great teammate!', new DateTime());
         $reviewRepo->method('getReview')->willReturn($review);
         $studentRepo->method('getStudent')->willReturn(['id' => 2]);
 
