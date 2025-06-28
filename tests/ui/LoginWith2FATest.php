@@ -83,8 +83,12 @@ try {
     // STEP 8: Verify error message is displayed
     sleep(2);
     $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
+    
+    // Check if error message is displayed
     if ($errorMessage->isDisplayed()) {
         echo "✅ Error message displayed: " . $errorMessage->getText() . "\n";
+    } else {
+        echo "❌ No error message displayed.\n";
     }
 
     // --- Negative Test for Invalid 2FA Code ---
@@ -96,8 +100,12 @@ try {
     // STEP 10: Verify error message for invalid 2FA code
     sleep(2);
     $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
+    
+    // Check if error message for invalid OTP is displayed
     if ($errorMessage->isDisplayed()) {
         echo "✅ Error message displayed for invalid 2FA code: " . $errorMessage->getText() . "\n";
+    } else {
+        echo "❌ No error message displayed for invalid 2FA code.\n";
     }
 
 } catch (Exception $e) {
@@ -105,3 +113,5 @@ try {
 } finally {
     $driver->quit();
 }
+
+?>
