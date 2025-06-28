@@ -126,3 +126,21 @@ jobs:
           echo "- Clears OTP + resend rate limits post-reset" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✔️ Forgot password flow tested with session and Redis logic simulation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Group Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This section covers group creation, deletion, and rate-limiting behavior:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**➕ Group Creation**" >> $GITHUB_STEP_SUMMARY
+          echo "- Creates group with valid form data" >> $GITHUB_STEP_SUMMARY
+          echo "- Validates required fields (acad year, trimester, module, size)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**❌ Rate Limiting**" >> $GITHUB_STEP_SUMMARY
+          echo "- Simulates Redis-based limit on group creation" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks creation after threshold is hit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🗑️ Group Deletion**" >> $GITHUB_STEP_SUMMARY
+          echo "- Soft-deletes group and sets session success message" >> $GITHUB_STEP_SUMMARY
+          echo "- Handles invalid delete inputs gracefully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Group create/delete + rate-limit tests passed using mock repositories" >> $GITHUB_STEP_SUMMARY
