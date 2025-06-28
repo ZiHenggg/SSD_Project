@@ -95,7 +95,6 @@ class ReviewReplyFlowTest extends TestCase
     public function testSubmitReplySuccess(): void
     {
         $_SESSION['user']['id'] = 3;
-
         $this->replyController->onSubmitReply(1, 3, 'Thanks!');
         $this->assertTrue(true);
     }
@@ -126,9 +125,6 @@ class ReviewReplyFlowTest extends TestCase
         $_SESSION['user']['id'] = 3;
 
         $this->replyRepo->method('hasReply')->willReturn(true);
-        $this->replyRepo->method('getReplyByReviewId')->willReturn(
-            new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
-        );
 
         $this->replyController->onSubmitReply(1, 3, 'Already replied.');
     }
@@ -139,7 +135,6 @@ class ReviewReplyFlowTest extends TestCase
         $_SESSION['user']['id'] = 3;
 
         $this->replyRepo->method('hasReply')->willReturn(false);
-        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
 
         $mockReviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
         $mockReviewRepo->method('getReview')->willReturn(null);
@@ -169,7 +164,6 @@ class ReviewReplyFlowTest extends TestCase
     {
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
-
         $this->replyController->onSubmitReply(0, 0, '');
     }
 }
