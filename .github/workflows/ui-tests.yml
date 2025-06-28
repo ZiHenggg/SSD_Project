@@ -33,7 +33,17 @@ jobs:
         run: |
           docker build -t php-webapp .
           docker run -d -p 8080:80 --name php-webapp php-webapp
-          sleep 5 # allow PHP container to start up
+
+      - name: ⏳ Wait for webapp to become ready
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:8080/register.php > /dev/null; then
+              echo "✅ Webapp is ready!"
+              break
+            fi
+            echo "🔄 Waiting for webapp to be ready ($i)..."
+            sleep 2
+          done
 
       - name: 🧪 Run RegisterTest
         run: php tests/ui/RegisterTest.php
