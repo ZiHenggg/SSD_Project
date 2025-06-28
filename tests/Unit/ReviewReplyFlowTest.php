@@ -46,9 +46,12 @@ class ReviewReplyFlowTest extends TestCase
         $reviewControl = new ReviewControl($this->reviewRepo, $this->studentStatsRepo);
         $replyControl = new ReplyControl($this->replyRepo, $this->reviewRepo, $this->studentRepo);
 
-        $this->reviewController = new ReviewPageController($reviewControl);
-        $this->replyController = new ReplyPageController($replyControl);
+        // ✅ FIX: Pass mock PDO too (even if unused, required by constructor)
+        $mockPdo = $this->createMock(\PDO::class);
+        $this->reviewController = new ReviewPageController($reviewControl, $mockPdo);
+        $this->replyController = new ReplyPageController($replyControl, $mockPdo);
     }
+
 
     public function testSubmitReviewSuccess(): void
     {
