@@ -12,7 +12,6 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use App\SessionManager;
 use App\Boundary\ReviewPageController;
 use App\Boundary\ReplyPageController;
 use App\Control\ReviewControl;
@@ -26,13 +25,16 @@ use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Entity\Review;
-use App\Entity\Reply;
 use DateTime;
+use App\Entity\Reply;
+use PDO;
 
 class ReviewReplyFlowTest extends TestCase
 {
     private $reviewController;
     private $replyController;
+    private $groupMembershipController;
+    private $replyRepo;
 
     protected function setUp(): void
     {
@@ -42,7 +44,10 @@ class ReviewReplyFlowTest extends TestCase
         $_SESSION = [];
 
         $reviewRepo = $this->createMock(ReviewRepository::class);
-        $replyRepo = $this->createMock(ReplyRepository::class);
+        $this->replyRepo = $this->getMockBuilder(ReplyRepository::class)
+            ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
+            ->getMock();
+
         $studentRepo = $this->createMock(StudentRepository::class);
         $studentStatsRepo = $this->createMock(StudentStatsRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
@@ -50,26 +55,26 @@ class ReviewReplyFlowTest extends TestCase
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
         $reviewRepo->method('addReview')->willReturnCallback(function () {});
-        $replyRepo->method('addReply')->willReturnCallback(function () {});
-        $replyRepo->method('getReply')->willReturn(null);
+        $this->replyRepo->method('addReply')->willReturnCallback(function () {});
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
+        $this->replyRepo->method('hasReply')->willReturn(false);
 
-        $review = new Review(1, 2, 123, 4, 'Great teammate!', new DateTime());
+        $review = new Review(1, 2, 123, 5, 'Great teammate!', new DateTime());
         $reviewRepo->method('getReview')->willReturn($review);
-
         $studentRepo->method('getStudent')->willReturn(['id' => 2]);
 
         $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
-        $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
+        $replyControl = new ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
 
-        $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(\PDO::class));
-        $this->replyController = new ReplyPageController($replyControl, $this->createMock(\PDO::class));
+        $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(PDO::class));
+        $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class));
 
         $groupMembershipControl = new GroupMembershipControl(
             $groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo
         );
 
         $this->groupMembershipController = new \App\Boundary\GroupMembershipController(
-            $groupMembershipControl, $this->createMock(\PDO::class)
+            $groupMembershipControl, $this->createMock(PDO::class)
         );
     }
 
@@ -82,7 +87,7 @@ class ReviewReplyFlowTest extends TestCase
         ];
 
         $this->reviewController->onSubmitReview(1, 2, 123, 5, 'Well done!', date('Y-m-d H:i:s'));
-        $this->assertTrue(true); // No exceptions
+        $this->assertTrue(true);
     }
 
     public function testSubmitReplySuccess(): void
@@ -96,29 +101,30 @@ class ReviewReplyFlowTest extends TestCase
     public function testSubmitReviewMissingContext(): void
     {
         $this->expectException(\Exception::class);
-        $_SESSION['review_context'] = null;
+        unset($_SESSION['review_context']);
 
-        $this->reviewController->onSubmitReview(1, 2, 123, 4, 'Nice', timestamp: date('Y-m-d H:i:s'));
+        $this->reviewController->onSubmitReview(1, 2, 123, 4, 'Nice', date('Y-m-d H:i:s'));
     }
 
     public function testSubmitReviewInvalidRating(): void
     {
         $this->expectException(\Exception::class);
+
         $_SESSION['review_context'] = [
             'reviewer_id' => 1,
             'reviewee_id' => 2,
             'group_id' => 123
         ];
 
-        $this->reviewController->onSubmitReview(1, 2, 123, 6, '', timestamp: date('Y-m-d H:i:s'));
+        $this->reviewController->onSubmitReview(1, 2, 123, 6, '', date('Y-m-d H:i:s'));
     }
 
     public function testSubmitReplyDuplicate(): void
     {
         $this->expectException(\Exception::class);
-
         $_SESSION['user']['id'] = 3;
-        $this->replyController->checkIfReplyExists = fn() => true;
+
+        $this->replyRepo->method('hasReply')->willReturn(true);
 
         $this->replyController->onSubmitReply(1, 3, 'Already replied.', date('Y-m-d H:i:s'));
     }
@@ -126,11 +132,10 @@ class ReviewReplyFlowTest extends TestCase
     public function testSubmitReplyNotInSameGroup(): void
     {
         $this->expectException(\Exception::class);
-
         $_SESSION['user']['id'] = 3;
 
-        $controller = $this->groupMembershipController;
-        $controller->OnCheckIfMember = fn() => false;
+        $groupController = $this->createMock(\App\Boundary\GroupMembershipController::class);
+        $groupController->method('OnCheckIfMember')->willReturn(false);
 
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.', date('Y-m-d H:i:s'));
     }
@@ -138,8 +143,8 @@ class ReviewReplyFlowTest extends TestCase
     public function testSubmitReplyMissingFields(): void
     {
         $this->expectException(\Exception::class);
-
         $_SESSION['user']['id'] = 3;
+
         $this->replyController->onSubmitReply(0, 0, '', date('Y-m-d H:i:s'));
     }
 }
