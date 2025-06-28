@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run PHPUnit Tests for Registration + OTP + Login
+    name: Run PHPUnit Tests for Registration + OTP + Login + Group
     runs-on: ubuntu-latest
 
     services:
