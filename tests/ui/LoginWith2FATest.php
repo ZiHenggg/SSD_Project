@@ -36,10 +36,12 @@ try {
     
     // STEP 3: Check if redirected to the correct page
     sleep(2); // Wait for redirection
-    
+
     // If 2FA is required, check for QR code (setup page)
     $url = $driver->getCurrentURL();
-    if (strpos($url, 'setup_2fa.php') !== false) {
+
+    // Ensure $url is a string before passing to strpos()
+    if (is_string($url) && strpos($url, 'setup_2fa.php') !== false) {
         echo "✅ Redirected to 2FA setup page\n";
         // Check QR code visibility
         $qrImage = $driver->findElement(WebDriverBy::cssSelector('img[src*="data:image"]'));
@@ -54,9 +56,9 @@ try {
         // Wait for redirection to verify 2FA
         sleep(2);
     }
-    
+
     // If already 2FA-enabled, check for dashboard redirect
-    if (strpos($url, 'dashboard.php') !== false) {
+    if (is_string($url) && strpos($url, 'dashboard.php') !== false) {
         echo "✅ Already logged in and redirected to the dashboard\n";
     }
 
