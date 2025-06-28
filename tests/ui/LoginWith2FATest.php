@@ -44,9 +44,13 @@ try {
     if (is_string($url) && strpos($url, 'setup_2fa.php') !== false) {
         echo "✅ Redirected to 2FA setup page\n";
         // Check QR code visibility
-        $qrImage = $driver->findElement(WebDriverBy::cssSelector('img[src*="data:image"]'));
-        if ($qrImage->isDisplayed()) {
-            echo "✅ QR Code displayed for Google Authenticator\n";
+        try {
+            $qrImage = $driver->findElement(WebDriverBy::cssSelector('img[src*="data:image"]'));
+            if ($qrImage->isDisplayed()) {
+                echo "✅ QR Code displayed for Google Authenticator\n";
+            }
+        } catch (Exception $e) {
+            echo "❌ QR Code not found: " . $e->getMessage() . "\n";
         }
         
         // STEP 4: Enter OTP for 2FA setup
@@ -71,7 +75,7 @@ try {
     // STEP 6: Verify successful redirection to dashboard
     sleep(2);
     $url = $driver->getCurrentURL();
-    if (strpos($url, 'dashboard.php') !== false) {
+    if (is_string($url) && strpos($url, 'dashboard.php') !== false) {
         echo "✅ 2FA verification successful, redirected to dashboard\n";
     }
 
@@ -84,13 +88,15 @@ try {
     
     // STEP 8: Verify error message is displayed
     sleep(2);
-    $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
-    
-    // Check if error message is displayed
-    if ($errorMessage->isDisplayed()) {
-        echo "✅ Error message displayed: " . $errorMessage->getText() . "\n";
-    } else {
-        echo "❌ No error message displayed.\n";
+    try {
+        $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
+        if ($errorMessage->isDisplayed()) {
+            echo "✅ Error message displayed: " . $errorMessage->getText() . "\n";
+        } else {
+            echo "❌ No error message displayed.\n";
+        }
+    } catch (Exception $e) {
+        echo "❌ Error message not found: " . $e->getMessage() . "\n";
     }
 
     // --- Negative Test for Invalid 2FA Code ---
@@ -101,13 +107,15 @@ try {
     
     // STEP 10: Verify error message for invalid 2FA code
     sleep(2);
-    $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
-    
-    // Check if error message for invalid OTP is displayed
-    if ($errorMessage->isDisplayed()) {
-        echo "✅ Error message displayed for invalid 2FA code: " . $errorMessage->getText() . "\n";
-    } else {
-        echo "❌ No error message displayed for invalid 2FA code.\n";
+    try {
+        $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
+        if ($errorMessage->isDisplayed()) {
+            echo "✅ Error message displayed for invalid 2FA code: " . $errorMessage->getText() . "\n";
+        } else {
+            echo "❌ No error message displayed for invalid 2FA code.\n";
+        }
+    } catch (Exception $e) {
+        echo "❌ Error message for invalid 2FA code not found: " . $e->getMessage() . "\n";
     }
 
 } catch (Exception $e) {
