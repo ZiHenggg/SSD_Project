@@ -25,6 +25,7 @@ use App\Repository\StudentRepository;
 use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
+use App\Repository\StudentStatsRepository;
 use PDO;
 
 class ReviewReplyFlowTest extends TestCase
@@ -42,7 +43,7 @@ class ReviewReplyFlowTest extends TestCase
 
         $reviewRepo = $this->createMock(ReviewRepository::class);
         $replyRepo = $this->createMock(ReplyRepository::class);
-        $studentStatsRepo = $this->createMock(StudentStatsRepository::class); // ✅ FIXED
+        $studentStatsRepo = $this->createMock(StudentStatsRepository::class);
         $groupRepo = $this->createMock(GroupRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
