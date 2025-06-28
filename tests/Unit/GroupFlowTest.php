@@ -115,12 +115,12 @@ class GroupFlowTest extends TestCase
     private function fakeGroupEntity(): Group
     {
         $group = new Group(
-            '2025',
-            'T1',
-            'ICT2206',
-            4,
-            99,
-            'G1'
+            '2025',        // acadYear
+            'T1',          // trimester
+            'ICT2206',     // moduleCode
+            4,             // maxGroupSize
+            99,            // creatorId
+            'G1'           // labGroup
         );
 
         $ref = new \ReflectionClass($group);
@@ -130,5 +130,4 @@ class GroupFlowTest extends TestCase
 
         return $group;
     }
-
 }
