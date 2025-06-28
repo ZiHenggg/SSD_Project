@@ -124,9 +124,28 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        $this->replyRepo->method('hasReply')->willReturn(true);
+        $this->replyRepo = $this->getMockBuilder(ReplyRepository::class)
+            ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
+            ->getMock();
+
+        $this->replyRepo->method('hasReply')->willReturn(true); // ✅ Set it before control/controller
+
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(
+            new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
+        );
+
+        $reviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
+        $studentRepo = $this->getMockBuilder(StudentRepository::class)
+            ->onlyMethods(['getStudentById'])
+            ->getMock();
+        $studentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
+
+        $replyControl = new \App\Control\ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
+        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class));
+
         $this->replyController->onSubmitReply(1, 3, 'Already replied.');
     }
+
 
     public function testSubmitReplyNotInSameGroup(): void
     {
