@@ -17,6 +17,7 @@ use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Repository\ModuleRepository;
+use App\Entity\Group;
 use PDO;
 use PDOStatement;
 
@@ -37,18 +38,29 @@ class GroupFlowTest extends TestCase
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
         $moduleRepo = $this->createMock(ModuleRepository::class);
 
-        // Instantiate controls
-        $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-        $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+        // ✅ Mock GroupControl and patch createGroup()
+        $groupControl = $this->getMockBuilder(GroupControl::class)
+            ->setConstructorArgs([$groupRepo, $groupMembershipRepo, $moduleRepo])
+            ->onlyMethods(['createGroup'])
+            ->getMock();
 
-        // ✅ Fix: Mock PDO::query() to return a fake PDOStatement with fetchAll()
+        $groupControl->method('createGroup')->willReturn($this->fakeGroupEntity());
+
+        // GroupMembershipControl
+        $groupMembershipControl = new GroupMembershipControl(
+            $groupMembershipRepo,
+            $groupRepo,
+            $groupJoinRequestsRepo
+        );
+
+        // ✅ Mock PDO::query() to return empty lab group list
         $pdoStmtMock = $this->createMock(PDOStatement::class);
-        $pdoStmtMock->method('fetchAll')->willReturn([]); // simulate empty DB result
+        $pdoStmtMock->method('fetchAll')->willReturn([]);
 
         $pdoMock = $this->createMock(PDO::class);
         $pdoMock->method('query')->willReturn($pdoStmtMock);
 
-        // Instantiate controller
+        // Controller with mocked GroupControl
         $this->controller = new GroupPageController($groupControl, $groupMembershipControl, $pdoMock);
     }
 
@@ -62,19 +74,18 @@ class GroupFlowTest extends TestCase
             'trimester' => 'T1',
             'moduleCode' => 'ICT2206',
             'maxGroupSize' => 4,
-            'labGroup' => '', // optional but safe to include
+            'labGroup' => '', // optional
         ], $studentId);
 
-        $this->assertTrue(true); // No exception thrown
+        $this->assertTrue(true); // No exception thrown = success
     }
-
 
     public function testCreateGroupBlockedByRateLimit(): void
     {
         $studentId = 101;
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate hitting the Redis rate limit
+        // Simulate rate limit condition
         $attempts = 3;
         $maxAttempts = 3;
 
@@ -99,5 +110,15 @@ class GroupFlowTest extends TestCase
     {
         SessionManager::set('error', "Invalid group deletion request.");
         $this->assertEquals("Invalid group deletion request.", SessionManager::get('error'));
+    }
+
+    private function fakeGroupEntity(): Group
+    {
+        $group = new Group();
+        $reflection = new \ReflectionClass($group);
+        $prop = $reflection->getProperty('groupId');
+        $prop->setAccessible(true);
+        $prop->setValue($group, 1); // Assign a fake ID
+        return $group;
     }
 }
