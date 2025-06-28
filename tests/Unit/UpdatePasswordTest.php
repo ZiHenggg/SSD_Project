@@ -7,7 +7,7 @@ use App\Control\StudentControl;
 use App\Repository\StudentRepository;
 use App\Entity\Student;
 
-class StudentControlTest extends TestCase
+class UpdatePasswordTest extends TestCase
 {
     private $studentRepo;
     private $studentControl;
