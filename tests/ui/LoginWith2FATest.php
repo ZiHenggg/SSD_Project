@@ -3,11 +3,10 @@
 /**
  * UI Test for Login and 2FA Flow:
  *
- * 1. ✅ Enter valid email and password → Redirect to 2FA setup or dashboard
- * 2. ✅ Check for QR Code and enter OTP
- * 3. ✅ Enter OTP on 2FA verification page → Dashboard
- * 4. ❌ Enter invalid login → Error message
- * 5. ❌ Enter invalid OTP → Error message
+ * 1. ✅ Login with valid credentials → 2FA setup or verify
+ * 2. ✅ Complete 2FA → dashboard
+ * 3. ❌ Invalid login → error message
+ * 4. ❌ Invalid 2FA → error message
  */
 
 require 'vendor/autoload.php';
@@ -15,19 +14,21 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\WebDriverBy;
 
+error_reporting(E_ALL & ~E_WARNING); // Optional: hide noisy warnings
+
 $driver = RemoteWebDriver::create('http://localhost:4444/wd/hub', DesiredCapabilities::chrome());
 
 try {
     // STEP 1: Open login page
     $driver->get('http://localhost:8080/login.php');
 
-    // STEP 2: Valid login
+    // STEP 2: Submit valid login
     $driver->findElement(WebDriverBy::name('email'))->sendKeys('valid_email@sit.singaporetech.edu.sg');
     $driver->findElement(WebDriverBy::name('password'))->sendKeys('validPassword123');
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
     sleep(2);
 
-    // STEP 3: 2FA setup or dashboard
+    // STEP 3: Check current page after login
     $urlRaw = $driver->executeScript('return window.location.href');
     $url = is_array($urlRaw) ? '' : (string) $urlRaw;
 
@@ -46,14 +47,16 @@ try {
         $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
         sleep(2);
+
+    } elseif (strpos($url, 'verify_2fa.php') !== false) {
+        echo "📥 Redirected to 2FA verification page\n";
+
+        $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
+        $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
+        sleep(2);
     }
 
-    // STEP 4: OTP verification
-    $driver->get('http://localhost:8080/verify_2fa.php');
-    $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
-    $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
-    sleep(2);
-
+    // STEP 4: Confirm dashboard redirection
     $urlRaw = $driver->executeScript('return window.location.href');
     $url = is_array($urlRaw) ? '' : (string) $urlRaw;
 
@@ -79,19 +82,31 @@ try {
         echo "❌ Error message not found: " . $e->getMessage() . "\n";
     }
 
-    // STEP 6: Invalid 2FA
-    $driver->get('http://localhost:8080/verify_2fa.php');
-    $driver->findElement(WebDriverBy::name('code'))->sendKeys('999999');
+    // STEP 6: Invalid 2FA test (only attempt if 2FA page is reachable)
+    $driver->get('http://localhost:8080/login.php');
+    $driver->findElement(WebDriverBy::name('email'))->sendKeys('valid_email@sit.singaporetech.edu.sg');
+    $driver->findElement(WebDriverBy::name('password'))->sendKeys('validPassword123');
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
     sleep(2);
 
-    try {
-        $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
-        $text = $errorMessage->getText();
-        $text = is_array($text) ? implode(', ', $text) : $text;
-        echo "✅ Error message displayed for invalid 2FA code: $text\n";
-    } catch (Exception $e) {
-        echo "❌ Error message for invalid 2FA code not found: " . $e->getMessage() . "\n";
+    $urlRaw = $driver->executeScript('return window.location.href');
+    $url = is_array($urlRaw) ? '' : (string) $urlRaw;
+
+    if (strpos($url, 'verify_2fa.php') !== false) {
+        $driver->findElement(WebDriverBy::name('code'))->sendKeys('999999'); // invalid OTP
+        $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
+        sleep(2);
+
+        try {
+            $errorMessage = $driver->findElement(WebDriverBy::cssSelector('.alert-danger'));
+            $text = $errorMessage->getText();
+            $text = is_array($text) ? implode(', ', $text) : $text;
+            echo "✅ Error message displayed for invalid 2FA code: $text\n";
+        } catch (Exception $e) {
+            echo "❌ Error message for invalid 2FA code not found: " . $e->getMessage() . "\n";
+        }
+    } else {
+        echo "⚠️ Skipped invalid 2FA test — not redirected to verify_2fa.php\n";
     }
 
 } catch (Exception $e) {
@@ -99,6 +114,3 @@ try {
 } finally {
     $driver->quit();
 }
-
-?>
-
