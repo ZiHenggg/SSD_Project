@@ -10,8 +10,6 @@
  * 5. ❌ Enter invalid OTP → Error message
  */
 
-error_reporting(E_ALL & ~E_WARNING); // optional
-
 require 'vendor/autoload.php';
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
