@@ -18,6 +18,7 @@ use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Repository\ModuleRepository;
 use PDO;
+use PDOStatement;
 
 class GroupFlowTest extends TestCase
 {
@@ -36,11 +37,18 @@ class GroupFlowTest extends TestCase
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
         $moduleRepo = $this->createMock(ModuleRepository::class);
 
-        // Instantiate controls and controller
+        // Instantiate controls
         $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
         $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-        $pdoMock = $this->createMock(PDO::class);
 
+        // ✅ Fix: Mock PDO::query() to return a fake PDOStatement with fetchAll()
+        $pdoStmtMock = $this->createMock(PDOStatement::class);
+        $pdoStmtMock->method('fetchAll')->willReturn([]); // simulate empty DB result
+
+        $pdoMock = $this->createMock(PDO::class);
+        $pdoMock->method('query')->willReturn($pdoStmtMock);
+
+        // Instantiate controller
         $this->controller = new GroupPageController($groupControl, $groupMembershipControl, $pdoMock);
     }
 
@@ -61,8 +69,8 @@ class GroupFlowTest extends TestCase
         $studentId = 101;
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate exceeding the Redis threshold
-        $attempts = 3; // You simulate Redis counters
+        // Simulate hitting the Redis rate limit
+        $attempts = 3;
         $maxAttempts = 3;
 
         if ($attempts >= $maxAttempts) {
