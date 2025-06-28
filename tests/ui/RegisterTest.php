@@ -31,7 +31,7 @@ $driver = RemoteWebDriver::create('http://localhost:4444/wd/hub', DesiredCapabil
 
 try {
     // STEP 1: Open registration page
-    $driver->get('http://localhost:8080/register.php');
+    $driver->get('http://php-webapp/register.php');
 
     // STEP 2: Fill out the registration form
     $driver->findElement(WebDriverBy::id('studentId'))->sendKeys('1234567');
