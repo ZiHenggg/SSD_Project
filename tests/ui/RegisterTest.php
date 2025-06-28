@@ -28,13 +28,17 @@ try {
     }
 
     // STEP 4: Enter OTP (we simulate with correct format, real value mocked)
-    $driver->findElement(WebDriverBy::id('otp'))->sendKeys('123456'); // Change this if you mock/check exact OTP
+    $driver->findElement(WebDriverBy::id('otp'))->sendKeys('123456'); // Adjust if mocking OTP
     $driver->findElement(WebDriverBy::cssSelector('button.btn-success'))->click();
 
     // STEP 5: Wait for success modal or redirect
     sleep(2);
 
-    $currentUrl = $driver->getCurrentURL();
+    $currentUrlRaw = $driver->getCurrentURL();
+    $currentUrl = is_array($currentUrlRaw) && isset($currentUrlRaw['value']) 
+        ? $currentUrlRaw['value'] 
+        : (string) $currentUrlRaw;
+
     if (strpos($currentUrl, 'login.php') !== false) {
         echo "✅ Registration completed → redirected to login.\n";
     } else {
