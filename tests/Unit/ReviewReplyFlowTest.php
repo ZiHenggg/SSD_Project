@@ -61,7 +61,11 @@ class ReviewReplyFlowTest extends TestCase
 
         $review = new Review(1, 2, 123, 456, 5, 'Great teammate!', date('Y-m-d H:i:s'));
         $reviewRepo->method('getReview')->willReturn($review);
-        $studentRepo->method('getStudent')->willReturn(['id' => 2]);
+        $studentRepo = $this->getMockBuilder(StudentRepository::class)
+            ->onlyMethods(['getStudentById'])
+            ->getMock();
+
+        $studentRepo->method('getStudentById')->willReturn(['id' => 2]);
 
         $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
         $replyControl = new ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
