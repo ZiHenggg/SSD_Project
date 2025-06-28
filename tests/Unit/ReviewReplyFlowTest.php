@@ -125,7 +125,6 @@ class ReviewReplyFlowTest extends TestCase
         $_SESSION['user']['id'] = 3;
 
         $this->replyRepo->method('hasReply')->willReturn(true);
-
         $this->replyController->onSubmitReply(1, 3, 'Already replied.');
     }
 
