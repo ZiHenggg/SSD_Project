@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ✅ testSendJoinRequestSuccess – Simulates valid join request flow
  * ✅ testSendJoinRequestBlockedByRateLimit – Rejects request after 5 tries
@@ -56,7 +57,7 @@ class GroupRequestFlowTest extends TestCase
         $groupId = 1;
         $studentId = 99;
 
-        $group = new Group('2025', 'T1', 'ICT2206', 4, 99, 'G1');
+        $group = new Group('2025', 'T1', 'ICT2206', 4, 99, 'G1'); // Ensure 4 is an int
         $this->groupRepo->method('getGroup')->willReturn($group);
         $this->groupMembershipRepo->method('getMembers')->willReturn([]);
         $this->groupJoinRequestsRepo->method('getRequestStatus')->willReturn(null);
@@ -81,8 +82,7 @@ class GroupRequestFlowTest extends TestCase
         $approverId = 55;
         $groupId = 1;
 
-        $group = new Group('2025', 'T1', 'ICT2206', 4, 99, 'G1');
-
+        $group = new Group('2025', 'T1', 'ICT2206', 4, 99, 'G1'); // Ensure 4 is int
         $this->groupRepo->method('getGroup')->willReturn($group);
         $this->groupMembershipRepo->method('getMembers')->willReturn([]);
         $this->groupJoinRequestsRepo->method('getGroupIdByRequestId')->willReturn($groupId);
@@ -106,8 +106,13 @@ class GroupRequestFlowTest extends TestCase
         $requestId = 20;
         $requesterId = 98;
         $approverId = 55;
+        $groupId = 1;
 
-        $mockRequest = new GroupJoinRequests($requestId, 1, $requesterId, 'pending', new \DateTime());
+        $group = new Group('2025', 'T1', 'ICT2206', 4, 99, 'G1'); // dummy fallback
+        $this->groupRepo->method('getGroup')->willReturn($group);
+        $this->groupJoinRequestsRepo->method('getGroupIdByRequestId')->willReturn($groupId);
+
+        $mockRequest = new GroupJoinRequests($requestId, $groupId, $requesterId, 'pending', new \DateTime());
         $this->groupJoinRequestsRepo->method('getRequestsByStudent')->willReturn([$mockRequest]);
 
         $this->groupJoinRequestsRepo->expects($this->once())
