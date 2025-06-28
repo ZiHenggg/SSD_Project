@@ -120,7 +120,7 @@ class GroupFlowTest extends TestCase
             'ICT2206',     // moduleCode
             4,             // maxGroupSize
             99,            // creatorId
-            'G1'           // labGroup
+            10             // maxMembers (must be int!)
         );
 
         $ref = new \ReflectionClass($group);
@@ -130,4 +130,5 @@ class GroupFlowTest extends TestCase
 
         return $group;
     }
+
 }
