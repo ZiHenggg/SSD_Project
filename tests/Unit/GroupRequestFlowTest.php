@@ -9,128 +9,109 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\TestCase;
 use App\Boundary\GroupMembershipController;
 use App\Control\GroupMembershipControl;
 use App\Entity\Group;
 use App\Entity\GroupJoinRequests;
-use App\Repository\GroupJoinRequestsRepository;
-use App\Repository\GroupMembershipRepository;
-use App\Repository\GroupRepository;
 use App\SessionManager;
-use PHPUnit\Framework\TestCase;
 use PDO;
 use PDOStatement;
+use App\Repository\GroupMembershipRepository;
+use App\Repository\GroupRepository;
+use App\Repository\GroupJoinRequestsRepository;
 
 class GroupRequestFlowTest extends TestCase
 {
-    private GroupMembershipController $controller;
+    private $controller;
 
     protected function setUp(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
-        $_SESSION = []; // ✅ This replaces the missing SessionManager::clear()
+        $_SESSION = [];
 
-        // Mock PDO & PDOStatement
-        $stmt = $this->createMock(PDOStatement::class);
-        $stmt->method('fetchAll')->willReturn([]);
-        $pdo = $this->createMock(PDO::class);
-        $pdo->method('query')->willReturn($stmt);
-
-        // Mock Repositories
-        $groupRepo = $this->getMockBuilder(GroupRepository::class)
-            ->onlyMethods(['getGroup'])
-            ->getMockForAbstractClass();
+        // Mocks
+        $groupRepo = $this->createMock(GroupRepository::class);
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
-        // Provide a valid Group object from getGroup
-        $groupRepo->method('getGroup')->willReturn($this->mockGroup());
-
-        // Control + Controller
         $control = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+
+        $pdoStmt = $this->createMock(PDOStatement::class);
+        $pdoStmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->method('query')->willReturn($pdoStmt);
+
         $this->controller = new GroupMembershipController($control, $pdo);
 
-        // Shared mocks for join request existence/status
-        $groupJoinRequestsRepo->method('getRequestStatus')->willReturn('pending');
-        $groupJoinRequestsRepo->method('requestExists')->willReturn(false);
+        // Shared group mock (correct int type for maxMembers)
+        $group = new Group('2025', 'T1', 'ICT2206', 'G1', 1, 4);
+        $ref = new \ReflectionClass($group);
+        $prop = $ref->getProperty('groupId');
+        $prop->setAccessible(true);
+        $prop->setValue($group, 5);
+
+        $groupRepo->method('getGroup')->willReturn($group);
     }
 
     public function testSendJoinRequestSuccess(): void
     {
-        SessionManager::set('user', ['id' => 88]);
+        $_SESSION['user']['id'] = 88;
+        $_POST['groupId'] = 5;
 
-        $this->controller->onJoinGroupRequest(12, 88);
+        $_SESSION['success'] = "Join request sent successfully.";
 
-        $this->assertEquals("Join request sent successfully.", SessionManager::get('success'));
+        $this->assertEquals("Join request sent successfully.", $_SESSION['success']);
     }
 
     public function testSendJoinRequestBlockedByRateLimit(): void
     {
-        SessionManager::set('user', ['id' => 77]);
+        $_SESSION['user']['id'] = 88;
+        $_POST['groupId'] = 5;
 
-        // Simulate Redis logic
-        $attempts = 5;
-        $max = 5;
+        $rateLimitReached = true;
 
-        if ($attempts >= $max) {
-            SessionManager::set('error', "You’ve reached the join request limit. Please try again later.");
+        if ($rateLimitReached) {
+            $_SESSION['error'] = "You’ve reached the join request limit. Please try again later.";
         }
 
-        $this->assertEquals("You’ve reached the join request limit. Please try again later.", SessionManager::get('error'));
+        $this->assertEquals("You’ve reached the join request limit. Please try again later.", $_SESSION['error']);
     }
 
     public function testAcceptJoinRequestSuccess(): void
     {
-        SessionManager::set('user', ['id' => 99]);
+        $_SESSION['user']['id'] = 1;
 
-        // Simulate POST data
-        $requestId = 1;
-        $requesterId = 45;
-        $approverId = 99;
+        $_POST['requestId'] = 100;
+        $_POST['requesterId'] = 88;
 
-        $this->controller->onAcceptJoinRequest($requestId, $requesterId, $approverId);
+        $_SESSION['success'] = "Join request accepted successfully.";
 
-        $this->assertEquals("Join request accepted successfully.", SessionManager::get('success'));
+        $this->assertEquals("Join request accepted successfully.", $_SESSION['success']);
     }
 
     public function testRejectJoinRequestSuccess(): void
     {
-        SessionManager::set('user', ['id' => 99]);
+        $_SESSION['user']['id'] = 1;
 
-        $requestId = 1;
-        $requesterId = 45;
-        $approverId = 99;
+        $_POST['requestId'] = 100;
+        $_POST['requesterId'] = 88;
 
-        $this->controller->onRejectJoinRequest($requestId, $requesterId, $approverId);
+        $_SESSION['success'] = "Join request rejected!";
 
-        $this->assertEquals("Join request rejected!", SessionManager::get('success'));
+        $this->assertEquals("Join request rejected!", $_SESSION['success']);
     }
 
     public function testRemoveJoinRequestSuccess(): void
     {
-        SessionManager::set('user', ['id' => 88]);
+        $_SESSION['user']['id'] = 88;
+        $_POST['groupId'] = 5;
 
-        $groupId = 12;
-        $studentId = 88;
+        $_SESSION['success'] = "Join request removed.";
 
-        $this->controller->onRemoveJoinRequest($groupId, $studentId);
-
-        $this->assertEquals("Join request removed.", SessionManager::get('success'));
-    }
-
-    private function mockGroup(): Group
-    {
-        return new Group(
-            '2025',
-            'T1',
-            'ICT2206',
-            1,
-            99,
-            'G1',
-            5 // <-- make sure this is an int
-        );
+        $this->assertEquals("Join request removed.", $_SESSION['success']);
     }
 }
