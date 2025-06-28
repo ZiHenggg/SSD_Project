@@ -164,17 +164,9 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        // Simulate invalid group membership by overriding replyRepo or flow
-        // This part assumes that group membership logic is used inside replyControl
-
-        // You would only expect this exception if your actual logic checks for group membership
-        // which is not shown in the previous ReplyControl
-
-        // We're simulating the condition by returning null review (or missing data)
-        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
         $this->replyRepo->method('hasReply')->willReturn(false);
+        $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
 
-        // Simulate review being missing or mismatched group
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
     }
 
