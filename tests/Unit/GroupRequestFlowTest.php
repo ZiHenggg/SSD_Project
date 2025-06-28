@@ -27,7 +27,11 @@ class GroupRequestFlowTest extends TestCase
 
     protected function setUp(): void
     {
-        SessionManager::clear();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $_SESSION = []; // ✅ This replaces the missing SessionManager::clear()
 
         // Mock PDO & PDOStatement
         $stmt = $this->createMock(PDOStatement::class);
