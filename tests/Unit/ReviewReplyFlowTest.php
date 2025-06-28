@@ -128,15 +128,25 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
             ->getMock();
 
-        $this->replyRepo->method('hasReply')->willReturn(true); // ✅ Set it before control/controller
-
+        $this->replyRepo->method('hasReply')->willReturn(true);
         $this->replyRepo->method('getReplyByReviewId')->willReturn(
             new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
         );
 
         $reviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
+
         $studentRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['getStudentById'])
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA',
+            ])
             ->getMock();
         $studentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
 
