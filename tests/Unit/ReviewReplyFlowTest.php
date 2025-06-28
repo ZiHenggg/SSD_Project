@@ -125,7 +125,7 @@ class ReviewReplyFlowTest extends TestCase
         $this->expectException(\Exception::class);
         $_SESSION['user']['id'] = 3;
 
-        $this->replyRepo->method('hasReply')->willReturn(true); // simulate duplicate
+        $this->replyRepo->method('hasReply')->willReturn(true);
         $this->replyRepo->method('getReplyByReviewId')->willReturn(
             new Reply(1, 1, 3, 'Already replied.', date('Y-m-d H:i:s'))
         );
@@ -142,10 +142,20 @@ class ReviewReplyFlowTest extends TestCase
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
 
         $mockReviewRepo = $this->getMockForAbstractClass(ReviewRepository::class);
-        $mockReviewRepo->method('getReview')->willReturn(null); // simulate review missing
+        $mockReviewRepo->method('getReview')->willReturn(null);
 
         $mockStudentRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['getStudentById'])
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA',
+            ])
             ->getMock();
         $mockStudentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
 
