@@ -57,12 +57,17 @@ class GroupFlowTest extends TestCase
         $studentId = 99;
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate group creation with no rate limit exceeded
-        $this->controller->onCreateGroup(['group_name' => 'Test Group'], $studentId);
+        $this->controller->onCreateGroup([
+            'acadYear' => '2025',
+            'trimester' => 'T1',
+            'moduleCode' => 'ICT2206',
+            'maxGroupSize' => 4,
+            'labGroup' => '', // optional but safe to include
+        ], $studentId);
 
-        // No exception = success
-        $this->assertTrue(true);
+        $this->assertTrue(true); // No exception thrown
     }
+
 
     public function testCreateGroupBlockedByRateLimit(): void
     {
