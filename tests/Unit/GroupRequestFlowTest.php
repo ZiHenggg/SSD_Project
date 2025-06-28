@@ -17,6 +17,7 @@ use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Entity\Group;
+use App\Entity\GroupJoinRequests;
 use PDO;
 
 class GroupRequestFlowTest extends TestCase
@@ -32,7 +33,7 @@ class GroupRequestFlowTest extends TestCase
 
         // Mocks
         $groupRepo = $this->getMockBuilder(GroupRepository::class)
-            ->onlyMethods(['getGroup'])
+            ->addMethods(['getGroup']) // ✅ Fixed: use addMethods for interface or abstract
             ->getMock();
 
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
@@ -46,13 +47,11 @@ class GroupRequestFlowTest extends TestCase
         $prop->setValue($group, 10);
         $groupRepo->method('getGroup')->willReturn($group);
 
-        // 🔧 Fake join request object for getJoinRequestById()
-        $joinRequest = new \stdClass();
-        $joinRequest->groupId = 10;
+        // 🔧 Fake join request object for getGroupIdByRequestId()
         $groupJoinRequestsRepo->method('getGroupIdByRequestId')->willReturn(10);
 
-        // Simulate getRequestsByStudent returning an object with methods used in logic
-        $mockRequest = $this->createMock(\App\Entity\GroupJoinRequests::class);
+        // ✅ Mock request object with necessary methods
+        $mockRequest = $this->createMock(GroupJoinRequests::class);
         $mockRequest->method('getRequestId')->willReturn(7);
         $mockRequest->method('getRequesterId')->willReturn(88);
         $mockRequest->method('getJoinStatus')->willReturn('pending');
@@ -91,7 +90,6 @@ class GroupRequestFlowTest extends TestCase
         $studentId = 88;
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate rate-limit
         $attempts = 5;
         $max = 5;
 
