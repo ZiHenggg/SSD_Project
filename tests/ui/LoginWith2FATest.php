@@ -10,7 +10,7 @@
  * 5. ❌ Enter invalid OTP → Error message
  */
 
-error_reporting(E_ALL & ~E_WARNING); // Optional: suppress warnings
+error_reporting(E_ALL & ~E_WARNING); // optional
 
 require 'vendor/autoload.php';
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -29,7 +29,10 @@ try {
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
     sleep(2);
 
-    $url = $driver->executeScript('return window.location.href');
+    // STEP 3: 2FA setup or dashboard
+    $urlRaw = $driver->executeScript('return window.location.href');
+    $url = is_array($urlRaw) ? '' : (string) $urlRaw;
+
     if (strpos($url, 'setup_2fa.php') !== false) {
         echo "✅ Redirected to 2FA setup page\n";
 
@@ -42,19 +45,20 @@ try {
             echo "❌ QR Code not found: " . $e->getMessage() . "\n";
         }
 
-        // STEP 3: Simulate 2FA setup OTP entry
         $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
         $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
         sleep(2);
     }
 
-    // STEP 4: Simulate OTP verification
+    // STEP 4: OTP verification
     $driver->get('http://localhost:8080/verify_2fa.php');
     $driver->findElement(WebDriverBy::name('code'))->sendKeys('123456');
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
     sleep(2);
 
-    $url = $driver->executeScript('return window.location.href');
+    $urlRaw = $driver->executeScript('return window.location.href');
+    $url = is_array($urlRaw) ? '' : (string) $urlRaw;
+
     if (strpos($url, 'dashboard.php') !== false) {
         echo "✅ 2FA verification successful, redirected to dashboard\n";
     } else {
@@ -77,7 +81,7 @@ try {
         echo "❌ Error message not found: " . $e->getMessage() . "\n";
     }
 
-    // STEP 6: Invalid OTP
+    // STEP 6: Invalid 2FA
     $driver->get('http://localhost:8080/verify_2fa.php');
     $driver->findElement(WebDriverBy::name('code'))->sendKeys('999999');
     $driver->findElement(WebDriverBy::cssSelector('button[type="submit"]'))->click();
@@ -99,3 +103,4 @@ try {
 }
 
 ?>
+
