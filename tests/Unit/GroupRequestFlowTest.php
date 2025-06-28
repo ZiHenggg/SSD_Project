@@ -31,22 +31,33 @@ class GroupRequestFlowTest extends TestCase
         $_SESSION = [];
 
         // Mocks
-        $groupRepo = $this->createMock(GroupRepository::class);
+        $groupRepo = $this->getMockBuilder(GroupRepository::class)
+            ->onlyMethods(['getGroup'])
+            ->getMock();
+
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
-        // 🔧 Fake Group object for getGroupById
+        // 🔧 Fake Group object for getGroup()
         $group = new Group('2025', 'T1', 'ICT2206', 4, 88, 10);
         $ref = new \ReflectionClass($group);
         $prop = $ref->getProperty('groupId');
         $prop->setAccessible(true);
         $prop->setValue($group, 10);
-        $groupRepo->method('getGroupById')->willReturn($group);
+        $groupRepo->method('getGroup')->willReturn($group);
 
-        // 🔧 Fake join request object for getJoinRequestById
+        // 🔧 Fake join request object for getJoinRequestById()
         $joinRequest = new \stdClass();
         $joinRequest->groupId = 10;
-        $groupJoinRequestsRepo->method('getJoinRequestById')->willReturn($joinRequest);
+        $groupJoinRequestsRepo->method('getGroupIdByRequestId')->willReturn(10);
+
+        // Simulate getRequestsByStudent returning an object with methods used in logic
+        $mockRequest = $this->createMock(\App\Entity\GroupJoinRequests::class);
+        $mockRequest->method('getRequestId')->willReturn(7);
+        $mockRequest->method('getRequesterId')->willReturn(88);
+        $mockRequest->method('getJoinStatus')->willReturn('pending');
+        $mockRequest->method('getGroupId')->willReturn(10);
+        $groupJoinRequestsRepo->method('getRequestsByStudent')->willReturn([$mockRequest]);
 
         $membershipControl = new GroupMembershipControl(
             $groupMembershipRepo,
@@ -65,7 +76,7 @@ class GroupRequestFlowTest extends TestCase
 
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate Redis: request count under limit
+        // Simulate Redis logic (under limit)
         $attempts = 2;
         $max = 5;
 
@@ -80,7 +91,7 @@ class GroupRequestFlowTest extends TestCase
         $studentId = 88;
         SessionManager::set('user', ['id' => $studentId]);
 
-        // Simulate maxed out Redis
+        // Simulate rate-limit
         $attempts = 5;
         $max = 5;
 
@@ -100,13 +111,13 @@ class GroupRequestFlowTest extends TestCase
         SessionManager::set('user', ['id' => $approverId]);
 
         $this->controller->onAcceptJoinRequest($requestId, $requesterId, $approverId);
-        $this->assertTrue(true); // No exception thrown
+        $this->assertTrue(true);
     }
 
     public function testRejectJoinRequestSuccess(): void
     {
-        $requestId = 8;
-        $requesterId = 101;
+        $requestId = 7;
+        $requesterId = 88;
         $approverId = 99;
 
         SessionManager::set('user', ['id' => $approverId]);
@@ -117,7 +128,7 @@ class GroupRequestFlowTest extends TestCase
 
     public function testRemoveJoinRequestSuccess(): void
     {
-        $groupId = 22;
+        $groupId = 10;
         $studentId = 99;
 
         SessionManager::set('user', ['id' => $studentId]);
