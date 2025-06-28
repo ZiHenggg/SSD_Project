@@ -49,7 +49,17 @@ class ReviewReplyFlowTest extends TestCase
             ->getMock();
 
         $studentRepo = $this->getMockBuilder(StudentRepository::class)
-            ->onlyMethods(['getStudentById'])
+            ->onlyMethods([
+                'getStudentById',
+                'getStudentByEmail',
+                'getAllStudents',
+                'createStudentAccount',
+                'isStudentExists',
+                'updatePassword',
+                'verifyStudentEmail',
+                'enable2FAForUser',
+                'disable2FA',
+            ])
             ->getMock();
 
         $mockStudent = $this->createMock(Student::class);
