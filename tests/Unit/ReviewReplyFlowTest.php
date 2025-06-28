@@ -43,7 +43,17 @@ class ReviewReplyFlowTest extends TestCase
         }
         $_SESSION = [];
 
-        $reviewRepo = $this->createMock(ReviewRepository::class);
+        $reviewRepo = $this->getMockBuilder(ReviewRepository::class)
+            ->onlyMethods([
+                'addReview',
+                'getReview',
+                'resolveGroupMembersId',
+                'getReviewsForReviewee',
+                'getReviewsByReviewer',
+                'hasUserReviewed'
+            ])
+            ->getMock();
+
         $this->replyRepo = $this->getMockBuilder(ReplyRepository::class)
             ->onlyMethods(['addReply', 'getReplyByReviewId', 'hasReply'])
             ->getMock();
@@ -71,12 +81,14 @@ class ReviewReplyFlowTest extends TestCase
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
         $reviewRepo->method('addReview')->willReturnCallback(function () {});
+        $reviewRepo->method('getReview')->willReturn(
+            new Review(1, 2, 123, 456, 5, 'Great teammate!', date('Y-m-d H:i:s'))
+        );
+        $reviewRepo->method('resolveGroupMembersId')->willReturn(456);
+
         $this->replyRepo->method('addReply')->willReturnCallback(function () {});
         $this->replyRepo->method('getReplyByReviewId')->willReturn(null);
         $this->replyRepo->method('hasReply')->willReturn(false);
-
-        $review = new Review(1, 2, 123, 456, 5, 'Great teammate!', date('Y-m-d H:i:s'));
-        $reviewRepo->method('getReview')->willReturn($review);
 
         $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
         $replyControl = new ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
