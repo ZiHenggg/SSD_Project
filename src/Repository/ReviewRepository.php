@@ -15,7 +15,7 @@ interface ReviewRepository
 
     public function hasUserReviewed(int $reviewerId, int $revieweeId, int $groupId): bool;
 
-    public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): int;
+    public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): ?int;
 
     // public function getAllReviews(): array;
 }
