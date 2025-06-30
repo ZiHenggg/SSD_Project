@@ -31,7 +31,6 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
 
     public function getRequestsByStudent(int $studentId): array
     {
-        // $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupJoinRequests WHERE requesterId = :studentId");
         $stmt = $this->dbConnection->prepare("SELECT * FROM groupJoinRequests WHERE requesterId = :studentId");
         $stmt->bindParam(':studentId', $studentId, PDO::PARAM_INT);
         $stmt->execute();
@@ -40,16 +39,6 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
 
         $requests = [];
         foreach ($requestsData as $data) {
-            // $requests[] = new GroupJoinRequests(
-            //     $data['requestId'],
-            //     $data['groupId'],
-            //     $data['requesterId'],
-            //     $data['joinStatus'],
-            //     new \DateTime($data['requestedAt']),
-            //     isset($data['reviewedAt']) ? new \DateTime($data['reviewedAt']) : null,
-            //     $data['reviewedBy'] !== null ? (int) $data['reviewedBy'] : null
-            //     // new \DateTime($data['reviewedAt'])
-            // );
             $requests[] = $this->mapRowToGroupJoinRequest($data);
         }
 
@@ -58,7 +47,6 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
 
     public function getRequestsByGroup(int $groupId): array
     {
-        // $stmt = $this->dbConnection->prepare("SELECT requestId, groupId, requesterId, joinStatus, requestedAt FROM groupJoinRequests WHERE joinStatus = 'pending' AND groupId = :groupId");
         $stmt = $this->dbConnection->prepare("SELECT * FROM groupJoinRequests WHERE joinStatus = 'pending' AND groupId = :groupId");
         $stmt->bindParam(':groupId', $groupId, PDO::PARAM_INT);
         $stmt->execute();
@@ -67,16 +55,6 @@ class GroupJoinRequestsMapper implements GroupJoinRequestsRepository
 
         $requests = [];
         foreach ($requestsData as $data) {
-            // $requests[] = new GroupJoinRequests(
-            //     $data['requestId'],
-            //     $data['groupId'],
-            //     $data['requesterId'],
-            //     $data['joinStatus'],
-            //     new \DateTime($data['requestedAt']),
-            //     isset($data['reviewedAt']) ? new \DateTime($data['reviewedAt']) : null,
-            //     $data['reviewedBy'] !== null ? (int) $data['reviewedBy'] : null
-            //     // new \DateTime($data['reviewedAt'])
-            // );
             $requests[] = $this->mapRowToGroupJoinRequest($data);
         }
 

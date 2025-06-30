@@ -51,8 +51,6 @@ class ReplyControl
             throw new \Exception("You have already replied to this review.");
         }
 
-        // Optional: group check, e.g. same group logic here
-
         $reply = new Reply(
             null,
             $reviewId,

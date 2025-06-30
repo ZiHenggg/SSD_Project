@@ -41,7 +41,7 @@ if ($control->confirm2FASetup($email, $code, $secret)) {
 ob_start();
 ?>
 
-<div class="container w-50">
+<div class="container w-50 twofa-wrapper">
     <div class="card shadow p-4 text-center">
         <h2 class="mb-3">Invalid Code</h2>
         <p>The code you entered is incorrect. Please <a href="setup_2fa.php">go back</a> and try again.</p>

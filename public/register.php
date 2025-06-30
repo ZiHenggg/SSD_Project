@@ -16,7 +16,7 @@ unset($_SESSION['register_step'], $_SESSION['register_message'], $_SESSION['regi
 ob_start();
 ?>
 
-<div class="w-50 m-auto">
+<div class="w-50 m-auto register-wrapper">
     <h2 class="mb-4">Register</h2>
 
     <?php if ($message && !$isSuccessModal && $step != 'otp'): ?>

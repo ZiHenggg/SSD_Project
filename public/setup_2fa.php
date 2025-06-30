@@ -39,7 +39,7 @@ $title = "Set Up 2FA";
 ob_start();
 ?>
 
-<div class="container w-50">
+<div class="container w-50 twofa-wrapper">
     <div class="card shadow p-4">
         <h2 class="mb-4 text-center">Set Up Two-Factor Authentication</h2>
         <p>Scan the QR code below using your <strong>Google Authenticator</strong> app, then enter the 6-digit code to confirm.</p>

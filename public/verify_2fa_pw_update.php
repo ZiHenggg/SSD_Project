@@ -73,7 +73,7 @@ $title = "Verify 2FA";
 ob_start();
 ?>
 
-<div class="container w-50">
+<div class="container w-50 twofa-wrapper">
     <div class="card shadow p-4">
         <h2 class="mb-4 text-center">Enter Your 2FA Code</h2>
         <?php if ($error): ?>
@@ -81,8 +81,7 @@ ob_start();
         <?php endif; ?>
         <form method="post">
             <div class="mb-3">
-                <label for="code" class="form-label">6-digit code</label>
-                <input type="text" name="code" id="code" class="form-control" required pattern="\d{6}">
+                <input type="text" name="code" id="code" class="form-control" placeholder="Enter Code" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Verify</button>
         </form>

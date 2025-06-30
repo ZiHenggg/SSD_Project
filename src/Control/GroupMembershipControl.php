@@ -185,7 +185,7 @@ class GroupMembershipControl
         // Get the join request
         $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
         $request = null;
-        // TODO: Use a more efficient way to find the request
+        
         foreach ($requests as $req) {
             if ($req->getRequestId() === $requestId) {
                 $request = $req;

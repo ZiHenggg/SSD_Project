@@ -16,7 +16,7 @@ $title = "Login";
 ob_start();
 ?>
 
-<div class="w-50 m-auto">
+<div class="w-50 m-auto login-wrapper">
     <h2 class="mb-4">Login</h2>
 
     <?php

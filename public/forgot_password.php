@@ -4,7 +4,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 $title = "Forgot Password";
 
-// ⏳ Timeout duration (in seconds)
+// Timeout duration (in seconds)
 $timeout = 600;
 
 // Reset session if forgot flow expired
@@ -22,7 +22,7 @@ if (isset($_SESSION['forgot_started_at']) && time() - $_SESSION['forgot_started_
 // Step assignment before conditional session reset
 $step = $_SESSION['forgot_step'] ?? 'form';
 
-// ✅ Preserve forgot_message before wiping session
+// Preserve forgot_message before wiping session
 $message = $_SESSION['forgot_message'] ?? null;
 
 // Reset full flow on GET unless we're in an active step
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'd
     }
 }
 
-// ✅ Unset message after displaying it (except 'done')
+// Unset message after displaying it (except 'done')
 if ($message && $step !== 'done') {
     unset($_SESSION['forgot_message']);
 }
@@ -47,7 +47,7 @@ if ($message && $step !== 'done') {
 ob_start();
 ?>
 
-<div class="w-50 m-auto">
+<div class="w-50 m-auto forgot-wrapper">
     <h2 class="mb-4">Forgot Password</h2>
 
     <?php if ($message): ?>
@@ -68,7 +68,7 @@ ob_start();
     <?php elseif ($step === 'otp'): ?>
         <form method="post" action="process_forgot_password.php" class="mb-3">
             <label for="otp" class="form-label">Enter the OTP sent to your email</label>
-            <input type="text" name="otp" id="otp" class="form-control mb-3" required pattern="\d{6}">
+            <input type="text" name="otp" id="otp" class="form-control mb-3" required>
 
             <div class="d-flex justify-content-start gap-2">
                 <button type="submit" class="btn btn-success">Verify</button>
@@ -97,7 +97,7 @@ ob_start();
             <a href="login.php" class="btn btn-primary mt-3">Go to Login</a>
         </div>
         <?php
-        // ✅ Full cleanup after success
+        // Full cleanup after success
         unset(
             $_SESSION['forgot_step'],
             $_SESSION['forgot_message'],

@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/auth_check.php';
 $title = "Login";
 ob_start();
 ?>
-<div class="w-50 m-auto">
+<div class="w-50 m-auto change-pw-wrapper">
 
     <div class="card shadow p-4">
         <h2 class="mb-4 text-center">Change Password</h2>

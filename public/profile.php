@@ -126,8 +126,9 @@ ob_start();
                 <p><strong>Full Name:</strong> <?= htmlspecialchars($student->getStudentName()) ?></p>
                 <p><strong>Student ID:</strong> <?= htmlspecialchars($student->getStudentId()) ?></p>
                 <p><strong>Email:</strong> <?= htmlspecialchars($student->getEmail()) ?></p>
-
-                <p><a href="change_password.php" class="btn btn-outline-primary btn-sm mt-2">Change Password</a></p>
+                <?php if ($profileId === $loggedInId): ?>
+                    <p><a href="change_password.php" class="btn btn-outline-primary btn-sm mt-2">Change Password</a></p>
+                <?php endif; ?>
             </div>
             <?php if ($profileId === $loggedInId): ?>
                 <div class="mt-5 pending-requests">

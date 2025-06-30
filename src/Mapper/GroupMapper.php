@@ -141,7 +141,6 @@ class GroupMapper implements GroupRepository
 
     public function getGroupByName(string $groupName): ?Group
     {
-        // TODO: implement actual DB query here
         $stmt = $this->dbConnection->prepare("
             SELECT * 
             FROM `groups` 
@@ -160,7 +159,6 @@ class GroupMapper implements GroupRepository
 
     public function getGroupsByUser(int $studentId): array
     {
-        // TODO: implement actual DB query here
         $stmt = $this->dbConnection->prepare("
             SELECT g.*
             FROM `groups` g
@@ -180,7 +178,6 @@ class GroupMapper implements GroupRepository
     }
     public function getActiveGroupsByUser(int $studentId): array
     {
-        // TODO: implement actual DB query here
         $stmt = $this->dbConnection->prepare("
             SELECT g.*
             FROM `groups` g
