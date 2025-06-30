@@ -7,9 +7,10 @@ use App\Control\GroupMembershipControl;
 use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupMapper;
+use App\SessionManager;
 
 $groupId = $_POST['groupId'] ?? null;
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 
 if (!$groupId || !$studentId) {
     header("Location: group_info.php?groupId=$groupId&error=invalid");
@@ -24,9 +25,9 @@ $groupMembershipController = new GroupMembershipController($groupMembershipContr
 
 try {
     $groupMembershipController->onRemoveJoinRequest($groupId, $studentId);
-    $_SESSION['success'] = "Join request removed.";
+    SessionManager::setSuccess("Join request removed.");
 } catch (Exception $e) {
-    $_SESSION['error'] = "Error removing request: " . $e->getMessage();
+    SessionManager::setError("Error removing request: " . $e->getMessage());
 }
 
 header("Location: group_info.php?groupId=$groupId");

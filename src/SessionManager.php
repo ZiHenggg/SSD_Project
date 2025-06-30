@@ -192,4 +192,44 @@ class SessionManager
     {
         return self::get('login_error');
     }
+
+    public static function setError(?string $message): void
+    {
+        self::set('error', $message);
+    }
+
+    public static function getError(): ?string
+    {
+        return self::get ('error');
+    }
+
+    public static function setSuccess(?string $message): void
+    {
+        self::set('success', $message);
+    }
+
+    public static function getSuccess(): ?string
+    {
+        return self::get('success');
+    }
+
+    public static function setReviewContext(array $context): void
+    {
+        self::set('review_context', [
+            'reviewer_id' => $context['reviewer_id'] ?? null,
+            'reviewee_id' => $context['reviewee_id'] ?? null,
+            'group_id'    => $context['group_id'] ?? null,
+        ]);
+    }
+
+    public static function getReviewContext(): ?array
+    {
+        return self::get('review_context');
+    }
+
+    public static function clearReviewContext(): void
+    {
+        self::remove('review_context');
+    }
+
 }

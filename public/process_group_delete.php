@@ -9,6 +9,8 @@ use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\ModuleMapper;
 use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
+use App\SessionManager;
+
 // Initialize control class
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
@@ -21,11 +23,11 @@ $groupPageController = new GroupPageController($groupControl, $groupMembershipCo
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['delete_group'])) {
     $groupId = (int) $_POST['group_id'];
     $groupPageController->onDeleteGroup($groupId);
-    $_SESSION['success'] = "Group deleted successfully.";
+    SessionManager::setSuccess("Group deleted successfully.");
     header("Location: dashboard.php");
     exit;
 } else {
-    $_SESSION['error'] = "Invalid group deletion request.";
+    SessionManager::setError("Invalid group deletion request.");
     header("Location: dashboard.php");
     exit;
 }

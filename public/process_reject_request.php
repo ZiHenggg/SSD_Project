@@ -7,6 +7,7 @@ use App\Control\GroupMembershipControl;
 use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupMapper;
+use App\SessionManager;
 
 // Initialize control class
 $groupRepo = new GroupMapper($pdo);
@@ -18,19 +19,19 @@ $groupMembershipController = new GroupMembershipController($groupMembershipContr
 // Get input data
 $requestId = isset($_POST['requestId']) ? (int) $_POST['requestId'] : null;
 $requesterId = isset($_POST['requesterId']) ? (int) $_POST['requesterId'] : null;
-$approverId = $_SESSION['user']['id'] ?? null;
+$approverId = SessionManager::get('user')['id'] ?? null;
 
 if (!$requestId || !$requesterId || !$approverId) {
-    $_SESSION['error'] = "Invalid request data.";
+    SessionManager::setError("Invalid request data.");
     header("Location: group_requests.php?error=invalid");
     exit;
 }
 
 try {
     $groupMembershipController->onRejectJoinRequest($requestId, $requesterId, $approverId);
-    $_SESSION['success'] = "Join request rejected!";
+    SessionManager::setSuccess("Join request rejected!");
 } catch (Exception $e) {
-    $_SESSION['error'] = "Error rejecting join request: " . $e->getMessage();
+    SessionManager::setError("Error rejecting join request: " . $e->getMessage());
 }
 header("Location: dashboard.php");
 exit;

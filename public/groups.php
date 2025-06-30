@@ -12,6 +12,7 @@ use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
 use App\Boundary\GroupMembershipController;
 use Predis\Client as RedisClient;
+use App\SessionManager;
 
 // Redis rate limit
 $redis = new RedisClient([
@@ -20,7 +21,7 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$studentId = $_SESSION['user']['id'] ?? $_SERVER['REMOTE_ADDR'];
+$studentId = SessionManager::get('user')['id'] ?? $_SERVER['REMOTE_ADDR'];
 $rateKey = "search:rate:$studentId";
 $maxSearches = 10;
 $timeWindow = 60; // 60 seconds
@@ -60,7 +61,7 @@ $groups = $query
     : $controller->listAllActiveGroups();
 
 $noGroups = count($groups);
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 
 $title = "Groups";
 ob_start();

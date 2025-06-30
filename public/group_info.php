@@ -11,10 +11,12 @@ use App\Control\GroupMembershipControl;
 use App\Control\GroupJoinRequestsControl;
 use App\Boundary\GroupPageController;
 use App\Boundary\GroupMembershipController;
+use App\SessionManager;
+
 $title = "Group Info";
 ob_start();
 
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 $groupId = isset($_GET['groupId']) ? (int)$_GET['groupId'] : null;
 
 if (!$groupId) {

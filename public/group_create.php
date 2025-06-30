@@ -3,6 +3,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Mapper\GroupMapper;
+use App\SessionManager;
 
 // Initialize GroupRepository
 $groupRepo = new GroupMapper($pdo);
@@ -37,6 +38,14 @@ ob_start();
             <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
+
+        <?php
+        $error = SessionManager::getError();
+        if ($error) {
+            echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>';
+            SessionManager::setError(null); 
+        }
+        ?>
         
             <label for="acadYear">Academic Year</label>
             <select name="acadYear" id="acadYear" class="form-select" required>

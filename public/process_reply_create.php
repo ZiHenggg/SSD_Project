@@ -12,6 +12,7 @@ use App\Control\ReplyControl;
 use App\Control\GroupMembershipControl;
 use App\Boundary\ReplyPageController;
 use App\Boundary\GroupMembershipController;
+use App\SessionManager;
 
 $replyRepo = new ReplyMapper($pdo);
 $reviewRepo = new ReviewMapper($pdo);
@@ -25,7 +26,7 @@ $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $grou
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 
 // Session check
-$loggedInId = $_SESSION['user']['id'] ?? 0;
+$loggedInId = SessionManager::get('user')['id'] ?? 0;
 
 // Input sanitisation
 $reviewId = (int) ($_POST['review_id'] ?? 0);
@@ -64,10 +65,10 @@ try {
 
     // Submit reply
     $replyController->onSubmitReply($reviewId, $responderId, $justification, date('Y-m-d H:i:s'));
-    $_SESSION['success'] = "Reply submitted successfully.";
+    SessionManager::setSuccess("Reply submitted successfully.");
 
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    SessionManager::setError($e->getMessage());
 }
 
 header("Location: profile.php");

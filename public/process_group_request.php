@@ -9,6 +9,7 @@ use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
 use App\Mapper\GroupMapper;
 use Predis\Client as RedisClient;
+use App\SessionManager;
 
 // Redis setup
 $redis = new RedisClient([
@@ -24,7 +25,7 @@ $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $grou
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
 
 $groupId = $_POST['groupId'] ?? null;
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 
 if (!$groupId || !$studentId) {
     header("Location: group_info.php?groupId=$groupId&error=invalid");
@@ -37,14 +38,14 @@ $maxRequests = 5;
 $windowSeconds = 600; // 10 minutes
 
 if ((int)$redis->get($rateKey) >= $maxRequests) {
-    $_SESSION['error'] = "You’ve reached the join request limit. Please try again later.";
+    SessionManager::setError("You’ve reached the join request limit. Please try again later.");
     header("Location: group_info.php?groupId=$groupId");
     exit;
 }
 
 try {
     $groupMembershipController->onJoinGroupRequest($groupId, $studentId);
-    $_SESSION['success'] = "Join request sent successfully.";
+    SessionManager::setSuccess("Join request sent successfully.");
 
     // Increment Redis counter
     $redis->incr($rateKey);
@@ -53,7 +54,7 @@ try {
     }
 
 } catch (Exception $e) {
-    $_SESSION['error'] = "Error sending join request: " . $e->getMessage();
+    SessionManager::setError("Error sending join request: " . $e->getMessage());
 }
 
 header("Location: group_info.php?groupId=$groupId");

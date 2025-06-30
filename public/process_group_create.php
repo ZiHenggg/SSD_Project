@@ -11,6 +11,7 @@ use App\Control\GroupControl;
 use App\Control\GroupMembershipControl;
 use App\Boundary\GroupPageController;
 use Predis\Client as RedisClient;
+use App\SessionManager;
 
 // Redis setup
 $redis = new RedisClient([
@@ -19,14 +20,14 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$studentId = $_SESSION['user']['id'] ?? 0;
+$studentId = SessionManager::get('user')['id'] ?? 0;
 $key = "create_group:student:$studentId";
 $maxAttempts = 3;
 $duration = 600; // 10 minutes
 
 // Check rate limit
 if ((int)$redis->get($key) >= $maxAttempts) {
-    $_SESSION['error'] = "Too many group creation attempts. Please wait before trying again.";
+    SessionManager::setError("Too many group creation attempts. Please wait before trying again.");
     header("Location: group_create.php");
     exit;
 }
@@ -53,7 +54,7 @@ try {
     exit;
 
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    SessionManager::setError($e->getMessage());
     header("Location: group_create.php");
     exit;
 }
