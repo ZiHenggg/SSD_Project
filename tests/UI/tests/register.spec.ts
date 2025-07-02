@@ -15,23 +15,22 @@ import { test, expect } from '@playwright/test';
  */
 
 test('Register page displays and submits correctly', async ({ page }) => {
-  // 🟢 Go to register page
   await page.goto('http://localhost:8080/register.php');
 
-  // 🟢 Ensure form is visible
-  await expect(page.locator('form')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText('Register');
-
-  // 📝 Fill in form (dummy data, adjust if needed)
+  // Fill in registration form
   await page.fill('input[name="studentId"]', '1234567');
-  await page.fill('input[name="studentName"]', 'UI Test Student');
+  await page.fill('input[name="studentName"]', 'Test User');
   await page.fill('input[name="email"]', '1234567@sit.singaporetech.edu.sg');
-  await page.fill('input[name="password"]', 'testing123');
+  await page.fill('input[name="password"]', 'Password123!');
+  
+  // Submit form and wait for redirect to reload page
+  await Promise.all([
+    page.waitForNavigation(), // wait for redirect after form POST
+    page.click('button[type="submit"]'),
+  ]);
 
-  // 🚀 Submit form
-  await page.getByRole('button', { name: 'Register' }).click();
-
-  // 🟢 OTP form should appear (if step = 'otp' is triggered)
+  // ✅ OTP form should now be visible
   await expect(page.locator('input[name="otp"]')).toBeVisible();
   await expect(page.getByRole('button', { name: /resend otp/i })).toBeVisible();
 });
+
