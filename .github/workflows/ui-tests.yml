@@ -51,18 +51,10 @@ jobs:
       - name: Install PHP dependencies (Composer)
         run: composer install --no-interaction --prefer-dist
 
-      - name: Seed test database
+      - name: Seed test database using init.sql
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
-          mysql -h 127.0.0.1 -u root -proot ssddb <<EOF
-          INSERT INTO students (studentId, name, email, password, google2fa_secret, is_2fa_enabled, email_verified)
-          VALUES
-            (1234567, 'CI Test User 1', '1234567@sit.singaporetech.edu.sg',
-             '\$2y\$10\$vVaVplDWvIr5n1QMbROa7Ocbv6mCIcfRNd2ZzUn7qlmiXExEVntv2', NULL, FALSE, TRUE),
-            (7654321, 'CI Test User 2', '7654321@sit.singaporetech.edu.sg',
-             '\$2y\$10\$vVaVplDWvIr5n1QMbROa7Ocbv6mCIcfRNd2ZzUn7qlmiXExEVntv2', 'TESTSECRET', TRUE, TRUE);
-          INSERT INTO studentStats (studentId) VALUES (1234567), (7654321);
-          EOF
+          mysql -h 127.0.0.1 -u root -proot < init.sql
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -105,4 +97,4 @@ jobs:
           echo "- 🐘 MySQL and Redis services bootstrapped via GitHub Actions services" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 Application served at http://localhost:8080 using PHP built-in server" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ .env file created dynamically for CI compatibility" >> $GITHUB_STEP_SUMMARY
-          echo "- 🧪 Seeded test students inserted directly into MySQL before Playwright runs" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 init.sql executed to create schema and seed test data" >> $GITHUB_STEP_SUMMARY

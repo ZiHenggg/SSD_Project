@@ -177,3 +177,15 @@ INSERT INTO reply (reviewId, responderId, justification) VALUES
 (4, 1000001, 'Thanks!');
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- 👇 Additional seed data for CI login/2FA Playwright tests
+
+-- Add test users for login scenarios (with and without 2FA)
+INSERT INTO students (studentId, name, email, password, google2fa_secret, is_2fa_enabled, email_verified) VALUES
+(1234567, 'CI Test User 1', '1234567@sit.singaporetech.edu.sg',
+ '$2y$10$vVaVplDWvIr5n1QMbROa7Ocbv6mCIcfRNd2ZzUn7qlmiXExEVntv2', NULL, FALSE, TRUE), -- No 2FA
+(7654321, 'CI Test User 2', '7654321@sit.singaporetech.edu.sg',
+ '$2y$10$vVaVplDWvIr5n1QMbROa7Ocbv6mCIcfRNd2ZzUn7qlmiXExEVntv2', 'TESTSECRET', TRUE, TRUE); -- With 2FA
+
+-- Add their stats
+INSERT INTO studentStats (studentId) VALUES (1234567), (7654321);
