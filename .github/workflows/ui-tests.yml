@@ -40,6 +40,14 @@ jobs:
         with:
           php-version: '8.2'
 
+      - name: Create .env for CI
+        run: |
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_NAME=ssddb" >> .env
+          echo "DB_USER=ssduser" >> .env
+          echo "DB_PASS=ssdpass" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+
       - name: Install PHP dependencies (Composer)
         run: composer install --no-interaction --prefer-dist
 
