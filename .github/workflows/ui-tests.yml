@@ -40,10 +40,16 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: |
           cd tests/UI
-          npm install
+          npm ci
           npx playwright install --with-deps
 
       - name: Start PHP server
@@ -52,6 +58,8 @@ jobs:
         working-directory: .
 
       - name: Run Playwright tests
+        env:
+          DEBUG: pw:browser*   # Optional: Add for better logs if test fails
         run: |
           cd tests/UI
           npx playwright test
