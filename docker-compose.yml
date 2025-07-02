@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   web:                                # PHP Web Server Container
@@ -65,6 +63,15 @@ services:
     volumes:
       - splunk_data:/opt/splunk/var
       - splunk_etc:/opt/splunk/etc
+
+  playwright:                         # Playwright UI Testing Service
+    build:
+      context: ./tests/UI
+      dockerfile: Dockerfile
+    depends_on:
+      - web
+    stdin_open: true
+    tty: true
 
 volumes:
   splunk_data:

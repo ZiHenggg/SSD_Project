@@ -1,0 +1,57 @@
+name: Run Playwright UI Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ssddb
+          MYSQL_USER: ssduser
+          MYSQL_PASSWORD: ssdpass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd tests/UI
+          npm install
+          npx playwright install --with-deps
+
+      - name: Start PHP server
+        run: |
+          php -S 127.0.0.1:8080 -t public > /dev/null 2>&1 &
+        working-directory: .
+
+      - name: Run Playwright tests
+        run: |
+          cd tests/UI
+          npx playwright test

@@ -1,24 +1,5 @@
-# # Ignore Docker volumes and environment files
-# mysql-data/
-# .env
-
-# # Ignore editor files
-# *.log
-# *.php~
-# .DS_Store
-# .idea/
-# .vscode/
-
-# # Optional: if using Composer or Node
-# vendor/
-# node_modules/
-
 # -------------------------------
-# Dependency Check
-/odc-data/
-/odc-reports/
-
-# Docker volumes and env
+# Docker volumes and environment files
 mysql-data/
 .env
 
@@ -32,10 +13,16 @@ mysql-data/
 .vscode/
 
 # Composer (PHP)
-/vendor/
+vendor/
 
-# Node (if applicable)
-/node_modules/
+# Node.js (Playwright UI tests)
+node_modules/
+playwright-report/
+test-results/
+
+# Dependency Check
+/odc-data/
+/odc-reports/
 
 # PHPUnit
 .phpunit.result.cache
