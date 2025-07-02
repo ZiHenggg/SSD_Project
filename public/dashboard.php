@@ -198,7 +198,8 @@ ob_start();
                                         <h5><strong>Delete “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
                                         <p>This action cannot be undone. Current members will have to find another group.</p>
                                         <input type="checkbox" name="delete_group" required value="true"> I acknowledge and agree.
-                                        <div class="d-flex justify-content-end mt-3">
+                                        <div class="delete-group-footer d-flex align-items-center justify-content-end">
+                                            <span class="cancel-section text-center mx-4"><small>Cancel</small></span>
                                             <button type="submit" class="delete-button">Confirm</button>
                                         </div>
                                     </form>
