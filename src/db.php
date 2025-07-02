@@ -3,7 +3,7 @@ use Dotenv\Dotenv;
 
 if (!isset($_ENV['DB_HOST'])) {
     $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-    $dotenv->load();
+    $dotenv->safeLoad();
 }
 
 try {
