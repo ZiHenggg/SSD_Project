@@ -1,51 +1,37 @@
-/**
- * ✅ Register Page UI Flow Test with Playwright:
- *
- * ✅ Render Form Step
- * - Shows registration fields: Student ID, Name, Email, Password
- * - Submit button is visible
- *
- * ✅ Submit Valid Data
- * - Fills form with valid data
- * - Submits and checks for OTP input field
- * - Simulates backend setting session to OTP step
- *
- * ✅ UI Feedback
- * - Shows heading and correct form labels
- * - Graceful fallback if session not set (should show registration form)
- */
-
 import { test, expect } from '@playwright/test';
 
+/**
+ * ✅ UI Test: Registration Flow (Happy Path Only)
+ *
+ * Verifies the following in-browser flow:
+ *
+ * 1. Loads register page successfully
+ * 2. Fills and submits form
+ * 3. Verifies OTP input is shown after submission
+ *
+ * Does NOT:
+ * - Verify backend OTP logic (covered in PHPUnit)
+ * - Submit OTP or complete registration
+ */
+
 test('Register page displays and submits correctly', async ({ page }) => {
-  // Go to the register page
+  // 🟢 Go to register page
   await page.goto('http://localhost:8080/register.php');
 
-  // ✅ Heading and form should be visible
-  const heading = page.getByRole('heading', { level: 2 });
-  await expect(heading).toHaveText('Register');
+  // 🟢 Ensure form is visible
+  await expect(page.locator('form')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText('Register');
 
-  // ✅ Input fields should be visible
-  await expect(page.locator('input[name="studentId"]')).toBeVisible();
-  await expect(page.locator('input[name="studentName"]')).toBeVisible();
-  await expect(page.locator('input[name="email"]')).toBeVisible();
-  await expect(page.locator('input[name="password"]')).toBeVisible();
-
-  // ✅ Fill in form with valid input
+  // 📝 Fill in form (dummy data, adjust if needed)
   await page.fill('input[name="studentId"]', '1234567');
-  await page.fill('input[name="studentName"]', 'Playwright Tester');
+  await page.fill('input[name="studentName"]', 'UI Test Student');
   await page.fill('input[name="email"]', '1234567@sit.singaporetech.edu.sg');
-  await page.fill('input[name="password"]', 'Test@1234');
+  await page.fill('input[name="password"]', 'testing123');
 
-  // Submit the form
-  await Promise.all([
-    page.waitForNavigation(), // Wait for reload
-    page.click('button[type="submit"]')
-  ]);
+  // 🚀 Submit form
+  await page.getByRole('button', { name: 'Register' }).click();
 
-  // ✅ OTP form should be shown on success
+  // 🟢 OTP form should appear (if step = 'otp' is triggered)
   await expect(page.locator('input[name="otp"]')).toBeVisible();
-
-  // ✅ Resend button should be present
   await expect(page.getByRole('button', { name: /resend otp/i })).toBeVisible();
 });
