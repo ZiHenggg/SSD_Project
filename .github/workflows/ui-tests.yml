@@ -51,11 +51,6 @@ jobs:
       - name: Install PHP dependencies (Composer)
         run: composer install --no-interaction --prefer-dist
 
-      - name: Seed test database using init.sql
-        run: |
-          sudo apt-get update && sudo apt-get install -y mysql-client
-          mysql -h 127.0.0.1 -u root -proot < init.sql
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -97,4 +92,4 @@ jobs:
           echo "- 🐘 MySQL and Redis services bootstrapped via GitHub Actions services" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 Application served at http://localhost:8080 using PHP built-in server" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ .env file created dynamically for CI compatibility" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 init.sql executed to create schema and seed test data" >> $GITHUB_STEP_SUMMARY
+        
