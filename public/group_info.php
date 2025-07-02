@@ -1,16 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\ModuleMapper;
-use App\Control\GroupControl;
-use App\Control\GroupMembershipControl;
-use App\Control\GroupJoinRequestsControl;
-use App\Boundary\GroupPageController;
-use App\Boundary\GroupMembershipController;
 use App\SessionManager;
 
 $title = "Group Info";
@@ -26,14 +17,8 @@ if (!$groupId) {
     exit;
 }
 
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 $hasRequested = $groupMembershipController->onCheckIfRequested($groupId, $studentId);
 $joinStatus = $groupMembershipController->displayRequestStatus($groupId, $studentId);

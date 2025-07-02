@@ -1,6 +1,7 @@
 <?php
 namespace App\Boundary;
 
+use App\Entity\Review;
 use App\Control\ReviewControl;
 use PDO;
 use Exception;
@@ -79,6 +80,11 @@ class ReviewPageController
         } catch (Exception $e) {
             return ['error' => 'An error occurred while calculating average rating: ' . $e->getMessage()];
         }
+    }
+
+    public function onGetReviewById(int $reviewId): ?Review
+    {        
+        return $this->reviewControl->getReviewById($reviewId);  
     }
 }
 ?>

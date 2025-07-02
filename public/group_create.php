@@ -1,25 +1,21 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\GroupMapper;
 use App\SessionManager;
 
-// Initialize GroupRepository
-$groupRepo = new GroupMapper($pdo);
+$groupPageController = $pageControllers['groupPageController'];
 
-// Fetch modules from the database
-$moduleStmt = $pdo->query("SELECT moduleCode FROM modules");
-$modules = $moduleStmt->fetchAll(PDO::FETCH_COLUMN);
-
-// Fetch lab groups from the database
-$labGroupStmt = $pdo->query("SELECT labGroupCode, moduleCode FROM labGroups");
-$labGroupRows = $labGroupStmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Group lab groups by moduleCode
+$modules = $groupPageController->getAllModules();
 $labGroups = [];
-foreach ($labGroupRows as $row) {
-    $labGroups[$row['moduleCode']][] = $row['labGroupCode'];
+
+foreach ($modules as $module) {
+    $labGroups[$module->getModuleCode()] = array_map(function($group) {
+        return [
+            'labGroupCode' => $group->getLabGroupCode(),  // or whatever method gives you the code
+            // add more fields if needed
+        ];
+    }, $groupPageController->getLabGroupsByModuleCode($module->getModuleCode()));
 }
 
 $title = "Create Group";
@@ -75,7 +71,7 @@ ob_start();
             <select name="moduleCode" id="moduleCode" class="form-select" required>
                 <option value="">Select Module</option>
                 <?php foreach ($modules as $mod): ?>
-                    <option value="<?= htmlspecialchars($mod) ?>"><?= htmlspecialchars($mod) ?></option>
+                    <option value="<?= htmlspecialchars($mod->getModuleCode()) ?>"><?= htmlspecialchars($mod->getModuleCode()) ?>, <?= htmlspecialchars($mod->getModuleName()) ?></option>
                 <?php endforeach; ?>
             </select>
 
@@ -127,8 +123,8 @@ ob_start();
 
             groups.forEach(group => {
                 const option = document.createElement('option');
-                option.value = group;
-                option.textContent = group;
+                option.value = group.labGroupCode;
+                option.textContent = group.labGroupCode;
                 labGroupSelect.appendChild(option);
             });
         } else {

@@ -87,6 +87,11 @@ class GroupMembershipController
         return $this->groupMembershipControl->memberExists($groupId, $studentId);
     }
 
+    public function onCheckUserRole(int $groupId, int $studentId): ?string
+    {
+        return $this->groupMembershipControl->getUserRole($groupId, $studentId);
+    }
+
     // Accept Join Request
     public function onAcceptJoinRequest(int $requestId, int $requesterId, int $approverId): void
     {

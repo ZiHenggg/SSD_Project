@@ -1,16 +1,12 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Include Predis
 
-use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
 use Predis\Client as RedisClient;
 
-$repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$page = new StudentPageController($control);
+$page = $pageControllers['studentPageController'];
+$control = $pageControllers['studentControl'];
 
 $redis = new RedisClient([
     'scheme' => 'tcp',
@@ -22,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Step 1: Form Submission (rate-limit this)
     if (isset($_POST['studentId'])) {
-        // ✅ Bypass Redis/OTP in GitHub Actions CI
+        // Bypass Redis/OTP in GitHub Actions CI
         if (getenv('CI') === 'true') {
             $_SESSION['email'] = $_POST['email'];
             $_SESSION['register_step'] = 'otp';

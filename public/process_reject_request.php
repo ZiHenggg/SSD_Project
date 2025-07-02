@@ -1,20 +1,10 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Boundary\GroupMembershipController;
-use App\Control\GroupMembershipControl;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupMapper;
 use App\SessionManager;
 
-// Initialize control class
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 // Get input data
 $requestId = isset($_POST['requestId']) ? (int) $_POST['requestId'] : null;

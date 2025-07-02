@@ -1,6 +1,7 @@
 <?php
 namespace App\Boundary;
 
+use App\Entity\Module;
 use App\Control\GroupControl;
 use App\Control\GroupMembershipControl;
 use PDO;
@@ -125,26 +126,27 @@ class GroupPageController
     {
         try {
             $this->groupControl->softDeleteGroup($groupId);
-            // header("Location: groups.php");
-            // exit;
+
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();
-            header("Location: group_details.php?id=$groupId");
+            header("Location: dashboard.php");
             exit;
         }
     }
 
-    // public function onUpdateGroupStatus(int $groupId, string $status): void
-    // {
-    //     try {
-    //         $this->groupControl->updateGroupStatus($groupId, $status);
-    //         header("Location: group_details.php?id=$groupId");
-    //         exit;
-    //     } catch (Exception $e) {
-    //         $_SESSION['error'] = $e->getMessage();
-    //         header("Location: group_details.php?id=$groupId");
-    //         exit;
-    //     }
-    // }
+    public function onGetModuleByGroupId(int $groupId): ?Module
+    {
+        return $this->groupControl->getModuleByGroupId($groupId);
+    }
+
+    public function getAllModules(): array
+    {
+        return $this->groupControl->getAllModules();
+    }
+
+    public function getLabGroupsByModuleCode(string $moduleCode): array
+    {
+        return $this->groupControl->getLabGroupsByModuleCode($moduleCode);
+    }
 }
 ?>

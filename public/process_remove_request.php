@@ -1,12 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Boundary\GroupMembershipController;
-use App\Control\GroupMembershipControl;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupMapper;
 use App\SessionManager;
 
 $groupId = $_POST['groupId'] ?? null;
@@ -17,11 +12,7 @@ if (!$groupId || !$studentId) {
     exit;
 }
 
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 try {
     $groupMembershipController->onRemoveJoinRequest($groupId, $studentId);

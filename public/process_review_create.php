@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
 use App\SessionManager;
@@ -24,15 +24,8 @@ if ($rating < 1 || $rating > 5 || empty($description)) {
     exit;
 }
 
-use App\Mapper\ReviewMapper;
-use App\Mapper\StudentStatsMapper;
-use App\Control\ReviewControl;
-use App\Boundary\ReviewPageController;
 
-$reviewRepo = new ReviewMapper($pdo);
-$studentStatsRepo = new StudentStatsMapper($pdo);
-$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
-$reviewController = new ReviewPageController($reviewControl, $pdo);
+$reviewController = $pageControllers['reviewPageController'];
 
 try {
     $reviewController->onSubmitReview(

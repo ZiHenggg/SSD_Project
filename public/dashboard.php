@@ -1,23 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\StudentMapper;
-use App\Mapper\ReviewMapper;
-use App\Mapper\ModuleMapper;
-use App\Mapper\StudentStatsMapper;
-use App\Control\GroupControl;
-use App\Control\GroupJoinRequestsControl;
-use App\Control\GroupMembershipControl;
-use App\Control\StudentControl;
-use App\Control\ReviewControl;
-use App\Boundary\GroupPageController;
-use App\Boundary\GroupMembershipController;
-use App\Boundary\StudentPageController;
-use App\Boundary\ReviewPageController;
 use App\SessionManager;
 
 // ===== SESSION STUFF =====
@@ -27,32 +11,16 @@ use App\SessionManager;
 $student = SessionManager::getUser() ?? [];
 $studentId = (int)($student['id'] ?? 0);
 $studentName = $student['name'] ?? 'Unknown';
+// =========================
 
-
-
-
-
-// Instantiate mappers and controls
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$studentRepo = new StudentMapper($pdo);
-$reviewRepo = new ReviewMapper($pdo);
-$moduleRepo = new ModuleMapper($pdo);
-$studentStatsRepo = new StudentStatsMapper($pdo);
-
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
-$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
-$studentPageController = new StudentPageController($studentControl);
-$reviewPageController = new ReviewPageController($reviewControl, $pdo);
+$groupPageController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
+$studentController = $pageControllers['studentPageController'];
+$reviewController = $pageControllers['reviewPageController'];
 
 // Fetch student groups
-$groups = $groupController->listActiveUserGroups($studentId);
-$roles = $groupController->getUserRolesForGroups($studentId, $groups);
+$groups = $groupPageController->listActiveUserGroups($studentId);
+$roles = $groupPageController->getUserRolesForGroups($studentId, $groups);
 
 $title = "Dashboard";
 
@@ -63,6 +31,7 @@ ob_start();
 <div class="mx-5">
     <?php displayErrorMessage(); ?>
     <?php displaySuccessMessage(); ?>
+    <div class="error-message"></div>
     <h2>Welcome to your dashboard, Student ID: <?= htmlspecialchars((string)$studentId) ?></h2>
     <p>Name: <?= htmlspecialchars($studentName) ?></p>
 </div>
@@ -79,7 +48,7 @@ ob_start();
 
             <?php if (count($groups) > 0): ?>
                 <?php foreach ($groups as $group): ?>
-                    <?php $module = $groupControl->getModuleByGroupId($group->getGroupId()); ?>
+                    <?php $module = $groupPageController->onGetModuleByGroupId($group->getGroupId()); ?>
                     <div class="group-item" data-group-id="<?= $group->getGroupId() ?>">
                         <a href="group_info.php?groupId=<?= $group->getGroupId() ?>"
                            class="group-name text-decoration-none header"><?= htmlspecialchars($group->getGroupName()) ?></a>
@@ -157,7 +126,7 @@ ob_start();
                         <span class="header">Current Members</span>
                         <ol class="current-members name-list">
                             <?php
-                            $groupData = $groupController->displayGroupDetails($group->getGroupId());
+                            $groupData = $groupPageController->displayGroupDetails($group->getGroupId());
                             $groupMembers = $groupData['members'];
                             foreach ($groupMembers as $member):
                                 $isAdmin = $member->getRole() === 'admin';
@@ -194,11 +163,11 @@ ob_start();
                             <div class="delete-modal" data-group-id="<?= htmlspecialchars($group->getGroupId()) ?>">
                                 <div class="delete-group-wrapper">
                                     <form class="delete-form" action="process_group_delete.php" method="post">
-                                        <input type="hidden" name="group_id" value="<?= htmlspecialchars($group->getGroupId()) ?>">
+                                        <input type="hidden" class="delete-group-id" name="group_id" value="<?= htmlspecialchars($group->getGroupId()) ?>">
                                         <h5><strong>Delete “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
                                         <p>This action cannot be undone. Current members will have to find another group.</p>
                                         <input type="checkbox" name="delete_group" required value="true"> I acknowledge and agree.
-                                        <div class="delete-group-footer d-flex align-items-center justify-content-end">
+                                        <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
                                             <span class="cancel-section text-center mx-4"><small>Cancel</small></span>
                                             <button type="submit" class="delete-button">Confirm</button>
                                         </div>

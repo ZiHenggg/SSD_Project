@@ -59,5 +59,10 @@ class ReviewControl
         return $this->studentStatsRepo->getTotalReviews($studentId);
     }
 
+    public function getReviewById(int $reviewId): ?Review
+    {
+        return $this->reviewRepo->getReview($reviewId);
+    }
+
 }
 ?>

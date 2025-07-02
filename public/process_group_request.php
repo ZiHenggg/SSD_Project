@@ -1,13 +1,8 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Redis
 
-use App\Boundary\GroupMembershipController;
-use App\Control\GroupMembershipControl;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupMapper;
 use Predis\Client as RedisClient;
 use App\SessionManager;
 
@@ -18,11 +13,7 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 $groupId = $_POST['groupId'] ?? null;
 $studentId = SessionManager::get('user')['id'] ?? null;
@@ -38,7 +29,7 @@ $maxRequests = 5;
 $windowSeconds = 600; // 10 minutes
 
 if ((int)$redis->get($rateKey) >= $maxRequests) {
-    SessionManager::setError("You’ve reached the join request limit. Please try again later.");
+    SessionManager::setError("You've reached the join request limit. Please try again later.");
     header("Location: group_info.php?groupId=$groupId");
     exit;
 }
