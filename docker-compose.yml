@@ -4,13 +4,13 @@ services:
 
   web:                                # PHP Web Server Container
     container_name: php-webapp
-    build: .                          
+    build: .
     ports:
-      - "8080:80"                     
+      - "8080:80"
     volumes:
-      - .:/var/www                    
-      - ./public:/var/www/html        
-    restart: unless-stopped           
+      - .:/var/www
+      - ./public:/var/www/html
+    restart: unless-stopped
     depends_on:
       - db
       - redis                          # Ensure Redis starts before PHP app
@@ -19,9 +19,9 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
-      REDIS_HOST: redis               # Optional: pass Redis host if you use env()
+      REDIS_HOST: redis
 
-  db:                                 
+  db:
     image: mysql:8.0
     container_name: mysql-ssd-db
     restart: always
@@ -42,7 +42,7 @@ services:
     container_name: redis
     restart: always
     expose:
-      - "6379"                        # Only internal access; no external port needed
+      - "6379"
 
   adminer:                            # Optional DB GUI
     image: adminer
@@ -52,7 +52,7 @@ services:
 
   splunk:                             # Optional Log Collection
     image: splunk/splunk:latest
-    container_name: splunk            
+    container_name: splunk
     hostname: splunk
     restart: always
     ports:
@@ -62,19 +62,12 @@ services:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN}
-    volumes: 
+    volumes:
       - splunk_data:/opt/splunk/var
       - splunk_etc:/opt/splunk/etc
 
-  selenium:                           # Selenium Server for UI Testing
-    image: selenium/standalone-chrome
-    container_name: selenium-ui
-    ports:
-      - "4444:4444"
-    shm_size: "2g"
-
 volumes:
-  splunk_data: 
+  splunk_data:
     driver: local
   splunk_etc:
     driver: local
