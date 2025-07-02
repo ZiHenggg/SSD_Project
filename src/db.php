@@ -1,13 +1,14 @@
 <?php
 use Dotenv\Dotenv;
 
+// Load environment variables (if not already loaded)
 if (!isset($_ENV['DB_HOST'])) {
     $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-    $dotenv->safeLoad();
+    $dotenv->load();
 }
 
 try {
-    $host = getenv('DB_HOST') ?: '127.0.0.1';
+    $host = getenv('DB_HOST');
     $db = getenv('DB_NAME');
     $user = getenv('DB_USER');
     $pass = getenv('DB_PASS');
@@ -18,5 +19,4 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-
 ?>

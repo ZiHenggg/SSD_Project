@@ -80,3 +80,11 @@ jobs:
         run: |
           cd tests/UI
           npx playwright test
+
+      - name: Summary
+        run: |
+          echo "### ✅ Playwright UI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Verified frontend UI using Chromium via Playwright" >> $GITHUB_STEP_SUMMARY
+          echo "- MySQL and Redis containers used for backend support" >> $GITHUB_STEP_SUMMARY
+          echo "- App served at http://localhost:8080 using built-in PHP server" >> $GITHUB_STEP_SUMMARY
+          echo "- .env generated dynamically for CI environment" >> $GITHUB_STEP_SUMMARY
