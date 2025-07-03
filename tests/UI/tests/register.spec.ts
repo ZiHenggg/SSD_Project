@@ -18,10 +18,10 @@ test('Register page displays and submits correctly', async ({ page }) => {
   await page.goto('http://localhost:8080/register.php');
 
   // Fill in registration form
-  await page.fill('input[name="studentId"]', '1234567');
+  await page.fill('input[name="studentId"]', '1234568');
   await page.fill('input[name="studentName"]', 'Test User');
-  await page.fill('input[name="email"]', '1234567@sit.singaporetech.edu.sg');
-  await page.fill('input[name="password"]', 'Password123!');
+  await page.fill('input[name="email"]', '1234568@sit.singaporetech.edu.sg');
+  await page.fill('input[name="password"]', 'groupmates12345678');
   
   // Submit form and wait for redirect to reload page
   await Promise.all([

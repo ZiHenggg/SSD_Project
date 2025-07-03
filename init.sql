@@ -184,7 +184,7 @@ VALUES
   (1234567, 'testuser', '1234567@sit.singaporetech.edu.sg',
    '$2y$10$.vHyckdfzUEAJm55evtDKO56sJkLg2IwbJ9o.n75Oz51oO/0V0yP.', 'CGLX4LIL4VLVTSBE', 1, 1),
   (7654321, 'testuser2', '7654321@sit.singaporetech.edu.sg',
-   '$2y$10$hPfu5npLTKAJ1mYmDpOa3.21xvfNtEsmmOXZHPH1PtNcENEGkKH6W', NULL, 0, 1);
+   '$2y$10$hPfu5npLTKAJ1mYmDpOa3.21xvfNtEsmmOXZHPH1PtNcENEgkKH6W', NULL, 0, 1);
 
 INSERT INTO studentStats (studentId) VALUES (1234567), (7654321);
 
