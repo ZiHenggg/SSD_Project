@@ -24,7 +24,7 @@ class UpdatePasswordTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                'getAllStudents',
+                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',
