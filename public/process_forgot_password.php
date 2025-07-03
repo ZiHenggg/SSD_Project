@@ -4,6 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Mapper\StudentMapper;
 use App\Control\StudentControl;
+use App\Boundary\StudentPageController;
 use App\SessionManager;
 use Predis\Client as RedisClient;
 
@@ -11,6 +12,7 @@ SessionManager::start();
 
 $repo = new StudentMapper($pdo);
 $control = new StudentControl($repo);
+$pageController  =  new StudentPageController($control);
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host' => 'redis',
@@ -136,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (time() > $otpData['expiry']) {
             SessionManager::setOTP('', 0);
-            SessionManager::setForgotMessage("OTP has exwpired. Please try again.");
+            SessionManager::setForgotMessage("OTP has expired. Please try again.");
             SessionManager::setForgotStep('form');
             header("Location: forgot_password.php");
             exit;
@@ -176,6 +178,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$email) {
             SessionManager::setForgotMessage("Session expired. Please restart.");
             SessionManager::setForgotStep('form');
+            header("Location: forgot_password.php");
+            exit;
+        }
+
+        $error = $pageController->validatePassword($newPassword);
+        if ($error !== null) {
+            SessionManager::setForgotMessage($error);
+            SessionManager::setForgotStep('reset');
             header("Location: forgot_password.php");
             exit;
         }

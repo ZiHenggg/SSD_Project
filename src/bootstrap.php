@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
 // Set default timezone to Singapore
 date_default_timezone_set('Asia/Singapore');
 
@@ -28,23 +30,22 @@ use App\Boundary\ReplyPageController;
 use App\SessionManager;
 
 // Start session only if not already active
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+SessionManager::start();
+
 
 function displayErrorMessage(): void
 {
-    if (!empty($_SESSION['error'])) {
-        echo '<div class="alert alert-danger">' . htmlspecialchars($_SESSION['error']) . '</div>';
-        unset($_SESSION['error']);
+    if (!empty(SessionManager::getError())) {
+        echo '<div class="alert alert-danger">' . htmlspecialchars(SessionManager::getError()) . '</div>';
+        SessionManager::setError(null);
     }
 }
 
 function displaySuccessMessage(): void
 {
-    if (!empty($_SESSION['success'])) {
-        echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success']) . '</div>';
-        unset($_SESSION['success']);
+    if (!empty(SessionManager::getSuccess())) {
+        echo '<div class="alert alert-success">' . htmlspecialchars(SessionManager::getSuccess()) . '</div>';
+        SessionManager::setSuccess(null);
     }
 }
 

@@ -1,66 +1,69 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../src/auth_check.php';
 
 use App\Mapper\StudentMapper;
 use App\Control\StudentControl;
 use App\Boundary\StudentPageController;
+use App\SessionManager;
 
 $repo = new StudentMapper($pdo);
 $control = new StudentControl($repo);
 $pageController = new StudentPageController($control);
 
-// ✅ Check if user is in 2FA password update flow
-if (!isset($_SESSION['pending_2fa_email']) || $_SESSION['2fa_context'] !== 'password_update') {
+// Check if user is in 2FA password update flow
+if (
+    !SessionManager::has('pending_2fa_email') ||
+    SessionManager::get('2fa_context') !== 'password_update'
+) {
     header("Location: change_password.php");
     exit;
 }
 
-$email = $_SESSION['pending_2fa_email'];
+$email = SessionManager::get('pending_2fa_email');
 $secret = $pageController->get2FASecretForEmail($email);
 $error = '';
 
-// ✅ When form is submitted
+// When form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['code'] ?? '';
 
-    // ✅ Use controller to verify 2FA code
+    // Use controller to verify 2FA code
     if ($pageController->verify2FACodeForPasswordUpdate($secret, $code)) {
         try {
+            $pwChange = SessionManager::get('pending_pw_change');
+        
             // Check required session data
             if (
-                !isset($_SESSION['pending_pw_change']['old_password']) ||
-                !isset($_SESSION['pending_pw_change']['new_password'])
+                !isset($pwChange['old_password']) ||
+                !isset($pwChange['new_password'])
             ) {
-                $_SESSION['change_pw_error'] = "Password update data is missing or expired.";
+                SessionManager::setChangePWError("Password update data is missing or expired.");
                 header("Location: change_password.php");
                 exit;
             }
 
             $result = $pageController->updatePassword($email, [
-                'old_password' => $_SESSION['pending_pw_change']['old_password'],
-                'new_password' => $_SESSION['pending_pw_change']['new_password']
+                'old_password' => $pwChange['old_password'],
+                'new_password' => $pwChange['new_password']
             ]);
 
             if (!$result['success']) {
-                $_SESSION['change_pw_error'] = $result['message'];
+                SessionManager::setChangePWError($result['message']);
                 header("Location: change_password.php");
                 exit;
             }
 
-            // ✅ Clear session and redirect
-            unset(
-                $_SESSION['pending_pw_change'],
-                $_SESSION['pending_2fa_email'],
-                $_SESSION['2fa_context']
-            );
+            // Clear session and redirect
+            SessionManager::remove('pending_pw_change');
+            SessionManager::remove('pending_2fa_email');
+            SessionManager::remove('2fa_context');
 
-            $_SESSION['change_pw_success'] = "Password updated successfully.";
+            SessionManager::setSuccess("Password updated successfully.");
             header('Location: dashboard.php');
             exit;
         } catch (\Exception $e) {
-            $_SESSION['change_pw_error'] = $e->getMessage();
+            SessionManager::setChangePWError($e->getMessage());
             header("Location: change_password.php");
             exit;
         }

@@ -49,6 +49,24 @@ class SessionManager
             session_regenerate_id(true);
         }
 
+        $fingerprint = hash('sha256', $_SERVER['HTTP_USER_AGENT'] . ($_SERVER['REMOTE_ADDR'] ?? ''));
+
+        if (!isset($_SESSION['fingerprint'])) {
+            $_SESSION['fingerprint'] = $fingerprint;
+        } elseif ($_SESSION['fingerprint'] !== $fingerprint) {
+            self::destroy();
+
+            // Clear session cookie
+            if (ini_get('session.use_cookies')) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'],
+                    $params['secure'], $params['httponly']);
+            }
+
+            header('Location: login.php');
+            exit;
+        }
+
         if (!self::has('session_created')) {
             self::set('session_created', time());
         }
