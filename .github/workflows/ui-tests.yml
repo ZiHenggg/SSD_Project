@@ -56,12 +56,6 @@ jobs:
           sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u root -proot < init.sql
 
-      - name: 🕵️ Verify seeded users and password hash
-        run: |
-          echo "✅ Checking seeded users in 'students' table..."
-          mysql -h 127.0.0.1 -u root -proot ssddb -e \
-          "SELECT studentId, email, is_2fa_enabled, email_verified, password FROM students WHERE studentId IN (1234567, 7654321);"
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -92,14 +86,43 @@ jobs:
           cd tests/UI
           npx playwright test
 
-      - name: Summary
+      - name: ✅ Write UI Test Summary
         run: |
-          echo "### ✅ Playwright UI Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Registration & Login flows tested using Chromium + Playwright" >> $GITHUB_STEP_SUMMARY
-          echo "- Registration test fills form and confirms OTP input appears" >> $GITHUB_STEP_SUMMARY
-          echo "- Login test handles both 2FA and non-2FA redirects" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Registration Flow UI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow validates the UI for the student registration process using Playwright:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- 🐘 MySQL and Redis services bootstrapped via GitHub Actions services" >> $GITHUB_STEP_SUMMARY
-          echo "- 🌐 Application served at http://localhost:8080 using PHP built-in server" >> $GITHUB_STEP_SUMMARY
-          echo "- ⚙️ .env file created dynamically for CI compatibility" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 init.sql executed and student table verified" >> $GITHUB_STEP_SUMMARY
+          echo "**📄 Registration Form**" >> $GITHUB_STEP_SUMMARY
+          echo "- Fills form fields with valid student details" >> $GITHUB_STEP_SUMMARY
+          echo "- Submits registration and expects OTP form to render" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🧪 OTP UI Handling**" >> $GITHUB_STEP_SUMMARY
+          echo "- Confirms visibility of OTP input field" >> $GITHUB_STEP_SUMMARY
+          echo "- Confirms 'Resend OTP' button appears" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Registration page UI and OTP step simulated in CI without triggering email" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### ✅ Login + 2FA UI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow validates the login page UI including redirects for 2FA and non-2FA users:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔐 2FA-Enabled User Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Enters valid credentials for user with 2FA" >> $GITHUB_STEP_SUMMARY
+          echo "- Redirected to /verify_2fa.php" >> $GITHUB_STEP_SUMMARY
+          echo "- Enters valid OTP (generated from known TOTP secret)" >> $GITHUB_STEP_SUMMARY
+          echo "- Redirected to dashboard after successful 2FA" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔓 Non-2FA User Flow**" >> $GITHUB_STEP_SUMMARY
+          echo "- Enters valid credentials for user without 2FA" >> $GITHUB_STEP_SUMMARY
+          echo "- Redirected to /setup_2fa.php for initial 2FA setup" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Login and 2FA behavior verified for both flows using Playwright" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 🧪 Technical Details & Environment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 🐘 MySQL and Redis services started using GitHub Actions containers" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 init.sql is used to pre-seed known test users with hardcoded credentials + secrets" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚙️ .env file dynamically generated during workflow" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 Application served locally using PHP's built-in server (http://localhost:8080)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All Playwright UI tests passed successfully in CI" >> $GITHUB_STEP_SUMMARY

@@ -8,7 +8,7 @@ use Predis\Client as RedisClient;
 // Start session
 SessionManager::start();
 
-// CI MODE: Bypass Redis + rate limiting
+// CI MODE: Bypass Redis + rate limiting (Remove for production))
 if (getenv('CI') === 'true') {
     $pageController = $pageControllers['studentPageController'];
     $result = $pageController->loginStudent($_POST);

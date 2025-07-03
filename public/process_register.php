@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Step 1: Form Submission (rate-limit this)
     if (isset($_POST['studentId'])) {
-        // Bypass Redis/OTP in GitHub Actions CI
+        // Bypass Redis/OTP in GitHub Actions CI (Remove for production))
         if (getenv('CI') === 'true') {
             $_SESSION['email'] = $_POST['email'];
             $_SESSION['register_step'] = 'otp';
