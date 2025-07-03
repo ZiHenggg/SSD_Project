@@ -32,14 +32,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function displayErrorMessage(): void {
+function displayErrorMessage(): void
+{
     if (!empty($_SESSION['error'])) {
         echo '<div class="alert alert-danger">' . htmlspecialchars($_SESSION['error']) . '</div>';
         unset($_SESSION['error']);
     }
 }
 
-function displaySuccessMessage(): void {
+function displaySuccessMessage(): void
+{
     if (!empty($_SESSION['success'])) {
         echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success']) . '</div>';
         unset($_SESSION['success']);
@@ -73,10 +75,10 @@ $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
 $studentPageController = new StudentPageController($studentControl);
-$reviewPageController = new ReviewPageController($reviewControl, $pdo);
-$replyPageController = new ReplyPageController($replyControl, $pdo);
+$reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
+$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
 
 return [
     'studentControl' => $studentControl,

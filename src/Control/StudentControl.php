@@ -159,22 +159,22 @@ class StudentControl
         return true;
     }
 
-    public function deleteStudent(string $studentId): void
-    {
-        if (!$this->studentRepo->isStudentExists($studentId)) {
-            throw new \Exception("Student with ID $studentId does not exist.");
-        }
-    }
+    // public function deleteStudent(string $studentId): void
+    // {
+    //     if (!$this->studentRepo->isStudentExists($studentId)) {
+    //         throw new \Exception("Student with ID $studentId does not exist.");
+    //     }
+    // }
 
-    public function sendResetToken(string $email): void
-    {
-        $student = $this->studentRepo->getStudentByEmail($email);
-        if (!$student) {
-            throw new \Exception("No student found with email $email.");
-        }
+    // public function sendResetToken(string $email): void
+    // {
+    //     $student = $this->studentRepo->getStudentByEmail($email);
+    //     if (!$student) {
+    //         throw new \Exception("No student found with email $email.");
+    //     }
 
-        // TODO: Implement logic to send reset token
-    }
+    //     // TODO: Implement logic to send reset token
+    // }
 
     public function updatePassword(string $email, string $oldPassword, string $newPassword): void
     {

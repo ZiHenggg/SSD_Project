@@ -69,7 +69,7 @@ class GroupPageController
         );
     }
 
-    public function onSearchGroupsByModuleName(string $moduleName): array 
+    public function onSearchGroupsByModuleName(string $moduleName): array
     {
         return $this->groupControl->searchGroup($moduleName);
     }
@@ -81,20 +81,20 @@ class GroupPageController
         return $this->groupControl->getAllActiveGroups();
     }
 
-    public function listUserGroups(int $studentId): array
-    {
-        return $this->groupControl->getGroupsByUser($studentId);
-    }
+    // public function listUserGroups(int $studentId): array
+    // {
+    //     return $this->groupControl->getGroupsByUser($studentId);
+    // }
 
     public function listActiveUserGroups(int $studentId): array
     {
         return $this->groupControl->getActiveGroupsByUser($studentId);
     }
 
-    public function getUserRoleInGroup(int $groupId, int $studentId): ?string
-    {
-        return $this->groupMembershipControl->getUserRole($groupId, $studentId);
-    }
+    // public function getUserRoleInGroup(int $groupId, int $studentId): ?string
+    // {
+    //     return $this->groupMembershipControl->getUserRole($groupId, $studentId);
+    // }
 
     public function getUserRolesForGroups(int $studentId, array $groups): array
     {

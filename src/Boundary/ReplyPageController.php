@@ -9,12 +9,12 @@ use Exception;
 class ReplyPageController
 {
     private ReplyControl $replyControl;
-    private PDO $pdo;
+    // private PDO $pdo;
 
-    public function __construct(ReplyControl $replyControl, PDO $pdo)
+    public function __construct(ReplyControl $replyControl/*, PDO $pdo*/)
     {
         $this->replyControl = $replyControl;
-        $this->pdo = $pdo;
+        // $this->pdo = $pdo;
     }
 
     public function onViewReply(int $reviewId): Reply

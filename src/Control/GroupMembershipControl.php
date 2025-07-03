@@ -143,7 +143,6 @@ class GroupMembershipControl
         $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
         $request = null;
         $groupId = null;
-        // TODO: Use a more efficient way to find the request
         foreach ($requests as $req) {
             if ($req->getRequestId() === $requestId) {
                 $groupId = $this->groupJoinRequestsRepo->getGroupIdByRequestId($requestId);

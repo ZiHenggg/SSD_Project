@@ -53,10 +53,10 @@ class GroupMembership
         $this->role = $role;
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin'; // return true if the role is 'admin'
-    }
+    // public function isAdmin(): bool
+    // {
+    //     return $this->role === 'admin'; // return true if the role is 'admin'
+    // }
 
     public function __construct(int $groupId, int $studentId, string $role = 'member')
     {

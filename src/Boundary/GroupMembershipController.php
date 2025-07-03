@@ -9,12 +9,12 @@ use Exception;
 class GroupMembershipController
 {
     private GroupMembershipControl $groupMembershipControl;
-    private PDO $pdo;
+    // private PDO $pdo;
 
-    public function __construct(GroupMembershipControl $groupMembershipControl, PDO $pdo)
+    public function __construct(GroupMembershipControl $groupMembershipControl/*, PDO $pdo*/)
     {
         $this->groupMembershipControl = $groupMembershipControl;
-        $this->pdo = $pdo;
+        // $this->pdo = $pdo;
     }
 
     public function displayGroupId(int $groupMembersId): string
@@ -51,7 +51,7 @@ class GroupMembershipController
             return ['error' => 'An error occurred while fetching student join requests: ' . $e->getMessage()];
         }
     }
-    
+
     public function displayRequestStatus(int $groupId, int $studentId): ?string
     {
         return $this->groupMembershipControl->getRequestStatus($groupId, $studentId);
@@ -63,10 +63,9 @@ class GroupMembershipController
         if ($this->groupMembershipControl->requestExists($groupId, $studentId)) {
             if ($currentStatus === 'accepted') {
                 throw new \Exception("You are already a member of this group.");
-            }
-            elseif ($currentStatus === 'pending') {
+            } elseif ($currentStatus === 'pending') {
                 throw new Exception("You have already requested to join this group.");
-            }        
+            }
         }
 
         $this->groupMembershipControl->submitJoinRequest($groupId, $studentId);
