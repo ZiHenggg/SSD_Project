@@ -1,0 +1,19 @@
+name: Full CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dependency-check:
+    uses: ./.github/workflows/dependency-check.yml
+
+  unit-tests:
+    needs: dependency-check
+    uses: ./.github/workflows/unit-tests.yml
+
+  ui-tests:
+    needs: unit-tests
+    uses: ./.github/workflows/ui-tests.yml
