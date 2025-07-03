@@ -7,7 +7,7 @@ interface StudentRepository
 {
     public function getStudentById(int $studentId): ?Student;
     public function getStudentByEmail(string $email): ?Student;
-    // public function getAllStudents(): array;
+    public function getAllStudents(): array;
     public function createStudentAccount(Student $student): void;
     public function isStudentExists(string $identifier): bool;
     public function updatePassword(string $email, string $hashedPassword): void;
