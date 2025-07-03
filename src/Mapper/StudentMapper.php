@@ -14,7 +14,7 @@ class StudentMapper implements StudentRepository
         $this->dbConnection = $dbConnection;
     }
 
-    public function getStudentById(string $studentId): ?Student
+    public function getStudentById(int $studentId): ?Student
     {
         $stmt = $this->dbConnection->prepare("SELECT * FROM students WHERE studentId = :studentId");
         $stmt->bindParam(':studentId', $studentId);

@@ -17,7 +17,7 @@ class StudentControl
         $this->studentRepo = $studentRepo;
     }
 
-    public function getStudentById(string $studentId): ?Student
+    public function getStudentById(int $studentId): ?Student
     {
         return $this->studentRepo->getStudentById($studentId) ?: null;
     }
