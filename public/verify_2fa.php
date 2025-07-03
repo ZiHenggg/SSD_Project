@@ -44,6 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $control->verify2FACode($email, $code);
 
     if ($result['success']) {
+        $student = (new StudentMapper($pdo))->getStudentByEmail($email); // ✅ add this
+
+        SessionManager::setUser([
+            'id' => $student->getStudentID(),
+            'email' => $student->getEmail(),
+            'name' => $student->getStudentName(),
+        ]);
+
+        // Clear 2FA session data after successful setup
+        SessionManager::set('2fa_verified', true); 
+        SessionManager::set2FA(null, null);
+
         header('Location: ' . $result['redirect']);
         exit;
     } else {

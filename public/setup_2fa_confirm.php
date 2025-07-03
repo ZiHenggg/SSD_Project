@@ -4,18 +4,18 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 use App\Mapper\StudentMapper;
 use App\Control\StudentControl;
+use RobThree\Auth\TwoFactorAuth;
 use App\SessionManager;
 
 // ===== SESSION STUFF =====
 SessionManager::start();
 
 // Get current user and 2FA data from session (via SessionManager)
-$user = SessionManager::getUser();
 $twoFA = SessionManager::get2FA();
-
-$email = $user['email'] ?? null;
+$email = $twoFA['pending_email'] ?? null;
 $secret = $twoFA['secret'] ?? null;
 $code = $_POST['code'] ?? '';
+
 $title = "Confirm 2FA Setup";
 
 // Redirect if session data is missing
@@ -31,8 +31,19 @@ if (!$email || !$secret) {
 $control = new StudentControl(new StudentMapper($pdo));
 
 if ($control->confirm2FASetup($email, $code, $secret)) {
+    
+    $student = $control->getStudentByEmail($email);
+
+    SessionManager::setUser([
+        'id' => $student->getStudentID(),
+        'email' => $student->getEmail(),
+        'name' => $student->getStudentName(),
+    ]);
+
     // Clear 2FA session data after successful setup
+    SessionManager::set('2fa_verified', true); 
     SessionManager::set2FA(null, null);
+
     header('Location: dashboard.php');
     exit;
 }

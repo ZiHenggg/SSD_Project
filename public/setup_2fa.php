@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../src/auth_check.php';
 
 use RobThree\Auth\TwoFactorAuth;
 use App\SessionManager;
@@ -10,8 +9,9 @@ use App\SessionManager;
 // ===== SESSION STUFF =====
 SessionManager::start();
 
-$user = SessionManager::getUser();
-$email = $user['email'] ?? null;
+$twoFA = SessionManager::get2FA();
+$email = $twoFA['pending_email'] ?? null;
+$secret = $twoFA['secret'] ?? null;
 
 if (!$email) {
     header('Location: login.php');
@@ -32,7 +32,7 @@ if ($result && $result['is_2fa_enabled']) {
 // Generate 2FA secret + QR code
 $tfa = new TwoFactorAuth('SSD App');
 $secret = $tfa->createSecret();
-SessionManager::set2FA(null, $secret);
+SessionManager::set2FA(pendingEmail: $email, secret: $secret);
 $qrCodeUrl = $tfa->getQRCodeImageAsDataUri($email, $secret);
 
 $title = "Set Up 2FA";

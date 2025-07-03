@@ -51,14 +51,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </ul>
                 </div>
             </div>
-        <?php elseif ($currentPage != 'register.php'): ?>
-            <div class="nav-group ms-auto">
-                <a class="btn btn-outline-primary" href="register.php">No account? Register</a>
-            </div>
-            <?php else: ?>
+
+        <?php else: ?>
+            <?php if ($currentPage === 'register.php'): ?>
                 <div class="nav-group ms-auto">
                     <a class="btn btn-outline-primary" href="login.php">Login</a>
                 </div>
+            <?php elseif (!in_array($currentPage, ['setup_2fa.php', 'verify_2fa.php'])): ?>
+                <div class="nav-group ms-auto">
+                    <a class="btn btn-outline-primary" href="register.php">No account? Register</a>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </nav>

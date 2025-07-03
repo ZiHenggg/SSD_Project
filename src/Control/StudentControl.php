@@ -22,6 +22,11 @@ class StudentControl
         return $this->studentRepo->getStudentById($studentId) ?: null;
     }
 
+    public function getStudentByEmail(string $email): ?Student
+    {
+        return $this->studentRepo->getStudentByEmail($email) ?: null;
+    }
+
     public function registerStudentAccount(int $studentId, string $studentName, string $email, string $password): void
     {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -108,16 +113,17 @@ class StudentControl
             SessionManager::set2FA($student->getEmail());
             return ['success' => true, 'redirect' => 'verify_2fa.php'];
         }
-
-        SessionManager::setUser([
-            'id' => $student->getStudentId(),
-            'email' => $student->getEmail(),
-            'name' => $student->getStudentName(),
-        ]);
-
-        SessionManager::set2FA(null, null);
-
-        return ['success' => true, 'redirect' => 'setup_2fa.php'];
+        else 
+        {
+            SessionManager::set2FA(pendingEmail: $student->getEmail(), secret: null);
+            return ['success' => true, 'redirect' => 'setup_2fa.php'];
+        }
+        
+        // SessionManager::setUser([
+        //     'id' => $student->getStudentId(),
+        //     'email' => $student->getEmail(),
+        //     'name' => $student->getStudentName(),
+        // ]);
     }
 
     public function verify2FACode(string $email, string $code): array
