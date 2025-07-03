@@ -56,6 +56,11 @@ jobs:
           sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u root -proot < init.sql
 
+      - name: 🔍 Verify seeded test users
+        run: |
+          echo "Checking seeded test users..."
+          mysql -h 127.0.0.1 -u root -proot -e "USE ssddb; SELECT studentId, email, is_2fa_enabled FROM students;"
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -96,4 +101,4 @@ jobs:
           echo "- 🐘 MySQL and Redis services bootstrapped via GitHub Actions services" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 Application served at http://localhost:8080 using PHP built-in server" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ .env file created dynamically for CI compatibility" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 init.sql executed to create schema and seed test users (testuser + testuser2)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 init.sql executed and student table verified" >> $GITHUB_STEP_SUMMARY
