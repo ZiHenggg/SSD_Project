@@ -17,6 +17,7 @@ use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\GroupJoinRequestsRepository;
 use App\Repository\ModuleRepository;
+use App\Repository\LabGroupRepository;
 use App\Entity\Group;
 use PDO;
 use PDOStatement;
@@ -37,10 +38,11 @@ class GroupFlowTest extends TestCase
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
         $moduleRepo = $this->createMock(ModuleRepository::class);
+        $labGroupRepo = $this->createMock(LabGroupRepository::class); // ✅ Added
 
         // ✅ Mock GroupControl and patch createGroup()
         $groupControl = $this->getMockBuilder(GroupControl::class)
-            ->setConstructorArgs([$groupRepo, $groupMembershipRepo, $moduleRepo])
+            ->setConstructorArgs([$groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo])
             ->onlyMethods(['createGroup'])
             ->getMock();
 
@@ -120,7 +122,7 @@ class GroupFlowTest extends TestCase
             'ICT2206',     // moduleCode
             4,             // maxGroupSize
             99,            // creatorId
-            10             // maxMembers (must be int!)
+            10             // maxMembers
         );
 
         $ref = new \ReflectionClass($group);
@@ -130,5 +132,4 @@ class GroupFlowTest extends TestCase
 
         return $group;
     }
-
 }
