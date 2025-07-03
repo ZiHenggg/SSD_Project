@@ -23,3 +23,15 @@ jobs:
         with:
           name: Dependency-Check-Report
           path: dependency-check-report
+
+      - name: ✅ Write Dependency Check Summary
+        run: |
+          echo "### ✅ OWASP Dependency Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Scans the project for known vulnerable dependencies using OWASP Dependency-Check." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Analyzes `composer.lock`, PHP dependencies, and transitive packages" >> $GITHUB_STEP_SUMMARY
+          echo "- 🛡 Cross-references against the National Vulnerability Database (NVD)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 Generates an HTML report of any CVEs or security risks found" >> $GITHUB_STEP_SUMMARY
+          echo "- 📂 Full report is uploaded as an artifact (Dependency-Check-Report)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Dependency scan completed successfully using GitHub Actions" >> $GITHUB_STEP_SUMMARY
