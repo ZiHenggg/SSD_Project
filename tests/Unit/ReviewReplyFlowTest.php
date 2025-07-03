@@ -47,7 +47,7 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                'getAllStudents',
+                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',
@@ -139,7 +139,7 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                'getAllStudents',
+                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',
@@ -171,7 +171,7 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                'getAllStudents',
+                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',
