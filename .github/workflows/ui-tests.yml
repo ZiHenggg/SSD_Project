@@ -56,10 +56,11 @@ jobs:
           sudo apt-get update && sudo apt-get install -y mysql-client
           mysql -h 127.0.0.1 -u root -proot < init.sql
 
-      - name: 🔍 Verify seeded test users
+      - name: 🕵️ Verify seeded users and password hash
         run: |
-          echo "Checking seeded test users..."
-          mysql -h 127.0.0.1 -u root -proot -e "USE ssddb; SELECT studentId, email, is_2fa_enabled FROM students;"
+          echo "✅ Checking seeded users in 'students' table..."
+          mysql -h 127.0.0.1 -u root -proot ssddb -e \
+          "SELECT studentId, email, is_2fa_enabled, email_verified, password FROM students WHERE studentId IN (1234567, 7654321);"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
