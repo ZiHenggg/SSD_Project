@@ -51,6 +51,11 @@ jobs:
       - name: Install PHP dependencies (Composer)
         run: composer install --no-interaction --prefer-dist
 
+      - name: Seed database using init.sql
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u root -proot < init.sql
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -84,12 +89,11 @@ jobs:
       - name: Summary
         run: |
           echo "### ✅ Playwright UI Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Registration page UI tested using Chromium + Playwright" >> $GITHUB_STEP_SUMMARY
-          echo "- Simulates form submission with valid student data" >> $GITHUB_STEP_SUMMARY
-          echo "- Verifies OTP input and Resend OTP button appear after submission" >> $GITHUB_STEP_SUMMARY
-          echo "- Does NOT test OTP logic or registration completion (covered by PHPUnit)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Registration & Login flows tested using Chromium + Playwright" >> $GITHUB_STEP_SUMMARY
+          echo "- Registration test fills form and confirms OTP input appears" >> $GITHUB_STEP_SUMMARY
+          echo "- Login test handles both 2FA and non-2FA redirects" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- 🐘 MySQL and Redis services bootstrapped via GitHub Actions services" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 Application served at http://localhost:8080 using PHP built-in server" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ .env file created dynamically for CI compatibility" >> $GITHUB_STEP_SUMMARY
-        
+          echo "- 📦 init.sql executed to create schema and seed test users (testuser + testuser2)" >> $GITHUB_STEP_SUMMARY
