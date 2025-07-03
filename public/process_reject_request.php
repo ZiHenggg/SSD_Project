@@ -9,7 +9,7 @@ $groupMembershipController = $pageControllers['groupMembershipController'];
 // Get input data
 $requestId = isset($_POST['requestId']) ? (int) $_POST['requestId'] : null;
 $requesterId = isset($_POST['requesterId']) ? (int) $_POST['requesterId'] : null;
-$approverId = SessionManager::get('user')['id'] ?? null;
+$approverId = SessionManager::getUser()['id'] ?? null;
 
 if (!$requestId || !$requesterId || !$approverId) {
     SessionManager::setError("Invalid request data.");

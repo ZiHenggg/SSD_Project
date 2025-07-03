@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
+use App\SessionManager;
+
 $title = "Login";
 ob_start();
 ?>
@@ -9,9 +11,13 @@ ob_start();
 
     <div class="card shadow p-4">
         <h2 class="mb-4 text-center">Change Password</h2>
-        <?php if (!empty($_SESSION['change_pw_error'])): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['change_pw_error']) ?></div>
-            <?php unset($_SESSION['change_pw_error']); endif; ?>
+        <?php
+        $error = SessionManager::getChangePWError();
+        if ($error) {
+            echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>';
+            SessionManager::setChangePWError(null); // Clear after showing
+        }?>
+
         <form method="post" action="process_password_update.php">
             <div class="mb-3">
                 <label for="old_password" class="form-label">Current Password</label>

@@ -9,7 +9,7 @@ $groupMembershipController = $pageControllers['groupMembershipController'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['delete_group'])) {
     $groupId = (int) $_POST['group_id'];
-    $studentId = SessionManager::get('user')['id'] ?? null;
+    $studentId = SessionManager::getUser()['id'] ?? null;
     $ifMember = $groupMembershipController->onCheckIfMember($groupId, $studentId);
     $isAdmin = $groupMembershipController->onCheckUserRole($groupId, $studentId) === 'admin';
     if (!$ifMember) {

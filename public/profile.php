@@ -2,13 +2,15 @@
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
+use App\SessionManager;
+
 $groupMembershipController = $pageControllers['groupMembershipController'];
 $groupController = $pageControllers['groupPageController'];
 $studentController = $pageControllers['studentPageController'];
 $reviewController = $pageControllers['reviewPageController'];
 $replyController = $pageControllers['replyPageController'];
 
-$loggedInId = $_SESSION['user']['id'];
+$loggedInId = SessionManager::getUser()['id'];
 
 try {
     if (isset($_GET['id']) && ctype_digit($_GET['id'])) {

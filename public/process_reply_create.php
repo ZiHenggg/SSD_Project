@@ -9,7 +9,7 @@ $replyController = $pageControllers['replyPageController'];
 $reviewPageController = $pageControllers['reviewPageController'];
 
 // Session check
-$loggedInId = SessionManager::get('user')['id'] ?? 0;
+$loggedInId = SessionManager::getUser()['id'] ?? 0;
 
 // Input sanitisation
 $reviewId = (int) ($_POST['review_id'] ?? 0);

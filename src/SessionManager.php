@@ -172,7 +172,7 @@ class SessionManager
         return self::get('registration');
     }
 
-    public static function setForgotPasswordEmail(string $email): void
+    public static function setForgotPasswordEmail(?string $email): void
     {
         self::set('forgot_password', ['email' => $email]);
     }
@@ -230,6 +230,119 @@ class SessionManager
     public static function clearReviewContext(): void
     {
         self::remove('review_context');
+    }
+
+    public static function setRegisterStep(string $step): void
+    {
+        self::set('register_step', $step);
+    }
+
+    public static function getRegisterStep(): ?string
+    {
+        return self::get('register_step');
+    }
+
+    public static function setRegisterMessage(string $message): void
+    {
+        self::set('register_message', $message);
+    }
+
+    public static function getRegisterMessage(): ?string
+    {
+        return self::get('register_message');
+    }
+
+    public static function setRegisterMessageType(string $type): void
+    {
+        self::set('register_message_type', $type);
+    }
+
+    public static function getRegisterMessageType(): ?string
+    {
+        return self::get('register_message_type') ?? 'info';
+    }
+
+    public static function setRegisterSuccess(bool $success): void
+    {
+        self::set('register_success', $success);
+    }
+
+    public static function isRegisterSuccess(): bool
+    {
+        return self::get('register_success') ?? false;
+    }
+
+    public static function setForgotStep(string $step): void
+    {
+        self::set('forgot_step', $step);
+    }
+
+    public static function getForgotStep(): ?string
+    {
+        return self::get('forgot_step');
+    }
+
+    public static function setForgotMessage(string $message): void
+    {
+        self::set('forgot_message', $message);
+    }
+
+    public static function getForgotMessage(): ?string
+    {
+        return self::get('forgot_message');
+    }
+
+public static function setForgotStartedAt(int $timestamp): void
+    {
+        self::set('forgot_started_at', $timestamp);
+    }
+
+    public static function getForgotStartedAt(): ?int
+    {
+        return self::get('forgot_started_at');
+    }
+
+    public static function isForgotFlowExpired(int $timeoutSeconds): bool
+    {
+        $startedAt = self::getForgotStartedAt();
+        return $startedAt !== null && (time() - $startedAt) > $timeoutSeconds;
+    }
+
+    public static function resetForgotFlow(): void
+    {
+        self::remove('forgot_step');
+        self::remove('forgot_message');
+        self::remove('forgot_password'); 
+        self::remove('forgot_started_at');
+        self::remove('otp');
+        self::remove('otp_expiry');
+    }
+
+    public static function setChangePWError(?string $message): void
+    {
+        self::set('change_pw_error', $message);
+    }
+
+    public static function getChangePWError(): ?string
+    {
+        return self::get('change_pw_error');
+    }
+
+    public static function is2faVerified(): bool
+    {
+        return $_SESSION['2fa_verified'] ?? false;
+    }
+
+    public static function set2faVerified(bool $value): void
+    {
+        $_SESSION['2fa_verified'] = $value;
+    }
+
+    public static function resetAuth(): void
+    {
+        unset($_SESSION['user']);
+        unset($_SESSION['2fa']);
+        unset($_SESSION['2fa_verified']);
     }
 
 }

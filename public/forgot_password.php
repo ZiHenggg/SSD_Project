@@ -1,47 +1,38 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../src/bootstrap.php';
+
+use App\SessionManager;
+
+SessionManager::start();
 
 $title = "Forgot Password";
 
 // Timeout duration (in seconds)
 $timeout = 600;
 
-// Reset session if forgot flow expired
-if (isset($_SESSION['forgot_started_at']) && time() - $_SESSION['forgot_started_at'] > $timeout) {
-    unset(
-        $_SESSION['forgot_step'],
-        $_SESSION['forgot_message'],
-        $_SESSION['forgot_email'],
-        $_SESSION['otp'],
-        $_SESSION['otp_expiry'],
-        $_SESSION['forgot_started_at']
-    );
+// Handle timeout expiration
+if (SessionManager::isForgotFlowExpired($timeout)) {
+    SessionManager::resetForgotFlow();
 }
 
-// Step assignment before conditional session reset
-$step = $_SESSION['forgot_step'] ?? 'form';
+// Refresh timestamp
+SessionManager::set('forgot_last_active', time());
 
-// Preserve forgot_message before wiping session
-$message = $_SESSION['forgot_message'] ?? null;
+// Determine current step
+$step = SessionManager::getForgotStep() ?? 'form';
+$message = SessionManager::getForgotMessage();
 
-// Reset full flow on GET unless we're in an active step
+// Reset session state if not in OTP, reset, or done step
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'done'])) {
     if (!$message) {
-        unset(
-            $_SESSION['forgot_step'],
-            $_SESSION['forgot_email'],
-            $_SESSION['otp'],
-            $_SESSION['otp_expiry'],
-            $_SESSION['forgot_started_at']
-        );
+        SessionManager::resetForgotFlow();
         $step = 'form';
     }
 }
 
-// Unset message after displaying it (except 'done')
+// Clear message after showing (except for final step)
 if ($message && $step !== 'done') {
-    unset($_SESSION['forgot_message']);
+    SessionManager::setForgotMessage('');
 }
 
 ob_start();
@@ -97,15 +88,8 @@ ob_start();
             <a href="login.php" class="btn btn-primary mt-3">Go to Login</a>
         </div>
         <?php
-        // Full cleanup after success
-        unset(
-            $_SESSION['forgot_step'],
-            $_SESSION['forgot_message'],
-            $_SESSION['forgot_email'],
-            $_SESSION['forgot_started_at'],
-            $_SESSION['otp'],
-            $_SESSION['otp_expiry']
-        );
+        // Final cleanup
+        SessionManager::resetForgotFlow();
         ?>
     <?php endif; ?>
 </div>

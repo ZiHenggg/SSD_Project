@@ -14,7 +14,7 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$studentId = SessionManager::get('user')['id'] ?? 0;
+$studentId = SessionManager::getUser()['id'] ?? 0;
 $key = "create_group:student:$studentId";
 $maxAttempts = 3;
 $duration = 600; // 10 minutes

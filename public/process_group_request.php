@@ -16,7 +16,7 @@ $redis = new RedisClient([
 $groupMembershipController = $pageControllers['groupMembershipController'];
 
 $groupId = $_POST['groupId'] ?? null;
-$studentId = SessionManager::get('user')['id'] ?? null;
+$studentId = SessionManager::getUser()['id'] ?? null;
 
 if (!$groupId || !$studentId) {
     header("Location: group_info.php?groupId=$groupId&error=invalid");
