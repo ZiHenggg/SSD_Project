@@ -13,10 +13,10 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-
 // ==== Session Management ====
 $twoFA = SessionManager::get2FA();
 $email = $twoFA['pending_email'] ?? null;
+$user = SessionManager::getUser();
 
 // Already fully logged in — block access
 if ($user && !$email) {
@@ -29,12 +29,9 @@ if (!$email) {
     header("Location: login.php");
     exit;
 }
-
-// =====================
+// ============================
 
 $error = '';
-
-
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,12 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $control->verify2FACode($email, $code);
 
     if ($result['success']) {
-        $student = (new StudentMapper($pdo))->getStudentByEmail($email); // ✅ add this
+        $student = (new StudentMapper($pdo))->getStudentByEmail($email);
 
         SessionManager::setUser([
             'id' => $student->getStudentID(),
             'email' => $student->getEmail(),
             'name' => $student->getStudentName(),
+        ]);
+
+        // ✅ Log successful 2FA
+        logEvent('info', '2FA verification successful', [
+            'email' => $student->getEmail(),
+            'studentId' => $student->getStudentID(),
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
         ]);
 
         // Clear 2FA session data after successful setup

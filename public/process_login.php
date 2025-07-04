@@ -37,14 +37,17 @@ $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
-    // ✅ Set user into session the right way
+    // ✅ Set user into session (pending 2FA)
     SessionManager::setUser([
         'id' => $username,
         'email' => $result['email'] ?? null,
         'name' => $result['name'] ?? null,
     ]);
 
-    logEvent('info', 'Login successful', ['username' => $username, 'ip' => $ip]);
+    logEvent('info', 'Login passed password check, pending 2FA', [
+        'username' => $username,
+        'ip' => $ip
+    ]);
 
     $redis->del([$userKey, $ipKey]);
     SessionManager::setLoginError(null);
