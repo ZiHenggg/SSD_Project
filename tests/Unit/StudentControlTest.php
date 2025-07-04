@@ -59,7 +59,7 @@ class StudentControlTest extends TestCase
         );
 
         $pending = SessionManager::getRegistration();
-        $otpData = SessionManager::getOTP();
+        $otpData = SessionManager::getRegisterOTP();  // ✅ FIXED: was getOTP()
 
         $this->assertEquals(1234567, $pending['studentId']);
         $this->assertEquals('Jane Doe', $pending['studentName']);

@@ -45,7 +45,7 @@ class OtpVerificationTest extends TestCase
             ->method('verifyStudentEmail')
             ->with('test@sit.singaporetech.edu.sg');
 
-        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setRegisterOTP('123456', time() + 300);  // ✅ CORRECTED
         SessionManager::setRegistration([
             'studentId' => 1234567,
             'studentName' => 'Jane Doe',
@@ -58,13 +58,13 @@ class OtpVerificationTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertNull(SessionManager::getOTP());
+        $this->assertNull(SessionManager::getRegisterOTP());  // ✅ CORRECTED
         $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testVerifyOtpFailsIfExpired()
     {
-        SessionManager::setOTP('123456', time() - 1);
+        SessionManager::setRegisterOTP('123456', time() - 1);  // ✅ CORRECTED
         SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
         ]);
@@ -78,7 +78,7 @@ class OtpVerificationTest extends TestCase
 
     public function testVerifyOtpFailsIfIncorrect()
     {
-        SessionManager::setOTP('123456', time() + 300);
+        SessionManager::setRegisterOTP('123456', time() + 300);  // ✅ CORRECTED
         SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
         ]);
