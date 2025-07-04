@@ -65,10 +65,15 @@ SessionManager::start();
 function logEvent(string $type, string $message, array $context = []): void
 {
     $logPath = '/var/www/logs/app.log';
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+    // ✅ Real client IP first, fallback to Docker internal
+    $ip = $_SERVER['HTTP_X_REAL_IP']
+        ?? $_SERVER['HTTP_X_FORWARDED_FOR']
+        ?? $_SERVER['REMOTE_ADDR']
+        ?? 'unknown';
 
     $userData = \App\SessionManager::getUser();
-    $user = $userData['id'] ?? 'guest'; // this now works 👌
+    $user = $userData['id'] ?? 'guest';
 
     $entry = sprintf(
         "[%s] [%s] %s | User: %s | IP: %s | %s\n",
@@ -82,6 +87,7 @@ function logEvent(string $type, string $message, array $context = []): void
 
     file_put_contents($logPath, $entry, FILE_APPEND);
 }
+
 
 function displayErrorMessage(): void
 {
