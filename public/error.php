@@ -2,21 +2,27 @@
 define('STATIC_PAGE', true);
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
-$title = "Access Denied";
+
+$title = "Error";
+
 ob_start();
 ?>
 
 <div class="w-75 m-auto text-center py-5">
-    <img src="/img/professor.jpg" alt="Professor face" style="max-height: 350px;">
-    <img src="/img/professor2.jpg" alt="Professor face" style="max-height: 350px;">
-    <h1 class="display-4 text-danger">Access Denied!</h1>
-    <p class="lead mb-4">You are not authorized to view this page or resource.</p>
+    <img src="/img/professor.jpg" alt="Professor face" style="max-height: 300px;">
+    <img src="/img/professor2.jpg" alt="Professor face" style="max-height: 300px;" class="ms-2">
 
-    <div class="alert alert-info mx-auto w-75 text-start">
+    <h1 class="display-4 text-danger mt-4">Oops! Something's not right</h1>
+    <p class="lead mb-4">
+        Either you're trying to access a page or resource you're not authorized to view,<br>
+        or something unexpected went wrong on our end.
+    </p>
+
+    <div class="alert alert-warning mx-auto w-75 text-start">
         <h5 class="fw-bold">🔒 OWASP A01:2021 – Broken Access Control</h5>
         <p class="mb-0">
-            Access control enforces policy such that users cannot act outside of their intended permissions.
-            This page is protected to prevent unauthorized access to sensitive or internal resources.
+            Proper access control ensures users cannot act outside their intended permissions.
+            This page is protected to prevent exposure of restricted areas or actions.
         </p>
     </div>
 
