@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
         $repo->updatePassword($email, $hashed);
+        $repo->disable2FA($email); // 🔥 Require re-setup of 2FA on next login
 
         $redis->del($resendKey);
 
