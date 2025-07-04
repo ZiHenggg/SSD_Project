@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::setRegisterStep('otp');
             SessionManager::setRegisterMessage('Mocked OTP step in CI');
             SessionManager::setRegisterMessageType('success');
+            SessionManager::resetRegisterFlow();
+            SessionManager::setRegisterSuccess(true);
             header('Location: register.php');
             exit;
         }

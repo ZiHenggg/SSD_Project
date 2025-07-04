@@ -3,14 +3,14 @@
 /**
  * Tests OTP verification logic via StudentControl::verifyOtp():
  *
- * ✅ testVerifyOtpSuccess()
+ * testVerifyOtpSuccess()
  * - Accepts correct OTP and verifies student email
  * - Creates student account and clears session
  *
- * ✅ testVerifyOtpFailsIfExpired()
+ * testVerifyOtpFailsIfExpired()
  * - Fails if OTP has expired
  *
- * ✅ testVerifyOtpFailsIfIncorrect()
+ * testVerifyOtpFailsIfIncorrect()
  * - Fails if provided OTP does not match session
  */
 
@@ -45,7 +45,7 @@ class OtpVerificationTest extends TestCase
             ->method('verifyStudentEmail')
             ->with('test@sit.singaporetech.edu.sg');
 
-        SessionManager::setRegisterOTP('123456', time() + 300);  // ✅ CORRECTED
+        SessionManager::setRegisterOTP('123456', time() + 300);
         SessionManager::setRegistration([
             'studentId' => 1234567,
             'studentName' => 'Jane Doe',
@@ -58,13 +58,13 @@ class OtpVerificationTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertNull(SessionManager::getRegisterOTP());  // ✅ CORRECTED
+        $this->assertNull(SessionManager::getRegisterOTP());
         $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testVerifyOtpFailsIfExpired()
     {
-        SessionManager::setRegisterOTP('123456', time() - 1);  // ✅ CORRECTED
+        SessionManager::setRegisterOTP('123456', time() - 1);
         SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
         ]);
