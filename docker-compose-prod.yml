@@ -61,21 +61,3 @@ services:
       - ./nginx/logs:/mnt/nginx-logs
     restart: unless-stopped
 
-  snort3:
-    image: ciscotalos/snort3:latest
-    container_name: snort3
-    network_mode: host
-    environment:
-      - HEC_TOKEN=${SPLUNK_HEC_TOKEN}
-    cap_add:
-      - NET_ADMIN
-      - SYS_NICE
-      - NET_RAW
-    volumes:
-      - ./snort3/snort.lua:/usr/local/etc/snort/snort.lua:ro
-      - ./snort3/local.rules:/usr/local/etc/snort/local.rules:ro
-      - ./snort3/logs:/var/log/snort
-    command:
-      - -c /usr/local/etc/snort/snort.lua
-      - -i ${INTERFACE}
-      - -l /var/log/snort
