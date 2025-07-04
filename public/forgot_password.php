@@ -1,53 +1,54 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../src/bootstrap.php';
+
+use App\SessionManager;
+
+SessionManager::start();
+
+// If already logged in, redirect to dashboard
+if (SessionManager::getUser()) {
+    header("Location: dashboard.php");
+    exit();
+}
 
 $title = "Forgot Password";
 
-// ⏳ Timeout duration (in seconds)
-$timeout = 600;
+// Timeout duration (in seconds)
+$timeout = 600; // 10 minutes
 
-// Reset session if forgot flow expired
-if (isset($_SESSION['forgot_started_at']) && time() - $_SESSION['forgot_started_at'] > $timeout) {
-    unset(
-        $_SESSION['forgot_step'],
-        $_SESSION['forgot_message'],
-        $_SESSION['forgot_email'],
-        $_SESSION['otp'],
-        $_SESSION['otp_expiry'],
-        $_SESSION['forgot_started_at']
-    );
+// Handle timeout expiration
+if (SessionManager::isForgotFlowExpired($timeout)) {
+    SessionManager::resetForgotFlow();
+    SessionManager::setForgotMessage("Your session has expired. Please start over.");
+    header("Location: forgot_password.php");
+    exit;
 }
 
-// Step assignment before conditional session reset
-$step = $_SESSION['forgot_step'] ?? 'form';
 
-// ✅ Preserve forgot_message before wiping session
-$message = $_SESSION['forgot_message'] ?? null;
+// Refresh timestamp
+SessionManager::set('forgot_last_active', time());
 
-// Reset full flow on GET unless we're in an active step
+// Determine current step
+$step = SessionManager::getForgotStep() ?? 'form';
+$message = SessionManager::getForgotMessage();
+
+// Reset session state if not in OTP, reset, or done step
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !in_array($step, ['otp', 'reset', 'done'])) {
     if (!$message) {
-        unset(
-            $_SESSION['forgot_step'],
-            $_SESSION['forgot_email'],
-            $_SESSION['otp'],
-            $_SESSION['otp_expiry'],
-            $_SESSION['forgot_started_at']
-        );
+        SessionManager::resetForgotFlow();
         $step = 'form';
     }
 }
 
-// ✅ Unset message after displaying it (except 'done')
+// Clear message after showing (except for final step)
 if ($message && $step !== 'done') {
-    unset($_SESSION['forgot_message']);
+    SessionManager::setForgotMessage('');
 }
 
 ob_start();
 ?>
 
-<div class="w-50 m-auto">
+<div class="w-50 m-auto forgot-wrapper">
     <h2 class="mb-4">Forgot Password</h2>
 
     <?php if ($message): ?>
@@ -68,7 +69,7 @@ ob_start();
     <?php elseif ($step === 'otp'): ?>
         <form method="post" action="process_forgot_password.php" class="mb-3">
             <label for="otp" class="form-label">Enter the OTP sent to your email</label>
-            <input type="text" name="otp" id="otp" class="form-control mb-3" required pattern="\d{6}">
+            <input type="text" name="otp" id="otp" class="form-control mb-3" required>
 
             <div class="d-flex justify-content-start gap-2">
                 <button type="submit" class="btn btn-success">Verify</button>
@@ -97,15 +98,8 @@ ob_start();
             <a href="login.php" class="btn btn-primary mt-3">Go to Login</a>
         </div>
         <?php
-        // ✅ Full cleanup after success
-        unset(
-            $_SESSION['forgot_step'],
-            $_SESSION['forgot_message'],
-            $_SESSION['forgot_email'],
-            $_SESSION['forgot_started_at'],
-            $_SESSION['otp'],
-            $_SESSION['otp_expiry']
-        );
+        // Final cleanup
+        SessionManager::resetForgotFlow();
         ?>
     <?php endif; ?>
 </div>

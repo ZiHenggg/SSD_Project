@@ -1,54 +1,16 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\StudentStatsMapper;
-use App\Mapper\GroupJoinRequestsMapper;
+use App\SessionManager;
 
-use App\Mapper\GroupMembershipMapper;
-use App\Control\GroupMembershipControl;
-use App\Boundary\GroupMembershipController;
+$groupMembershipController = $pageControllers['groupMembershipController'];
+$groupController = $pageControllers['groupPageController'];
+$studentController = $pageControllers['studentPageController'];
+$reviewController = $pageControllers['reviewPageController'];
+$replyController = $pageControllers['replyPageController'];
 
-use App\Mapper\GroupMapper;
-use App\Control\GroupControl;
-use App\Boundary\GroupPageController;
-
-use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
-
-use App\Mapper\ReplyMapper;
-use App\Control\ReplyControl;
-use App\Boundary\ReplyPageController;
-
-use App\Mapper\ReviewMapper;
-use App\Control\ReviewControl;
-use App\Boundary\ReviewPageController;
-
-use App\Mapper\ModuleMapper;
-
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupRepo = new GroupMapper($pdo);
-$studentRepo = new StudentMapper($pdo);
-$reviewRepo = new ReviewMapper($pdo);
-$replyRepo = new ReplyMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$studentStatsRepo = new StudentStatsMapper($pdo);
-
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
-$replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
-
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
-$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$studentController = new StudentPageController($studentControl, $pdo);
-$reviewController = new ReviewPageController($reviewControl, $pdo);
-$replyController = new ReplyPageController($replyControl, $pdo);
-
-$loggedInId = $_SESSION['user']['id'];
+$loggedInId = SessionManager::getUser()['id'];
 
 try {
     if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
@@ -126,8 +88,9 @@ ob_start();
                 <p><strong>Full Name:</strong> <?= htmlspecialchars($student->getStudentName()) ?></p>
                 <p><strong>Student ID:</strong> <?= htmlspecialchars($student->getStudentId()) ?></p>
                 <p><strong>Email:</strong> <?= htmlspecialchars($student->getEmail()) ?></p>
-
-                <p><a href="change_password.php" class="btn btn-outline-primary btn-sm mt-2">Change Password</a></p>
+                <?php if ($profileId === $loggedInId): ?>
+                    <p><a href="change_password.php" class="btn btn-outline-primary btn-sm mt-2">Change Password</a></p>
+                <?php endif; ?>
             </div>
             <?php if ($profileId === $loggedInId): ?>
                 <div class="mt-5 pending-requests">
@@ -246,7 +209,7 @@ ob_start();
                             <?php endfor; ?>
                         </div>
                         <p class="total-reviews m-0 text-muted small">
-                            (<?= htmlspecialchars($totalReviews) . ' ' . ($totalReviews < 2 ? "review" : "reviews") ?>)</p>
+                            (<?= htmlspecialchars($totalReviews) . ' ' . ($totalReviews == 1 ? "review" : "reviews") ?>)</p>
                     </div>
                 </div>
             <?php if ($profileId === $loggedInId): ?>

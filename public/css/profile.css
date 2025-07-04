@@ -113,3 +113,14 @@
         margin-top: 3%;
     }
 }
+
+@media screen and (max-width: 620px) {
+    .review-wrapper > div {
+        flex-direction: column;
+    }
+
+    .review-wrapper .filter-group {
+        margin-right: auto;
+        margin-bottom: 5%;
+    }
+}

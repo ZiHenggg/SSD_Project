@@ -1,17 +1,10 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Redis
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\ModuleMapper;
-use App\Control\GroupControl;
-use App\Control\GroupMembershipControl;
-use App\Boundary\GroupPageController;
-use App\Boundary\GroupMembershipController;
 use Predis\Client as RedisClient;
+use App\SessionManager;
 
 // Redis rate limit
 $redis = new RedisClient([
@@ -20,7 +13,7 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$studentId = $_SESSION['user']['id'] ?? $_SERVER['REMOTE_ADDR'];
+$studentId = SessionManager::get('user')['id'] ?? $_SERVER['REMOTE_ADDR'];
 $rateKey = "search:rate:$studentId";
 $maxSearches = 10;
 $timeWindow = 60; // 60 seconds
@@ -44,23 +37,16 @@ if ($redis->ttl($rateKey) <= 0) {
     $redis->expire($rateKey, $timeWindow);
 }
 
-// --- Proceed with normal logic ---
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$moduleRepo = new ModuleMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$controller = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 $query = $_GET['query'] ?? '';
 $groups = $query
-    ? $controller->onSearchGroupsByModuleName($query)
-    : $controller->listAllActiveGroups();
+    ? $groupController->onSearchGroupsByModuleName($query)
+    : $groupController->listAllActiveGroups();
 
 $noGroups = count($groups);
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 
 $title = "Groups";
 ob_start();
@@ -78,7 +64,7 @@ ob_start();
         <?php 
         $anyShown = false;
         foreach ($groups as $group): 
-            $module = $groupControl->getModuleByGroupId($group->getGroupId());
+            $module = $groupController->onGetModuleByGroupId($group->getGroupId());
             $isMember = $groupMembershipController->onCheckIfMember($group->getGroupId(), $studentId);
 
             if ($isMember) continue;

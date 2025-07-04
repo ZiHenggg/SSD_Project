@@ -1,31 +1,15 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\ReplyMapper;
-use App\Mapper\ReviewMapper;
-use App\Mapper\StudentMapper;
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Control\ReplyControl;
-use App\Control\GroupMembershipControl;
-use App\Boundary\ReplyPageController;
-use App\Boundary\GroupMembershipController;
+use App\SessionManager;
 
-$replyRepo = new ReplyMapper($pdo);
-$reviewRepo = new ReviewMapper($pdo);
-$studentRepo = new StudentMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupRepo = new GroupMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
-$replyController = new ReplyPageController($replyControl, $pdo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupMembershipController = $pageControllers['groupMembershipController'];
+$replyController = $pageControllers['replyPageController'];
+$reviewPageController = $pageControllers['reviewPageController'];
 
 // Session check
-$loggedInId = $_SESSION['user']['id'] ?? 0;
+$loggedInId = SessionManager::getUser()['id'] ?? 0;
 
 // Input sanitisation
 $reviewId = (int) ($_POST['review_id'] ?? 0);
@@ -45,7 +29,7 @@ try {
     }
 
     // Check if review exists
-    $review = $reviewRepo->getReview($reviewId);
+    $review = $reviewPageController->onGetReviewById($reviewId);
     if (!$review) {
         throw new Exception("Something went wrong. Please try again.");
     }
@@ -64,10 +48,10 @@ try {
 
     // Submit reply
     $replyController->onSubmitReply($reviewId, $responderId, $justification, date('Y-m-d H:i:s'));
-    $_SESSION['success'] = "Reply submitted successfully.";
+    SessionManager::setSuccess("Reply submitted successfully.");
 
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    SessionManager::setError($e->getMessage());
 }
 
 header("Location: profile.php");

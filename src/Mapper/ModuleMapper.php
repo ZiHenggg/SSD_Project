@@ -30,5 +30,22 @@ class ModuleMapper implements ModuleRepository {
         return null; // Return null if no module found
     }
 
+    public function getAllModules(): array {
+        $stmt = $this->dbConnection->prepare("SELECT * FROM modules");
+        $stmt->execute();
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $modules = [];
+
+        foreach ($results as $result) {
+            $modules[] = new Module(
+                $result['moduleCode'],
+                $result['moduleName']
+            );
+        }
+
+        return $modules; // Return an array of all modules
+    }
+
 } 
 ?>

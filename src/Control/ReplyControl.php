@@ -42,8 +42,13 @@ class ReplyControl
             throw new \Exception("Invalid responder ID: $responderId");
         }
 
-        if (!$this->reviewRepo->getReview($reviewId)) {
+        $review = $this->reviewRepo->getReview($reviewId);
+        if (!$review) {
             throw new \Exception("Review not found with ID: $reviewId");
+        }
+
+        if ($this->replyRepo->hasReply($reviewId)) {
+            throw new \Exception("You have already replied to this review.");
         }
 
         $reply = new Reply(
@@ -56,5 +61,6 @@ class ReplyControl
 
         $this->replyRepo->addReply($reply);
     }
+
 }
 ?>

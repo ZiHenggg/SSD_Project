@@ -1,22 +1,37 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../src/bootstrap.php';
+
+use App\SessionManager;
+
+SessionManager::start();
+
+// Clear forgot password flow if it exists
+SessionManager::resetForgotFlow();
+
+// If already logged in, redirect to dashboard
+if (SessionManager::getUser()) {
+    header("Location: dashboard.php");
+    exit();
+}
 
 $title = "Register";
 
 // Get current step
-$step = $_SESSION['register_step'] ?? 'form';
-$message = $_SESSION['register_message'] ?? '';
-$otpStatus = $_SESSION['register_message_type'] ?? 'info';
-$isSuccessModal = $_SESSION['register_success'] ?? false;
+$step = SessionManager::getRegisterStep() ?? 'form';
+$message = SessionManager::getRegisterMessage();
+$otpStatus = SessionManager::getRegisterMessageType();
+$isSuccessModal = SessionManager::isRegisterSuccess();
 
 // Clear once shown
-unset($_SESSION['register_step'], $_SESSION['register_message'], $_SESSION['register_success'], $_SESSION['register_message_type']);
+SessionManager::setRegisterStep($step ?? '');                 
+SessionManager::setRegisterMessage($message ?? '');
+SessionManager::setRegisterMessageType($type ?? 'info');
+SessionManager::setRegisterSuccess((bool) ($success ?? false));
 
 ob_start();
 ?>
 
-<div class="w-50 m-auto">
+<div class="w-50 m-auto register-wrapper">
     <h2 class="mb-4">Register</h2>
 
     <?php if ($message && !$isSuccessModal && $step != 'otp'): ?>

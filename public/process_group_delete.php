@@ -1,31 +1,29 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Control\GroupControl;
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\ModuleMapper;
-use App\Control\GroupMembershipControl;
-use App\Boundary\GroupPageController;
-// Initialize control class
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+use App\SessionManager;
+
+$groupPageController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['delete_group'])) {
     $groupId = (int) $_POST['group_id'];
-    $groupPageController->onDeleteGroup($groupId);
-    $_SESSION['success'] = "Group deleted successfully.";
+    $studentId = SessionManager::getUser()['id'] ?? null;
+    $ifMember = $groupMembershipController->onCheckIfMember($groupId, $studentId);
+    $isAdmin = $groupMembershipController->onCheckUserRole($groupId, $studentId) === 'admin';
+    if (!$ifMember) {
+        SessionManager::setError("You are not a member of this group.");
+    } else if (!$isAdmin) {
+        SessionManager::setError("You do not have permission to delete this group.");
+    } else {
+        $groupPageController->onDeleteGroup($groupId);
+        SessionManager::setSuccess("Group deleted successfully.");
+    }
     header("Location: dashboard.php");
     exit;
 } else {
-    $_SESSION['error'] = "Invalid group deletion request.";
+    SessionManager::setError("Invalid group deletion request.");
     header("Location: dashboard.php");
     exit;
 }

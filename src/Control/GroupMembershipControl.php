@@ -85,26 +85,50 @@ class GroupMembershipControl
     {
         return $this->groupJoinRequestsRepo->requestExists($groupId, $studentId);
     }
+    
+    public function getRequestStatus(int $groupId, int $studentId): ?string
+    {
+        return $this->groupJoinRequestsRepo->getRequestStatus($groupId, $studentId);
+    }
 
     public function submitJoinRequest(int $groupId, int $studentId): void
     {
+        $currentStatus = $this->groupJoinRequestsRepo->getRequestStatus($groupId, $studentId);
         if ($this->groupJoinRequestsRepo->requestExists($groupId, $studentId)) {
-            throw new \Exception("A join request already exists for this group.");
+            if ($currentStatus === 'accepted') {
+                throw new \Exception("You are already a member of this group.");
+            }
+            elseif ($currentStatus === 'pending') {
+                throw new \Exception("A join request already exists for this group.");
+            }
         }
 
-        $request = new GroupJoinRequests(
-            0, // Auto-generated ID
-            $groupId,
-            $studentId,
-            'pending',
-            new \DateTime()
-        );
-
-        $this->groupJoinRequestsRepo->addRequest($request);
+        if ($this->checkIfGroupFull($groupId)) {
+            throw new \Exception("Group with ID $groupId is already full. Cannot submit join request.");
+        } else {
+            $request = new GroupJoinRequests(
+                0, // Auto-generated ID
+                $groupId,
+                $studentId,
+                'pending',
+                new \DateTime()
+            );
+            $this->groupJoinRequestsRepo->addRequest($request);
+        }
     }
 
     public function removeJoinRequest(int $groupId, int $studentId): void 
     {
+        $currentStatus = $this->groupJoinRequestsRepo->getRequestStatus($groupId, $studentId);
+        if ($currentStatus === 'accepted') {
+            throw new \Exception("You are already a member of this group.");
+        } else if ($currentStatus === 'rejected') {
+            throw new \Exception("Join request has already been rejected.");
+        } else if ($currentStatus === 'pending') {
+            $this->groupJoinRequestsRepo->removeRequest($groupId, $studentId);
+            return;
+        }
+
         $this->groupJoinRequestsRepo->removeRequest($groupId, $studentId);
     }
 
@@ -118,9 +142,10 @@ class GroupMembershipControl
         // Get the join request
         $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
         $request = null;
-        // TODO: Use a more efficient way to find the request
+        $groupId = null;
         foreach ($requests as $req) {
             if ($req->getRequestId() === $requestId) {
+                $groupId = $this->groupJoinRequestsRepo->getGroupIdByRequestId($requestId);
                 $request = $req;
                 break;
             }
@@ -147,6 +172,11 @@ class GroupMembershipControl
         // Add the member to the group
         $groupId = $request->getGroupId();
         $this->addMember($groupId, $requesterId);
+
+        if ($this->checkIfGroupFull($groupId)) {
+            // If group is full, remove remaining requests
+            $this->removeRemainingRequests($groupId, $approverId);
+        }
     }
 
     public function rejectJoinRequest(int $requestId, int $requesterId, int $approverId): void
@@ -154,7 +184,7 @@ class GroupMembershipControl
         // Get the join request
         $requests = $this->groupJoinRequestsRepo->getRequestsByStudent($requesterId);
         $request = null;
-        // TODO: Use a more efficient way to find the request
+        
         foreach ($requests as $req) {
             if ($req->getRequestId() === $requestId) {
                 $request = $req;
@@ -173,12 +203,33 @@ class GroupMembershipControl
             throw new \Exception("Join request with ID $requestId is not pending.");
         }
 
-        // Update the join request status to accepted
+        // Update the join request status to rejected
         $this->groupJoinRequestsRepo->updateRequestStatus(
             $requestId,
             $approverId,
             'rejected'
         );
+    }
+
+    public function checkIfGroupFull(int $groupId): bool
+    {
+        $noOfMembers = count($this->groupMembershipRepo->getMembers($groupId));
+        $group = $this->groupRepo->getGroup($groupId);
+        $maxMembers = $group->getMaxMembers();
+
+        return ($noOfMembers >= $maxMembers);
+    }
+
+    public function removeRemainingRequests(int $groupId, int $approverId): void
+    {
+        // Get all requests for the group
+        $requests = $this->groupJoinRequestsRepo->getRequestsByGroup($groupId);
+        
+        foreach ($requests as $request) {
+            if ($request->getJoinStatus() === 'pending') {
+                $this->rejectJoinRequest($request->getRequestId(), $request->getRequesterId(), $approverId);
+            }
+        }
     }
 }
 ?>

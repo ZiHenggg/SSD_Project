@@ -1,23 +1,51 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
 // Set default timezone to Singapore
 date_default_timezone_set('Asia/Singapore');
 
-// Start session only if not already active
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+use App\Mapper\GroupMapper;
+use App\Mapper\GroupJoinRequestsMapper;
+use App\Mapper\GroupMembershipMapper;
+use App\Mapper\StudentMapper;
+use App\Mapper\ReviewMapper;
+use App\Mapper\ReplyMapper;
+use App\Mapper\ModuleMapper;
+use App\Mapper\LabGroupMapper;
+use App\Mapper\StudentStatsMapper;
 
-function displayErrorMessage(): void {
-    if (!empty($_SESSION['error'])) {
-        echo '<div class="alert alert-danger">' . htmlspecialchars($_SESSION['error']) . '</div>';
-        unset($_SESSION['error']);
+use App\Control\GroupControl;
+use App\Control\GroupJoinRequestsControl;
+use App\Control\GroupMembershipControl;
+use App\Control\StudentControl;
+use App\Control\ReviewControl;
+use App\Control\ReplyControl;
+
+use App\Boundary\GroupPageController;
+use App\Boundary\GroupMembershipController;
+use App\Boundary\StudentPageController;
+use App\Boundary\ReviewPageController;
+use App\Boundary\ReplyPageController;
+
+use App\SessionManager;
+
+// Start session only if not already active
+SessionManager::start();
+
+
+function displayErrorMessage(): void
+{
+    if (!empty(SessionManager::getError())) {
+        echo '<div class="alert alert-danger">' . htmlspecialchars(SessionManager::getError()) . '</div>';
+        SessionManager::setError(null);
     }
 }
 
-function displaySuccessMessage(): void {
-    if (!empty($_SESSION['success'])) {
-        echo '<div class="alert alert-success">' . htmlspecialchars($_SESSION['success']) . '</div>';
-        unset($_SESSION['success']);
+function displaySuccessMessage(): void
+{
+    if (!empty(SessionManager::getSuccess())) {
+        echo '<div class="alert alert-success">' . htmlspecialchars(SessionManager::getSuccess()) . '</div>';
+        SessionManager::setSuccess(null);
     }
 }
 
@@ -29,4 +57,36 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../', '.env.prod');
 $dotenv->load();
 
 require_once __DIR__ . '/db.php';
+
+// Instantiate mappers and controls
+$groupRepo = new GroupMapper($pdo);
+$groupMembershipRepo = new GroupMembershipMapper($pdo);
+$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
+$studentRepo = new StudentMapper($pdo);
+$reviewRepo = new ReviewMapper($pdo);
+$replyRepo = new ReplyMapper($pdo);
+$moduleRepo = new ModuleMapper($pdo);
+$labGroupRepo = new LabGroupMapper($pdo);
+$studentStatsRepo = new StudentStatsMapper($pdo);
+
+$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo);
+$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+$studentControl = new StudentControl($studentRepo);
+$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
+$replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
+
+$groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
+$studentPageController = new StudentPageController($studentControl);
+$reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
+$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
+
+return [
+    'studentControl' => $studentControl,
+    'groupPageController' => $groupPageController,
+    'groupMembershipController' => $groupMembershipController,
+    'studentPageController' => $studentPageController,
+    'reviewPageController' => $reviewPageController,
+    'replyPageController' => $replyPageController,
+];
 ?>

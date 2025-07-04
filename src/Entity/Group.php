@@ -194,7 +194,6 @@ class Group
         $labGrp = trim($this->labGroup ?? '');
         $grpNum = $this->groupNumber;
 
-        // $groupName = "[$acad $tri] $modCode-$labGrp-G$grpNum";
         if (!empty($labGrp)) {
             $groupName = "[$acad T$tri] $modCode-$labGrp-G$grpNum";
         } else {

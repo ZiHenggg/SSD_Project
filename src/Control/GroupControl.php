@@ -2,26 +2,31 @@
 namespace App\Control;
 
 use App\Entity\Group;
+use App\Entity\LabGroup;
 use App\Entity\Module;
 use App\Repository\GroupRepository;
 use App\Repository\GroupMembershipRepository;
 use App\Repository\ModuleRepository;
+use App\Repository\LabGroupRepository;
 
 class GroupControl
 {
     private GroupRepository $groupRepo;
     private GroupMembershipRepository $groupMembershipRepo;
     private ModuleRepository $moduleRepo;
+    private LabGroupRepository $labGroupRepo;
 
     public function __construct(
         GroupRepository $groupRepo,
         GroupMembershipRepository $groupMembershipRepo,
-        ModuleRepository $moduleRepo
+        ModuleRepository $moduleRepo,
+        LabGroupRepository $labGroupRepo
 
     ) {
         $this->groupRepo = $groupRepo;
         $this->groupMembershipRepo = $groupMembershipRepo;
         $this->moduleRepo = $moduleRepo;
+        $this->labGroupRepo = $labGroupRepo;
     }
 
     public function createGroup(string $acadYear, string $trimester, string $moduleCode, int $maxMembers, string $studentId, string $labGroup = ''): Group
@@ -56,15 +61,15 @@ class GroupControl
     }
 
 
-    public function isMember(int $groupId, int $studentId): bool
-    {
-        return $this->groupMembershipRepo->isMember($groupId, $studentId);
-    }
+    // public function isMember(int $groupId, int $studentId): bool
+    // {
+    //     return $this->groupMembershipRepo->isMember($groupId, $studentId);
+    // }
 
-    public function getGroupsByUser(int $studentId): array
-    {
-        return $this->groupRepo->getGroupsByUser($studentId);
-    }
+    // public function getGroupsByUser(int $studentId): array
+    // {
+    //     return $this->groupRepo->getGroupsByUser($studentId);
+    // }
 
     public function getActiveGroupsByUser(int $studentId): array
     {
@@ -99,6 +104,16 @@ class GroupControl
             // $this->groupRepo->updateGroup($group); // Update the group in the repository
             $this->groupRepo->updateGroupStatus($groupId, 'inactive');
         }
+    }
+
+    public function getAllModules(): array
+    {
+        return $this->moduleRepo->getAllModules();
+    }
+
+    public function getLabGroupsByModuleCode(string $moduleCode): array
+    {
+        return $this->labGroupRepo->getLabGroupsByModuleCode($moduleCode);
     }
 }
 ?>

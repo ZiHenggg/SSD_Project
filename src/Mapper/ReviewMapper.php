@@ -174,7 +174,7 @@ class ReviewMapper implements ReviewRepository {
         }
     }
 
-    public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): ?int {
+    public function resolveGroupMembersId(int $reviewerId, int $revieweeId, int $groupId): int {
     $stmt = $this->dbConnection->prepare("
         SELECT gm.groupMembersId
         FROM groupMembers gm

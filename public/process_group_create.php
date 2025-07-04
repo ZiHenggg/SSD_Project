@@ -1,16 +1,11 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Redis
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\ModuleMapper;
-use App\Control\GroupControl;
-use App\Control\GroupMembershipControl;
-use App\Boundary\GroupPageController;
+
 use Predis\Client as RedisClient;
+use App\SessionManager;
 
 // Redis setup
 $redis = new RedisClient([
@@ -19,26 +14,19 @@ $redis = new RedisClient([
     'port' => 6379,
 ]);
 
-$studentId = $_SESSION['user']['id'] ?? 0;
+$studentId = SessionManager::getUser()['id'] ?? 0;
 $key = "create_group:student:$studentId";
 $maxAttempts = 3;
 $duration = 600; // 10 minutes
 
 // Check rate limit
 if ((int)$redis->get($key) >= $maxAttempts) {
-    $_SESSION['error'] = "Too many group creation attempts. Please wait before trying again.";
+    SessionManager::setError("Too many group creation attempts. Please wait before trying again.");
     header("Location: group_create.php");
     exit;
 }
 
-// Initialize control classes
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
+$groupPageController = $pageControllers['groupPageController'];
 
 try {
     $groupPageController->onCreateGroup($_POST, $studentId);
@@ -53,7 +41,7 @@ try {
     exit;
 
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    SessionManager::setError($e->getMessage());
     header("Location: group_create.php");
     exit;
 }

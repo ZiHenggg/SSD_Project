@@ -104,4 +104,9 @@ nav .search {
     .logo-wrapper .text {
         display: none;
     }
+    
+    .change-pw-wrapper, .login-wrapper, .register-wrapper, .twofa-wrapper, .forgot-wrapper {
+        width: 90% !important;
+        margin: 0 auto;
+    }
 }

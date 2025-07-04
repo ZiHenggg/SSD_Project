@@ -9,12 +9,12 @@ use Exception;
 class ReplyPageController
 {
     private ReplyControl $replyControl;
-    private PDO $pdo;
+    // private PDO $pdo;
 
-    public function __construct(ReplyControl $replyControl, PDO $pdo)
+    public function __construct(ReplyControl $replyControl/*, PDO $pdo*/)
     {
         $this->replyControl = $replyControl;
-        $this->pdo = $pdo;
+        // $this->pdo = $pdo;
     }
 
     public function onViewReply(int $reviewId): Reply
@@ -42,11 +42,16 @@ class ReplyPageController
             throw new Exception("Justification cannot be empty.");
         }
 
+        if ($this->replyControl->hasUserReplied($reviewId)) {
+            throw new Exception("You have already replied to this review.");
+        }
+
         try {
             $this->replyControl->submitReply($reviewId, $responderId, $justification);
         } catch (Exception $e) {
             throw new Exception('An error occurred while submitting the reply: ' . $e->getMessage());
         }
     }
+
 }
 ?>

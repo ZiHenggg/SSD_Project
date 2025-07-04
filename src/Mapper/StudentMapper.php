@@ -14,7 +14,7 @@ class StudentMapper implements StudentRepository
         $this->dbConnection = $dbConnection;
     }
 
-    public function getStudentById(string $studentId): ?Student
+    public function getStudentById(int $studentId): ?Student
     {
         $stmt = $this->dbConnection->prepare("SELECT * FROM students WHERE studentId = :studentId");
         $stmt->bindParam(':studentId', $studentId);
@@ -36,17 +36,17 @@ class StudentMapper implements StudentRepository
         return $result ? $this->mapRowToStudent($result) : null;
     }
 
-    public function getAllStudents(): array
-    {
-        $stmt = $this->dbConnection->query("SELECT * FROM students");
-        $students = [];
+    // public function getAllStudents(): array
+    // {
+    //     $stmt = $this->dbConnection->query("SELECT * FROM students");
+    //     $students = [];
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $students[] = $this->mapRowToStudent($row);
-        }
+    //     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    //         $students[] = $this->mapRowToStudent($row);
+    //     }
 
-        return $students;
-    }
+    //     return $students;
+    // }
 
     public function createStudentAccount(Student $student): void
     {

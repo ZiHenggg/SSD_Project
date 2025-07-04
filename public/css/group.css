@@ -68,11 +68,9 @@
 
 /* group_info.php css */
 .group-container {
-    /* max-width: 600px; */
     margin: 0 auto;
     background-color: white;
     border-radius: 8px;
-    padding: 20px;
 }
 
 .group-header {

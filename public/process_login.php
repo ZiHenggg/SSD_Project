@@ -1,17 +1,30 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../vendor/autoload.php'; // for Predis
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
+use App\SessionManager;
 use Predis\Client as RedisClient;
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Start session
+SessionManager::start();
+
+// CI MODE: Bypass Redis + rate limiting (Remove for production))
+if (getenv('CI') === 'true') {
+    $pageController = $pageControllers['studentPageController'];
+    $result = $pageController->loginStudent($_POST);
+
+    if ($result['success']) {
+        SessionManager::setLoginError(null);
+        header("Location: " . $result['redirect']);
+        exit;
+    } else {
+        SessionManager::setLoginError("CI mode login failed: " . ($result['message'] ?? 'Unknown error'));
+        header("Location: login.php");
+        exit;
+    }
 }
 
-// Redis setup
+// Redis for rate limiting
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host'   => 'redis',
@@ -24,47 +37,37 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $userKey = "login_attempts:user:" . $username;
 $ipKey   = "login_attempts:ip:" . $ip;
 $maxAttempts = 5;
-$lockoutDuration = 900; // 15 minutes in seconds
+$lockoutDuration = 900;
 
-// Check if user or IP is locked
 $userAttempts = (int) $redis->get($userKey);
 $ipAttempts   = (int) $redis->get($ipKey);
 
 if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
-    $_SESSION['login_error'] = "Account temporarily locked. Try again later.";
+    SessionManager::setLoginError("Account temporarily locked. Try again later.");
     header("Location: login.php");
     exit;
 }
 
-// Proceed with login
-$repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$pageController = new StudentPageController($control);
-
+$pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
-    // Login success — reset both counters
-    $redis->del($userKey);
-    $redis->del($ipKey);
-
+    $redis->del([$userKey, $ipKey]);
+    SessionManager::setLoginError(null);
     header("Location: " . $result['redirect']);
     exit;
 } else {
-    // Login failed — increment both keys and set expiry
     $redis->incr($userKey);
     $redis->incr($ipKey);
 
     if ($redis->ttl($userKey) <= 0) {
         $redis->expire($userKey, $lockoutDuration);
     }
-
     if ($redis->ttl($ipKey) <= 0) {
         $redis->expire($ipKey, $lockoutDuration);
     }
 
-    $_SESSION['login_error'] = "Invalid credentials. Please try again.";
+    SessionManager::setLoginError("Invalid credentials. Please try again.");
     header("Location: login.php");
     exit;
 }
-?>

@@ -9,12 +9,12 @@ use Exception;
 class GroupMembershipController
 {
     private GroupMembershipControl $groupMembershipControl;
-    private PDO $pdo;
+    // private PDO $pdo;
 
-    public function __construct(GroupMembershipControl $groupMembershipControl, PDO $pdo)
+    public function __construct(GroupMembershipControl $groupMembershipControl/*, PDO $pdo*/)
     {
         $this->groupMembershipControl = $groupMembershipControl;
-        $this->pdo = $pdo;
+        // $this->pdo = $pdo;
     }
 
     public function displayGroupId(int $groupMembersId): string
@@ -52,10 +52,20 @@ class GroupMembershipController
         }
     }
 
+    public function displayRequestStatus(int $groupId, int $studentId): ?string
+    {
+        return $this->groupMembershipControl->getRequestStatus($groupId, $studentId);
+    }
+
     public function onJoinGroupRequest(int $groupId, int $studentId): void
     {
+        $currentStatus = $this->groupMembershipControl->getRequestStatus($groupId, $studentId);
         if ($this->groupMembershipControl->requestExists($groupId, $studentId)) {
-            throw new Exception("You have already requested to join this group.");
+            if ($currentStatus === 'accepted') {
+                throw new \Exception("You are already a member of this group.");
+            } elseif ($currentStatus === 'pending') {
+                throw new Exception("You have already requested to join this group.");
+            }
         }
 
         $this->groupMembershipControl->submitJoinRequest($groupId, $studentId);
@@ -74,6 +84,11 @@ class GroupMembershipController
     public function OnCheckIfMember(int $groupId, int $studentId): bool
     {
         return $this->groupMembershipControl->memberExists($groupId, $studentId);
+    }
+
+    public function onCheckUserRole(int $groupId, int $studentId): ?string
+    {
+        return $this->groupMembershipControl->getUserRole($groupId, $studentId);
     }
 
     // Accept Join Request

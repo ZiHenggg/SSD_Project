@@ -1,20 +1,13 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\ModuleMapper;
-use App\Control\GroupControl;
-use App\Control\GroupMembershipControl;
-use App\Control\GroupJoinRequestsControl;
-use App\Boundary\GroupPageController;
-use App\Boundary\GroupMembershipController;
+use App\SessionManager;
+
 $title = "Group Info";
 ob_start();
 
-$studentId = $_SESSION['user']['id'] ?? null;
+$studentId = SessionManager::get('user')['id'] ?? null;
 $groupId = isset($_GET['groupId']) ? (int)$_GET['groupId'] : null;
 
 if (!$groupId) {
@@ -24,18 +17,20 @@ if (!$groupId) {
     exit;
 }
 
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
+$groupController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
 
 $hasRequested = $groupMembershipController->onCheckIfRequested($groupId, $studentId);
+$joinStatus = $groupMembershipController->displayRequestStatus($groupId, $studentId);
 $isMember = $groupMembershipController->onCheckIfMember($groupId, $studentId);
 $groupData = $groupController->displayGroupDetails($groupId);
+
+if (!$groupData) {
+    echo "<p>Group not found.</p>";
+    $content = ob_get_clean();
+    header("Location: groups.php");
+}
+
 $group = $groupData['group'];
 $members = $groupData['members'];
 $moduleData = $groupData['module'];
@@ -51,11 +46,11 @@ $moduleData = $groupData['module'];
             <p><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></p>
         </div>
         <?php if (!$isMember && count($members) < $group->getMaxMembers()): ?>
-            <form method="POST" action="<?= $hasRequested ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
+            <form method="POST" action="<?= ($hasRequested && ($joinStatus === 'pending')) ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
                 <input type="hidden" name="groupId" value="<?= $groupId ?>">
-                <?php if ($hasRequested): ?>
+                <?php if ($hasRequested && ($joinStatus === 'pending')): ?>
                     <button class="join-button" type="submit">Cancel Request</button>
-                <?php else: ?>
+                <?php elseif ((!$hasRequested) || ($joinStatus === 'rejected')): ?>
                     <button class="join-button" type="submit">Request to Join</button>
                 <?php endif; ?>
             </form>

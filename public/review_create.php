@@ -1,41 +1,15 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 
-use App\Mapper\StudentMapper;
-use App\Mapper\GroupMapper;
-use App\Mapper\GroupJoinRequestsMapper;
-use App\Mapper\GroupMembershipMapper;
-use App\Mapper\ReviewMapper;
-use App\Mapper\ModuleMapper;
-use App\Mapper\StudentStatsMapper;
-use App\Control\GroupControl;
-use App\Control\StudentControl;
-use App\Control\GroupMembershipControl;
-use App\Control\ReviewControl;
-use App\Boundary\GroupPageController;
-use App\Boundary\GroupMembershipController;
-use App\Boundary\StudentPageController;
-use App\Boundary\ReviewPageController;
+use App\SessionManager;
 
-$groupRepo = new GroupMapper($pdo);
-$groupMembershipRepo = new GroupMembershipMapper($pdo);
-$groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
-$studentRepo = new StudentMapper($pdo);
-$reviewRepo = new ReviewMapper($pdo);
-$moduleRepo = new moduleMapper($pdo);
-$studentStatsRepo = new StudentStatsMapper($pdo);
+$groupController = $pageControllers['groupPageController'];
+$groupMembershipController = $pageControllers['groupMembershipController'];
+$studentController = $pageControllers['studentPageController'];
+$reviewController = $pageControllers['reviewPageController'];
 
-$groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo);
-$groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
-$studentControl = new StudentControl($studentRepo);
-$reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
-$groupController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl, $pdo);
-$studentController = new StudentPageController($studentControl, $pdo);
-$reviewController = new ReviewPageController($reviewControl, $pdo);
-
-$reviewerId = $_SESSION['user']['id'];
+$reviewerId =SessionManager::getUser()['id'];
 
 if (isset($_GET['cancel'])) {
     unset($_SESSION['review_context']);
@@ -49,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate input
     if ($revieweeId <= 0 || $groupId <= 0 || $revieweeId === $reviewerId) {
-        $_SESSION['error'] = "Something went wrong. Please try again.";
+        SessionManager::setError("Something went wrong. Please try again.");
         header("Location: dashboard.php");
         exit;
     }
@@ -59,31 +33,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !$groupMembershipController->OnCheckIfMember($groupId, $reviewerId) ||
         !$groupMembershipController->OnCheckIfMember($groupId, $revieweeId)
     ) {
-        $_SESSION['error'] = "Something went wrong. Please try again.";
+        SessionManager::setError("Something went wrong. Please try again.");
         header("Location: dashboard.php");
         exit;
     }
 
     // Check if user has already reviewed
     if ($reviewController->onCheckIfReviewed($reviewerId, $revieweeId, $groupId)) {
-        $_SESSION['error'] = "You have already reviewed this user.";
+        SessionManager::setError("You have already reviewed this user.");
         header("Location: dashboard.php");
         exit;
     }
 
     // Store context in session
-    $_SESSION['review_context'] = [
+    SessionManager::setReviewContext([
         'reviewer_id' => $reviewerId,
         'reviewee_id' => $revieweeId,
-        'group_id' => $groupId
-    ];
+        'group_id'    => $groupId
+    ]);
 }
 
 // Display review form
-$context = $_SESSION['review_context'] ?? null;
+$context = SessionManager::getReviewContext();
 
 if (!$context) {
-    $_SESSION['error'] = "Something went wrong. Please try again.";
+    SessionManager::setError("Something went wrong. Please try again.");
     header("Location: dashboard.php");
     exit;
 }
@@ -96,8 +70,8 @@ $groupInfo = $groupController->displayGroupDetails($groupId);
 $reviewee = $studentController->showUserProfile($revieweeId);
 
 if (!$groupInfo || !$reviewee) {
-    unset($_SESSION['review_context']);
-    $_SESSION['error'] = "Something went wrong. Please try again.";
+    SessionManager::clearReviewContext();
+    SessionManager::setError("Something went wrong. Please try again.");
     header("Location: dashboard.php");
     exit;
 }
@@ -121,9 +95,9 @@ ob_start();
         </div>
 
         <form class="my-4" action="process_review_create.php" method="POST">
-            <?php if (!empty($_SESSION['error'])): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
-                <?php unset($_SESSION['error']); ?>
+            <?php if (SessionManager::getError()): ?>
+                <div class="alert alert-danger"><?= htmlspecialchars(SessionManager::getError()) ?></div>
+                <?php SessionManager::setError(null); ?>
             <?php endif; ?>
 
             <label for="rating">Rating</label>
