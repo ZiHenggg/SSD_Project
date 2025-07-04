@@ -64,6 +64,11 @@ class ReviewPageController
             throw new Exception("Invalid input. Please fill out all fields correctly.");
         }
 
+        $onCheckProfanities = $this->reviewControl->containsProfanity($description);
+        if ($onCheckProfanities) {
+            throw new Exception("Your review contains inappropriate content. Please revise your description.");
+        }
+
         try {
             $this->reviewControl->submitReview($reviewerId, $revieweeId, $groupId, $rating, $description);
         } catch (Exception $e) {

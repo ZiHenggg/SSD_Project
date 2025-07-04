@@ -77,9 +77,9 @@ $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
 $groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
-$studentPageController = new StudentPageController($studentControl);
+$studentPageController = new StudentPageController($studentControl, $reviewControl);
 $reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
-$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
+$replyPageController = new ReplyPageController($replyControl, $reviewControl/*, $pdo*/);
 
 return [
     'studentControl' => $studentControl,

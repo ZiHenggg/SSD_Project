@@ -78,7 +78,7 @@ class OtpVerificationTest extends TestCase
 
     public function testVerifyOtpFailsIfIncorrect()
     {
-        SessionManager::setRegisterOTP('123456', time() + 300);  // ✅ CORRECTED
+        SessionManager::setRegisterOTP('123456', time() + 300);
         SessionManager::setRegistration([
             'email' => 'test@sit.singaporetech.edu.sg'
         ]);

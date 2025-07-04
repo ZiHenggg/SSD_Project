@@ -64,5 +64,19 @@ class ReviewControl
         return $this->reviewRepo->getReview($reviewId);
     }
 
+    public function containsProfanity(string $description): bool
+    {
+        // Load the profanity list from JSON
+        $profanities = json_decode(file_get_contents(__DIR__ . '/../words.json'), true);
+
+        // Loop through each profanity and check if it appears in the description (case-insensitive)
+        foreach ($profanities as $badWord) {
+            if (stripos($description, $badWord) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 ?>

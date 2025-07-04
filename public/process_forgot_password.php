@@ -1,18 +1,17 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
 use App\SessionManager;
 use Predis\Client as RedisClient;
 
 SessionManager::start();
 
 $repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$pageController  =  new StudentPageController($control);
+$control = $pageControllers['studentControl'];
+$pageController = $pageControllers['studentPageController'];
+
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host' => 'redis',
