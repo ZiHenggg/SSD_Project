@@ -16,7 +16,10 @@ $redis = new RedisClient([
 ]);
 
 $username = $_POST['username'] ?? '';
-$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$ip = $_SERVER['HTTP_X_REAL_IP']
+    ?? $_SERVER['HTTP_X_FORWARDED_FOR']
+    ?? $_SERVER['REMOTE_ADDR']
+    ?? 'unknown';
 
 $userKey = "login_attempts:user:" . $username;
 $ipKey   = "login_attempts:ip:" . $ip;
