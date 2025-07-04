@@ -5,15 +5,25 @@ use App\SessionManager;
 
 SessionManager::start();
 
+// If already logged in, redirect to dashboard
+if (SessionManager::getUser()) {
+    header("Location: dashboard.php");
+    exit();
+}
+
 $title = "Forgot Password";
 
 // Timeout duration (in seconds)
-$timeout = 600;
+$timeout = 600; // 10 minutes
 
 // Handle timeout expiration
 if (SessionManager::isForgotFlowExpired($timeout)) {
     SessionManager::resetForgotFlow();
+    SessionManager::setForgotMessage("Your session has expired. Please start over.");
+    header("Location: forgot_password.php");
+    exit;
 }
+
 
 // Refresh timestamp
 SessionManager::set('forgot_last_active', time());
