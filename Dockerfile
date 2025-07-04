@@ -23,4 +23,8 @@ RUN echo "ServerTokens Prod\nServerSignature Off" > /etc/apache2/conf-available/
 # Copy application code
 COPY src/ /var/www/html/
 
+# Copy the production PHP config
+COPY php-production.ini /usr/local/etc/php/conf.d/error-config.ini
+
+
 EXPOSE 9000
