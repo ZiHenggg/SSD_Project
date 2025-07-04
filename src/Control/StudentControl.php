@@ -246,4 +246,10 @@ class StudentControl
 
         $this->sendOtpEmail($email, $otp);
     }
+
+    public function is2FAEnabled(string $email): bool
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+        return $student ? $student->is2FAEnabled() : false;
+    }
 }

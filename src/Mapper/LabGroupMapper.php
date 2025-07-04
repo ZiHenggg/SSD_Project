@@ -31,5 +31,20 @@ class LabGroupMapper implements LabGroupRepository {
         return $labGroups; // Return an array of lab groups for the specified module
     }
 
+    public function getAllLabGroups(): array {
+        $stmt = $this->dbConnection->query("SELECT labGroupCode, moduleCode FROM labGroups");
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $labGroups = [];
+
+        foreach ($results as $result) {
+            $labGroups[] = new LabGroup(
+                $result['labGroupCode'],
+                $result['moduleCode']
+            );
+        }
+
+        return $labGroups; // Return all lab groups
+    }
+
 } 
 ?>

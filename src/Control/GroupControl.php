@@ -115,5 +115,10 @@ class GroupControl
     {
         return $this->labGroupRepo->getLabGroupsByModuleCode($moduleCode);
     }
+
+    public function getAllLabGroups(): array
+    {
+        return $this->labGroupRepo->getAllLabGroups();
+    }
 }
 ?>

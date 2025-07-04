@@ -153,4 +153,9 @@ class StudentPageController
     {
         return $this->studentControl->verify2FACodeWithSecret($secret, $code);
     }
+
+    public function is2FAEnabled(string $email): bool
+    {
+        return $this->studentControl->is2FAEnabled($email);
+    }
 }
