@@ -1,15 +1,13 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 
 use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
 use App\SessionManager;
 
 $repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$pageController = new StudentPageController($control);
+$control = $pageControllers['studentControl'];
+$pageController = $pageControllers['studentPageController'];
 
 // Check if user is in 2FA password update flow
 if (
