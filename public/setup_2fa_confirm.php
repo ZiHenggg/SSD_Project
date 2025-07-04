@@ -15,7 +15,6 @@ $secret = $twoFA['secret'] ?? null;
 $code = $_POST['code'] ?? '';
 
 $title = "Confirm 2FA Setup";
-$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
 if (!$email || !$secret) {
     header('Location: login.php');
@@ -28,23 +27,21 @@ if ($control->confirm2FASetup($email, $code, $secret)) {
     $student = $control->getStudentByEmail($email);
 
     SessionManager::setUser([
-        'id' => $student->getStudentID(),
+        'id'    => $student->getStudentID(),
         'email' => $student->getEmail(),
-        'name' => $student->getStudentName(),
+        'name'  => $student->getStudentName(),
     ]);
 
     // ✅ Log 2FA setup confirmation
     logEvent('info', '2FA setup confirmed', [
         'studentId' => $student->getStudentID(),
-        'email' => $student->getEmail(),
-        'ip' => $ip
+        'email'     => $student->getEmail()
     ]);
 
-    // ✅ Log that user is now fully logged in via 2FA setup
+    // ✅ Log full login success
     logEvent('info', 'Login complete (via 2FA setup)', [
         'studentId' => $student->getStudentID(),
-        'email' => $student->getEmail(),
-        'ip' => $ip
+        'email'     => $student->getEmail()
     ]);
 
     SessionManager::set('2fa_verified', true); 
@@ -56,8 +53,7 @@ if ($control->confirm2FASetup($email, $code, $secret)) {
 
 // ❌ Log failed setup attempt
 logEvent('warn', '2FA setup failed - invalid code', [
-    'email' => $email,
-    'ip' => $ip
+    'email' => $email
 ]);
 
 ob_start();

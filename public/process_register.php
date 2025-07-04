@@ -1,6 +1,6 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../vendor/autoload.php'; // Include Predis
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Predis\Client as RedisClient;
 use App\SessionManager;
@@ -12,23 +12,26 @@ $control = $pageControllers['studentControl'];
 
 $redis = new RedisClient([
     'scheme' => 'tcp',
-    'host' => 'redis',
-    'port' => 6379,
+    'host'   => 'redis',
+    'port'   => 6379,
 ]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Step 1: Form Submission (rate-limit this)
+    // Step 1: Form Submission
     if (isset($_POST['studentId'])) {
-        
-        $ip = $_SERVER['REMOTE_ADDR'];
+        $ip = $_SERVER['HTTP_X_REAL_IP']
+            ?? $_SERVER['HTTP_X_FORWARDED_FOR']
+            ?? $_SERVER['REMOTE_ADDR']
+            ?? 'unknown';
+
         $ipKey = "register_attempts:ip:" . $ip;
         $maxAttempts = 10;
-        $lockoutDuration = 600; // 10 minutes
+        $lockoutDuration = 600;
 
         $ipAttempts = (int) $redis->get($ipKey);
         if ($ipAttempts >= $maxAttempts) {
-            logEvent('warn', 'Registration blocked due to rate limit', ['ip' => $ip]);
+            logEvent('warn', 'Registration blocked due to rate limit');
             SessionManager::setRegisterMessage("Too many registration attempts. Please try again later.");
             SessionManager::setRegisterStep('form');
             header('Location: register.php');
@@ -36,18 +39,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $formData = [
-            'studentId' => $_POST['studentId'],
-            'studentName' => $_POST['studentName'],
-            'email' => $_POST['email'],
-            'password' => $_POST['password'], // password still used internally, not logged
+            'studentId'    => $_POST['studentId'],
+            'studentName'  => $_POST['studentName'],
+            'email'        => $_POST['email'],
+            'password'     => $_POST['password'], // used internally
         ];
 
         $sanitizedData = $formData;
-        unset($sanitizedData['password']); // remove sensitive field
+        unset($sanitizedData['password']);
 
         $error = $page->validateStudentInput($formData);
         if ($error) {
-            logEvent('warn', 'Registration failed - invalid input', ['error' => $error, 'input' => $sanitizedData]);
+            logEvent('warn', 'Registration failed - invalid input', [
+                'error' => $error,
+                'input' => $sanitizedData
+            ]);
             SessionManager::setRegisterMessage($error);
             SessionManager::setRegisterStep('form');
         } elseif ($control->checkStudentExist($formData['studentId']) || $control->checkStudentExist($formData['email'])) {
@@ -68,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             logEvent('info', 'Student registered successfully', [
                 'studentId' => $formData['studentId'],
-                'email' => $formData['email'],
+                'email'     => $formData['email']
             ]);
             SessionManager::setRegisterMessage("OTP has been sent to your email.");
             SessionManager::setRegisterMessageType('success');
@@ -137,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::resetRegisterFlow();
             SessionManager::setRegisterSuccess(true);
         } else {
-            logEvent('warn', 'OTP verification failed', ['email' => $email]); // removed OTP value from log
+            logEvent('warn', 'OTP verification failed', ['email' => $email]);
             $redis->incr($otpKey);
             if ($redis->ttl($otpKey) <= 0) {
                 $redis->expire($otpKey, $otpLockout);

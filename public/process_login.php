@@ -30,7 +30,7 @@ $userAttempts = (int) $redis->get($userKey);
 $ipAttempts   = (int) $redis->get($ipKey);
 
 if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
-    logEvent('warn', 'Login blocked due to rate limit', ['username' => $username, 'ip' => $ip]);
+    logEvent('warn', 'Login blocked due to rate limit', ['username' => $username]);
     SessionManager::setLoginError("Account temporarily locked. Try again later.");
     header("Location: login.php");
     exit;
@@ -42,14 +42,13 @@ $result = $pageController->loginStudent($_POST);
 if ($result['success']) {
     // ✅ Set user into session (pending 2FA)
     SessionManager::setUser([
-        'id' => $username,
+        'id'    => $username,
         'email' => $result['email'] ?? null,
-        'name' => $result['name'] ?? null,
+        'name'  => $result['name'] ?? null,
     ]);
 
     logEvent('info', 'Login passed password check, pending 2FA', [
-        'username' => $username,
-        'ip' => $ip
+        'username' => $username
     ]);
 
     $redis->del([$userKey, $ipKey]);
@@ -57,7 +56,7 @@ if ($result['success']) {
     header("Location: " . $result['redirect']);
     exit;
 } else {
-    logEvent('warn', 'Login failed', ['username' => $username, 'ip' => $ip]);
+    logEvent('warn', 'Login failed', ['username' => $username]);
 
     $redis->incr($userKey);
     $redis->incr($ipKey);

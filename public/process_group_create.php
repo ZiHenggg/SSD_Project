@@ -13,14 +13,13 @@ $redis = new RedisClient([
 ]);
 
 $studentId = SessionManager::getUser()['id'] ?? 0;
-$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $key = "create_group:student:$studentId";
 $maxAttempts = 3;
 $duration = 600; // 10 minutes
 
 // Check rate limit
 if ((int)$redis->get($key) >= $maxAttempts) {
-    logEvent('warn', 'Group creation blocked by rate limit', ['studentId' => $studentId, 'ip' => $ip]);
+    logEvent('warn', 'Group creation blocked by rate limit', ['studentId' => $studentId]);
     SessionManager::setError("Too many group creation attempts. Please wait before trying again.");
     header("Location: group_create.php");
     exit;

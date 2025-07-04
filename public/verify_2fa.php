@@ -49,11 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $student->getStudentName(),
         ]);
 
-        // ✅ Log successful 2FA
-        logEvent('info', '2FA verification successful', [
-            'email' => $student->getEmail(),
+        // ✅ Log successful 2FA login
+        logEvent('info', 'Login complete (2FA verified)', [
             'studentId' => $student->getStudentID(),
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+            'email'     => $student->getEmail()
         ]);
 
         // Clear 2FA session data after successful setup
@@ -63,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . $result['redirect']);
         exit;
     } else {
+        logEvent('warn', '2FA verification failed', [
+            'email' => $email
+        ]);
         $error = $result['message'];
     }
 }

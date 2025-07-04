@@ -11,7 +11,7 @@ $repo = new StudentMapper($pdo);
 $control = new StudentControl($repo);
 $pageController = new StudentPageController($control);
 
-$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+SessionManager::start();
 
 // Check if user is in 2FA password update flow
 if (
@@ -32,8 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($pageController->verify2FACodeForPasswordUpdate($secret, $code)) {
         logEvent('info', '2FA verified for password update', [
-            'email' => $email,
-            'ip' => $ip
+            'email' => $email
         ]);
 
         try {
@@ -56,18 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$result['success']) {
                 logEvent('warn', 'Password update failed', [
                     'email' => $email,
-                    'error' => $result['message'],
-                    'ip' => $ip
+                    'error' => $result['message']
                 ]);
                 SessionManager::setChangePWError($result['message']);
                 header("Location: change_password.php");
                 exit;
             }
 
-            // ✅ Log successful password change
             logEvent('info', 'Password updated', [
-                'email' => $email,
-                'ip' => $ip
+                'email' => $email
             ]);
 
             SessionManager::remove('pending_pw_change');
@@ -81,8 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (\Exception $e) {
             logEvent('error', 'Exception during password update', [
                 'email' => $email,
-                'error' => $e->getMessage(),
-                'ip' => $ip
+                'error' => $e->getMessage()
             ]);
             SessionManager::setChangePWError($e->getMessage());
             header("Location: change_password.php");
@@ -91,8 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } else {
         logEvent('warn', '2FA code invalid during password update', [
-            'email' => $email,
-            'ip' => $ip
+            'email' => $email
         ]);
         $error = 'Invalid 2FA code. Please try again.';
     }
