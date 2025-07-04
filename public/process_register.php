@@ -39,20 +39,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'studentId' => $_POST['studentId'],
             'studentName' => $_POST['studentName'],
             'email' => $_POST['email'],
-            'password' => $_POST['password'],
+            'password' => $_POST['password'], // password still used internally, not logged
         ];
+
+        $sanitizedData = $formData;
+        unset($sanitizedData['password']); // remove sensitive field
 
         $error = $page->validateStudentInput($formData);
         if ($error) {
-            logEvent('warn', 'Registration failed - invalid input', ['error' => $error, 'input' => $formData]);
+            logEvent('warn', 'Registration failed - invalid input', ['error' => $error, 'input' => $sanitizedData]);
             SessionManager::setRegisterMessage($error);
             SessionManager::setRegisterStep('form');
         } elseif ($control->checkStudentExist($formData['studentId']) || $control->checkStudentExist($formData['email'])) {
-            logEvent('warn', 'Registration failed - student already exists', ['input' => $formData]);
+            logEvent('warn', 'Registration failed - student already exists', ['input' => $sanitizedData]);
             SessionManager::setRegisterMessage("Student already exists.");
             SessionManager::setRegisterStep('form');
         } elseif (explode('@', $formData['email'])[0] !== $formData['studentId']) {
-            logEvent('warn', 'Registration failed - email does not match student ID', ['input' => $formData]);
+            logEvent('warn', 'Registration failed - email does not match student ID', ['input' => $sanitizedData]);
             SessionManager::setRegisterMessage("Email must begin with your Student ID.");
             SessionManager::setRegisterStep('form');
         } else {
@@ -134,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::resetRegisterFlow();
             SessionManager::setRegisterSuccess(true);
         } else {
-            logEvent('warn', 'OTP verification failed', ['email' => $email, 'otp' => $otp]);
+            logEvent('warn', 'OTP verification failed', ['email' => $email]); // removed OTP value from log
             $redis->incr($otpKey);
             if ($redis->ttl($otpKey) <= 0) {
                 $redis->expire($otpKey, $otpLockout);
