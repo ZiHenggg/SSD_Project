@@ -60,6 +60,26 @@ register_shutdown_function(function () {
 // Start session only if not already active
 SessionManager::start();
 
+function logEvent(string $type, string $message, array $context = []): void
+{
+    $logPath = '/var/www/logs/app.log';  // Make sure this path matches your docker mount
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $user = $_SESSION['username'] ?? 'guest';
+
+    $entry = sprintf(
+        "[%s] [%s] %s | User: %s | IP: %s | %s\n",
+        date('Y-m-d H:i:s'),
+        strtoupper($type),
+        $message,
+        $user,
+        $ip,
+        json_encode($context)
+    );
+
+    file_put_contents($logPath, $entry, FILE_APPEND);
+}
+
+
 function displayErrorMessage(): void
 {
     if (!empty(SessionManager::getError())) {

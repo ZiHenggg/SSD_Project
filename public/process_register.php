@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $ipAttempts = (int) $redis->get($ipKey);
         if ($ipAttempts >= $maxAttempts) {
+            logEvent('warn', 'Registration blocked due to rate limit', ['ip' => $ip]);
             SessionManager::setRegisterMessage("Too many registration attempts. Please try again later.");
             SessionManager::setRegisterStep('form');
             header('Location: register.php');
@@ -43,12 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $error = $page->validateStudentInput($formData);
         if ($error) {
+            logEvent('warn', 'Registration failed - invalid input', ['error' => $error, 'input' => $formData]);
             SessionManager::setRegisterMessage($error);
             SessionManager::setRegisterStep('form');
         } elseif ($control->checkStudentExist($formData['studentId']) || $control->checkStudentExist($formData['email'])) {
+            logEvent('warn', 'Registration failed - student already exists', ['input' => $formData]);
             SessionManager::setRegisterMessage("Student already exists.");
             SessionManager::setRegisterStep('form');
         } elseif (explode('@', $formData['email'])[0] !== $formData['studentId']) {
+            logEvent('warn', 'Registration failed - email does not match student ID', ['input' => $formData]);
             SessionManager::setRegisterMessage("Email must begin with your Student ID.");
             SessionManager::setRegisterStep('form');
         } else {
@@ -59,6 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $formData['email'],
                 $formData['password']
             );
+            logEvent('info', 'Student registered successfully', [
+                'studentId' => $formData['studentId'],
+                'email' => $formData['email'],
+            ]);
             SessionManager::setRegisterMessage("OTP has been sent to your email.");
             SessionManager::setRegisterMessageType('success');
             SessionManager::setRegisterStep('otp');
@@ -78,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $resends = (int) $redis->get($resendKey);
         if ($resends >= $maxResends) {
+            logEvent('warn', 'OTP resend blocked - too many attempts', ['email' => $email]);
             SessionManager::setRegisterMessage("OTP resend limit reached. Please try again later in 15 minutes.");
             SessionManager::setRegisterMessageType('danger');
             SessionManager::setRegisterStep('otp');
@@ -91,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($redis->ttl($resendKey) <= 0) {
             $redis->expire($resendKey, $resendTTL);
         }
+
+        logEvent('info', 'OTP resent to user', ['email' => $email]);
 
         SessionManager::setRegisterMessage("A new OTP has been sent to your email.");
         SessionManager::setRegisterMessageType('success');
@@ -108,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $otpAttempts = (int) $redis->get($otpKey);
         if ($otpAttempts >= $maxOtpAttempts) {
+            logEvent('warn', 'OTP verification blocked - too many attempts', ['email' => $email]);
             SessionManager::setRegisterMessage("Too many failed OTP attempts. Please try again later in 5 minutes.");
             SessionManager::setRegisterMessageType('danger');
             SessionManager::setRegisterStep('otp');
@@ -117,11 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $result = $control->verifyOtp($otp);
         if ($result['success']) {
+            logEvent('info', 'OTP verified successfully', ['email' => $email]);
             $redis->del($otpKey);
             SessionManager::resetRegisterFlow();
             SessionManager::setRegisterSuccess(true);
-
         } else {
+            logEvent('warn', 'OTP verification failed', ['email' => $email, 'otp' => $otp]);
             $redis->incr($otpKey);
             if ($redis->ttl($otpKey) <= 0) {
                 $redis->expire($otpKey, $otpLockout);

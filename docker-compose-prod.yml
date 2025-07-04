@@ -7,6 +7,8 @@ services:
     volumes:
       - .:/var/www
       - ./public:/var/www/html
+      - ./logs:/var/www/logs       # <-- ✅ Add this line
+
     restart: unless-stopped
     env_file:
       - .env.prod
