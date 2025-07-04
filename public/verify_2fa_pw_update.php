@@ -11,6 +11,8 @@ $repo = new StudentMapper($pdo);
 $control = new StudentControl($repo);
 $pageController = new StudentPageController($control);
 
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
 // Check if user is in 2FA password update flow
 if (
     !SessionManager::has('pending_2fa_email') ||
@@ -28,12 +30,15 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['code'] ?? '';
 
-    // Use controller to verify 2FA code
     if ($pageController->verify2FACodeForPasswordUpdate($secret, $code)) {
+        logEvent('info', '2FA verified for password update', [
+            'email' => $email,
+            'ip' => $ip
+        ]);
+
         try {
             $pwChange = SessionManager::get('pending_pw_change');
-        
-            // Check required session data
+
             if (
                 !isset($pwChange['old_password']) ||
                 !isset($pwChange['new_password'])
@@ -49,12 +54,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             if (!$result['success']) {
+                logEvent('warn', 'Password update failed', [
+                    'email' => $email,
+                    'error' => $result['message'],
+                    'ip' => $ip
+                ]);
                 SessionManager::setChangePWError($result['message']);
                 header("Location: change_password.php");
                 exit;
             }
 
-            // Clear session and redirect
+            // ✅ Log successful password change
+            logEvent('info', 'Password updated', [
+                'email' => $email,
+                'ip' => $ip
+            ]);
+
             SessionManager::remove('pending_pw_change');
             SessionManager::remove('pending_2fa_email');
             SessionManager::remove('2fa_context');
@@ -62,12 +77,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::setSuccess("Password updated successfully.");
             header('Location: dashboard.php');
             exit;
+
         } catch (\Exception $e) {
+            logEvent('error', 'Exception during password update', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'ip' => $ip
+            ]);
             SessionManager::setChangePWError($e->getMessage());
             header("Location: change_password.php");
             exit;
         }
+
     } else {
+        logEvent('warn', '2FA code invalid during password update', [
+            'email' => $email,
+            'ip' => $ip
+        ]);
         $error = 'Invalid 2FA code. Please try again.';
     }
 }
