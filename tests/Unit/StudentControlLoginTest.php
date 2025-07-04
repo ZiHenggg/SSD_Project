@@ -106,12 +106,11 @@ class StudentControlLoginTest extends TestCase
         $this->assertTrue($result['success']);
         $this->assertEquals('setup_2fa.php', $result['redirect']);
 
-        $this->assertEquals([
-            'id' => 2001,
-            'email' => 'jane@sit.singaporetech.edu.sg',
-            'name' => 'Jane SIT'
-        ], SessionManager::getUser());
+        // Assert user session is NOT set yet (intended behavior)
+        $this->assertNull(SessionManager::getUser());
 
+        // Assert 2FA session is set up correctly
+        $this->assertEquals('jane@sit.singaporetech.edu.sg', SessionManager::get2FA()['pending_email']);
         $this->assertNull(SessionManager::get2FA()['secret']);
     }
 }
