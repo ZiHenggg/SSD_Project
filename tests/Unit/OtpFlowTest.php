@@ -32,7 +32,7 @@ class OtpFlowTest extends TestCase
 
     public function testValidOtpVerifiesAccountAndCreatesStudent()
     {
-        SessionManager::setRegisterOTP('654321', time() + 600); // ✅ FIXED
+        SessionManager::setOTP('654321', time() + 600); // ✅ Matches real logic
         SessionManager::setRegistration([
             'studentId' => 7654321,
             'studentName' => 'Alice Tan',
@@ -50,13 +50,13 @@ class OtpFlowTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertNull(SessionManager::getRegisterOTP());   // ✅ Updated
+        $this->assertNull(SessionManager::getOTP());   // ✅ FIXED: getOTP not getRegisterOTP
         $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testExpiredOtpFailsVerification()
     {
-        SessionManager::setRegisterOTP('123456', time() - 1); // ✅ FIXED
+        SessionManager::setOTP('123456', time() - 1); // ✅ Matches real logic
         SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
@@ -68,7 +68,7 @@ class OtpFlowTest extends TestCase
 
     public function testInvalidOtpFailsVerification()
     {
-        SessionManager::setRegisterOTP('111111', time() + 600); // ✅ FIXED
+        SessionManager::setOTP('111111', time() + 600); // ✅ Matches real logic
         SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
@@ -105,7 +105,7 @@ class OtpFlowTest extends TestCase
 
         $mockControl->resendOtp('7654321@sit.singaporetech.edu.sg');
 
-        $otpData = SessionManager::getOTP(); // This one is correct for resendOtp flow
+        $otpData = SessionManager::getOTP();
         $this->assertNotEmpty($otpData['code']);
         $this->assertGreaterThan(time(), $otpData['expiry']);
     }
