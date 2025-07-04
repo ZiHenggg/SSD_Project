@@ -77,7 +77,7 @@ class ReviewReplyFlowTest extends TestCase
         $replyControl = new ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
 
         $this->reviewController = new ReviewPageController($reviewControl, $this->createMock(PDO::class));
-        $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class));
+        $this->replyController = new ReplyPageController($replyControl, $this->createMock(PDO::class), $reviewControl);
     }
 
     public function testSubmitReviewSuccess(): void
@@ -151,7 +151,7 @@ class ReviewReplyFlowTest extends TestCase
         $studentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
 
         $replyControl = new \App\Control\ReplyControl($this->replyRepo, $reviewRepo, $studentRepo);
-        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class));
+        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class), $reviewControl);
 
         $this->replyController->onSubmitReply(1, 3, 'Already replied.');
     }
@@ -183,7 +183,7 @@ class ReviewReplyFlowTest extends TestCase
         $mockStudentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
 
         $replyControl = new \App\Control\ReplyControl($this->replyRepo, $mockReviewRepo, $mockStudentRepo);
-        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class));
+        $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $this->createMock(PDO::class), $reviewControl);
 
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
     }

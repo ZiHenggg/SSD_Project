@@ -16,6 +16,7 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Boundary\StudentPageController;
 use App\Control\StudentControl;
+use App\Control\ReviewControl;
 
 class StudentPageControllerTest extends TestCase
 {
@@ -24,7 +25,8 @@ class StudentPageControllerTest extends TestCase
     protected function setUp(): void
     {
         $mockControl = $this->createMock(StudentControl::class);
-        $this->controller = new StudentPageController($mockControl);
+        $reviewControl = $this->createMock(ReviewControl::class);
+        $this->controller = new StudentPageController($mockControl, $reviewControl);
     }
 
     /** ❌ Fails if required fields are left empty */
