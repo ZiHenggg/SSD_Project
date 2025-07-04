@@ -29,9 +29,36 @@ use App\Boundary\ReplyPageController;
 
 use App\SessionManager;
 
+// ✅ GLOBAL ERROR HANDLERS – Redirect to error.php instead of showing raw error
+set_exception_handler(function ($e) {
+    error_log("Uncaught exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+    if (!headers_sent()) {
+        header("Location: /error.php");
+        exit();
+    }
+});
+
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
+    if (!headers_sent()) {
+        header("Location: /error.php");
+        exit();
+    }
+});
+
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        error_log("Fatal error: " . $error['message'] . " in " . $error['file'] . " on line " . $error['line']);
+        if (!headers_sent()) {
+            header("Location: /error.php");
+            exit();
+        }
+    }
+});
+
 // Start session only if not already active
 SessionManager::start();
-
 
 function displayErrorMessage(): void
 {
@@ -76,10 +103,10 @@ $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl);
 $studentPageController = new StudentPageController($studentControl);
-$reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
-$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
+$reviewPageController = new ReviewPageController($reviewControl);
+$replyPageController = new ReplyPageController($replyControl);
 
 return [
     'studentControl' => $studentControl,
@@ -89,4 +116,3 @@ return [
     'reviewPageController' => $reviewPageController,
     'replyPageController' => $replyPageController,
 ];
-?>

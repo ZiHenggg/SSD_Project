@@ -10,7 +10,6 @@ ob_start();
 
 <div class="w-75 m-auto text-center py-5">
     <img src="/img/professor.jpg" alt="Professor face" style="max-height: 300px;">
-    <img src="/img/professor2.jpg" alt="Professor face" style="max-height: 300px;" class="ms-2">
 
     <h1 class="display-4 text-danger mt-4">Oops! Something's not right</h1>
     <p class="lead mb-4">
