@@ -8,21 +8,6 @@ use Predis\Client as RedisClient;
 // Start session
 SessionManager::start();
 
-// CI MODE: Bypass Redis + rate limiting (Remove for production))
-if (getenv('CI') === 'true') {
-    $pageController = $pageControllers['studentPageController'];
-    $result = $pageController->loginStudent($_POST);
-
-    if ($result['success']) {
-        SessionManager::setLoginError(null);
-        header("Location: " . $result['redirect']);
-        exit;
-    } else {
-        SessionManager::setLoginError("CI mode login failed: " . ($result['message'] ?? 'Unknown error'));
-        header("Location: login.php");
-        exit;
-    }
-}
 
 // Redis for rate limiting
 $redis = new RedisClient([

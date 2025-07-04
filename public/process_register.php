@@ -20,16 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Step 1: Form Submission (rate-limit this)
     if (isset($_POST['studentId'])) {
-        // Bypass Redis/OTP in GitHub Actions CI (Remove for production))
-        if (getenv('CI') === 'true') {
-            SessionManager::set('email', $_POST['email']);
-            SessionManager::setRegisterStep('otp');
-            SessionManager::setRegisterMessage('Mocked OTP step in CI');
-            SessionManager::setRegisterMessageType('success');
-            header('Location: register.php');
-            exit;
-        }
-
+        
         $ip = $_SERVER['REMOTE_ADDR'];
         $ipKey = "register_attempts:ip:" . $ip;
         $maxAttempts = 10;
