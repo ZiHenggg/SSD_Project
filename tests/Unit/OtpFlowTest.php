@@ -18,7 +18,6 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Control\StudentControl;
 use App\Repository\StudentRepository;
-use App\Entity\Student;
 use App\SessionManager;
 
 class OtpFlowTest extends TestCase
@@ -33,7 +32,7 @@ class OtpFlowTest extends TestCase
 
     public function testValidOtpVerifiesAccountAndCreatesStudent()
     {
-        SessionManager::setOTP('654321', time() + 600);
+        SessionManager::setRegisterOTP('654321', time() + 600); // ✅ FIXED
         SessionManager::setRegistration([
             'studentId' => 7654321,
             'studentName' => 'Alice Tan',
@@ -51,13 +50,13 @@ class OtpFlowTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('Registration complete!', $result['message']);
-        $this->assertNull(SessionManager::getOTP());
+        $this->assertNull(SessionManager::getRegisterOTP());   // ✅ Updated
         $this->assertNull(SessionManager::getRegistration());
     }
 
     public function testExpiredOtpFailsVerification()
     {
-        SessionManager::setOTP('123456', time() - 1); // already expired
+        SessionManager::setRegisterOTP('123456', time() - 1); // ✅ FIXED
         SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
@@ -69,7 +68,7 @@ class OtpFlowTest extends TestCase
 
     public function testInvalidOtpFailsVerification()
     {
-        SessionManager::setOTP('111111', time() + 600);
+        SessionManager::setRegisterOTP('111111', time() + 600); // ✅ FIXED
         SessionManager::setRegistration([]);
 
         $control = new StudentControl($this->createMock(StudentRepository::class));
@@ -106,7 +105,7 @@ class OtpFlowTest extends TestCase
 
         $mockControl->resendOtp('7654321@sit.singaporetech.edu.sg');
 
-        $otpData = SessionManager::getOTP();
+        $otpData = SessionManager::getOTP(); // This one is correct for resendOtp flow
         $this->assertNotEmpty($otpData['code']);
         $this->assertGreaterThan(time(), $otpData['expiry']);
     }
