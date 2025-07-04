@@ -184,7 +184,7 @@ class ReviewReplyFlowTest extends TestCase
         $mockStudentRepo->method('getStudentById')->willReturn($this->createMock(Student::class));
 
         $replyControl = new \App\Control\ReplyControl($this->replyRepo, $mockReviewRepo, $mockStudentRepo);
-        $reviewControl = new \App\Control\ReviewControl($reviewRepo, $this->createMock(StudentStatsRepository::class));
+        $reviewControl = new \App\Control\ReviewControl($mockReviewRepo,$mockStudentRepo);
         $this->replyController = new \App\Boundary\ReplyPageController($replyControl, $reviewControl, $this->createMock(PDO::class));
 
         $this->replyController->onSubmitReply(1, 3, 'Invalid group.');
