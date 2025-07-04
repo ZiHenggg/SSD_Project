@@ -100,8 +100,6 @@ class GroupControl
     {
         $group = $this->getGroupInfo($groupId);
         if ($group) {
-            // $group->setIsActive(false); // Set the group as inactive
-            // $this->groupRepo->updateGroup($group); // Update the group in the repository
             $this->groupRepo->updateGroupStatus($groupId, 'inactive');
         }
     }
