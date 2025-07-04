@@ -40,7 +40,7 @@ class StudentControl
             'password' => $hashedPassword,
         ]);
 
-        SessionManager::setOTP($otp, $otpExpiry);
+        SessionManager::setRegisterOTP($otp, $otpExpiry);
 
         $this->sendOtpEmail($email, $otp);
     }
@@ -70,7 +70,7 @@ class StudentControl
 
     public function verifyOtp(string $inputOtp): array
     {
-        $otpSession = SessionManager::getOTP();
+        $otpSession = SessionManager::getRegisterOTP();
         $registration = SessionManager::getRegistration();
 
         if (!$otpSession || !$registration) {

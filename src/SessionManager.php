@@ -175,6 +175,19 @@ class SessionManager
         return self::get('otp');
     }
 
+    public static function setRegisterOTP(string $code, int $expiry): void
+    {
+        self::set('register_otp', [
+            'code'   => $code,
+            'expiry' => $expiry,
+        ]);
+    }
+
+    public static function getRegisterOTP(): ?array
+    {
+        return self::get('register_otp');
+    }
+
     public static function setRegistration(array $data): void
     {
         self::set('registration', [
