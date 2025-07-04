@@ -95,7 +95,7 @@ class StudentControl
         $this->studentRepo->createStudentAccount($student);
         $this->studentRepo->verifyStudentEmail($student->getEmail());
 
-        SessionManager::remove('otp');
+        SessionManager::remove('register_otp');
         SessionManager::remove('registration');
 
         return ['success' => true, 'message' => 'Registration complete!'];
