@@ -9,7 +9,7 @@ ob_start();
 <div class="w-75 m-auto text-center py-5">
     <img src="/img/professor.jpg" alt="Professor face" style="max-height: 350px;">
     <img src="/img/professor2.jpg" alt="Professor face" style="max-height: 350px;">
-    <h1 class="display-4 text-danger">Access Denied</h1>
+    <h1 class="display-4 text-danger">Access Denied!</h1>
     <p class="lead mb-4">You are not authorized to view this page or resource.</p>
 
     <div class="alert alert-info mx-auto w-75 text-start">
