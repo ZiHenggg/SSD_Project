@@ -127,9 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $control->verifyOtp($otp);
         if ($result['success']) {
             $redis->del($otpKey);
-            SessionManager::setRegisterMessage($result['message']);
-            SessionManager::setRegisterMessageType(true);
-            SessionManager::setRegisterStep('done');
+            SessionManager::resetRegisterFlow();
+            SessionManager::setRegisterSuccess(true);
+
         } else {
             $redis->incr($otpKey);
             if ($redis->ttl($otpKey) <= 0) {

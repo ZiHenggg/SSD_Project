@@ -336,6 +336,16 @@ public static function setForgotStartedAt(int $timestamp): void
         self::remove('otp_expiry');
     }
 
+    public static function resetRegisterFlow(): void
+    {
+        self::remove('register_step');
+        self::remove('register_message');
+        self::remove('register_message_type');
+        self::remove('register_success');
+        self::remove('otp');
+        self::remove('otp_expiry');
+    }
+
     public static function setChangePWError(?string $message): void
     {
         self::set('change_pw_error', $message);
