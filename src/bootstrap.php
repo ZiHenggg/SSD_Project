@@ -64,9 +64,11 @@ SessionManager::start();
 
 function logEvent(string $type, string $message, array $context = []): void
 {
-    $logPath = '/var/www/logs/app.log';  // Make sure this path matches your docker mount
+    $logPath = '/var/www/logs/app.log';
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $user = $_SESSION['username'] ?? 'guest';
+
+    $userData = \App\SessionManager::getUser();
+    $user = $userData['id'] ?? 'guest'; // this now works 👌
 
     $entry = sprintf(
         "[%s] [%s] %s | User: %s | IP: %s | %s\n",

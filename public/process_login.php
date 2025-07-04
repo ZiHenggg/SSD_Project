@@ -37,13 +37,22 @@ $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
+    // ✅ Set user into session the right way
+    SessionManager::setUser([
+        'id' => $username,
+        'email' => $result['email'] ?? null,
+        'name' => $result['name'] ?? null,
+    ]);
+
     logEvent('info', 'Login successful', ['username' => $username, 'ip' => $ip]);
+
     $redis->del([$userKey, $ipKey]);
     SessionManager::setLoginError(null);
     header("Location: " . $result['redirect']);
     exit;
 } else {
     logEvent('warn', 'Login failed', ['username' => $username, 'ip' => $ip]);
+
     $redis->incr($userKey);
     $redis->incr($ipKey);
 
