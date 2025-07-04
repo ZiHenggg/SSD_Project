@@ -8,7 +8,6 @@ use Predis\Client as RedisClient;
 // Start session
 SessionManager::start();
 
-
 // Redis for rate limiting
 $redis = new RedisClient([
     'scheme' => 'tcp',
@@ -28,6 +27,7 @@ $userAttempts = (int) $redis->get($userKey);
 $ipAttempts   = (int) $redis->get($ipKey);
 
 if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
+    logEvent('warn', 'Login blocked due to rate limit', ['username' => $username, 'ip' => $ip]);
     SessionManager::setLoginError("Account temporarily locked. Try again later.");
     header("Location: login.php");
     exit;
@@ -37,11 +37,13 @@ $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
+    logEvent('info', 'Login successful', ['username' => $username, 'ip' => $ip]);
     $redis->del([$userKey, $ipKey]);
     SessionManager::setLoginError(null);
     header("Location: " . $result['redirect']);
     exit;
 } else {
+    logEvent('warn', 'Login failed', ['username' => $username, 'ip' => $ip]);
     $redis->incr($userKey);
     $redis->incr($ipKey);
 
