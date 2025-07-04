@@ -29,7 +29,8 @@ use App\Boundary\ReplyPageController;
 
 use App\SessionManager;
 
-// ✅ GLOBAL ERROR HANDLERS – Redirect to error.php instead of showing raw error
+// 🔴 Commented out error handlers for debugging
+/*
 set_exception_handler(function ($e) {
     error_log("Uncaught exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
     if (!headers_sent()) {
@@ -56,6 +57,7 @@ register_shutdown_function(function () {
         }
     }
 });
+*/
 
 // Start session only if not already active
 SessionManager::start();
@@ -78,7 +80,6 @@ function logEvent(string $type, string $message, array $context = []): void
 
     file_put_contents($logPath, $entry, FILE_APPEND);
 }
-
 
 function displayErrorMessage(): void
 {
