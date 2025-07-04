@@ -16,6 +16,10 @@ RUN sed -i 's/80/9000/g' /etc/apache2/ports.conf /etc/apache2/sites-available/00
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
+# Hide Apache version and port info in error pages
+RUN echo "ServerTokens Prod\nServerSignature Off" >> /etc/apache2/conf-available/security.conf \
+ && ln -s ../conf-available/security.conf /etc/apache2/conf-enabled/security.conf
+
 # Copy application code
 COPY src/ /var/www/html/
 
