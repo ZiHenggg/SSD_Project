@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $ipAttempts = (int) $redis->get($ipKey);
         if ($ipAttempts >= 10) {
+            logEvent('warn', 'Forgot password blocked: too many IP attempts', ['ip' => $ip]);
             SessionManager::setForgotMessage("Too many attempts from your IP. Please wait 10 minutes.");
             SessionManager::setForgotStep('form');
             header("Location: forgot_password.php");
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            logEvent('warn', 'Invalid email format', ['ip' => $ip]);
             SessionManager::setForgotMessage("Invalid email format.");
             SessionManager::setForgotStep('form');
             $redis->incr($ipKey);
@@ -59,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!$control->checkStudentExist($email)) {
+            logEvent('warn', 'Forgot password email not found', ['email' => $email, 'ip' => $ip]);
             SessionManager::setForgotMessage("No account found with this email.");
             SessionManager::setForgotStep('form');
             $redis->incr($ipKey);
@@ -71,11 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $control->sendForgotPasswordOtp($email);
+            logEvent('info', 'Forgot password OTP sent', ['email' => $email]);
             SessionManager::setForgotStep('otp');
             SessionManager::setForgotPasswordEmail($email);
             SessionManager::setForgotStartedAt(time());
             SessionManager::setForgotMessage("An OTP has been sent to your email.");
         } catch (Exception $e) {
+            logEvent('error', 'Failed to send forgot password OTP', ['email' => $email, 'error' => $e->getMessage()]);
             SessionManager::setForgotMessage("Failed to send OTP: " . $e->getMessage());
             SessionManager::setForgotStep('form');
         }
@@ -85,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $redis->expire($ipKey, 120);
         }
 
+        logEvent('info', 'Forgot password email submitted', ['email' => $email, 'ip' => $ip]);
         header("Location: forgot_password.php");
         exit;
     }
@@ -99,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ((int) $redis->get($resendKey) >= 3) {
+            logEvent('warn', 'OTP resend blocked - limit reached', ['email' => $emailKey]);
             SessionManager::setForgotMessage("You’ve reached the resend limit. Try again in 15 minutes.");
             SessionManager::setForgotStep('otp');
             header("Location: forgot_password.php");
@@ -113,9 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redis->expire($resendKey, 900);
             }
 
+            logEvent('info', 'OTP resent successfully', ['email' => $emailKey]);
+
             SessionManager::setForgotMessage("A new OTP has been sent.");
             SessionManager::setForgotStep('otp');
         } catch (Exception $e) {
+            logEvent('error', 'Failed to resend OTP', ['email' => $emailKey, 'error' => $e->getMessage()]);
             SessionManager::setForgotMessage("Failed to resend OTP: " . $e->getMessage());
             SessionManager::setForgotStep('otp');
         }
@@ -137,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (time() > $otpData['expiry']) {
+            logEvent('warn', 'OTP expired during verification', ['email' => SessionManager::getForgotPasswordEmail()]);
             SessionManager::setOTP('', 0);
             SessionManager::setForgotMessage("OTP has expired. Please try again.");
             SessionManager::setForgotStep('form');
@@ -146,6 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($otpData['code'] !== $otpInput) {
             if ((int) $redis->get($otpKey) >= 5) {
+                logEvent('warn', 'OTP blocked after too many failures', ['email' => SessionManager::getForgotPasswordEmail()]);
                 SessionManager::setForgotMessage("Too many incorrect OTPs. Try again in 5 minutes.");
                 SessionManager::setForgotStep('otp');
                 header("Location: forgot_password.php");
@@ -157,12 +169,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redis->expire($otpKey, 300);
             }
 
+            logEvent('warn', 'OTP invalid', ['email' => SessionManager::getForgotPasswordEmail()]);
             SessionManager::setForgotMessage("Invalid OTP.");
             SessionManager::setForgotStep('otp');
             header("Location: forgot_password.php");
             exit;
         }
 
+        logEvent('info', 'OTP verified', ['email' => SessionManager::getForgotPasswordEmail()]);
         $redis->del($otpKey);
         SessionManager::setForgotStep('reset');
         SessionManager::setForgotMessage("OTP verified. Please enter your new password.");
@@ -184,6 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $error = $pageController->validatePassword($newPassword);
         if ($error !== null) {
+            logEvent('warn', 'Password reset failed validation', ['email' => $email]);
             SessionManager::setForgotMessage($error);
             SessionManager::setForgotStep('reset');
             header("Location: forgot_password.php");
@@ -195,6 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $repo->disable2FA($email); // 🔥 Require re-setup of 2FA on next login
 
         $redis->del($resendKey);
+
+        logEvent('info', 'Password reset successfully', ['email' => $email]);
 
         SessionManager::resetForgotFlow();
         SessionManager::setForgotStep('done');
