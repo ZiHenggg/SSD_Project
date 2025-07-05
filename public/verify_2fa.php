@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
 
@@ -22,13 +18,13 @@ $twoFA = SessionManager::get2FA();
 $email = $twoFA['pending_email'] ?? null;
 $user = SessionManager::getUser();
 
-// Already fully logged in and passed 2FA — redirect to dashboard
-if ($user && SessionManager::get('2fa_verified')) {
+// Already fully logged in — block access
+if ($user && !$email) {
     header("Location: dashboard.php");
     exit;
 }
 
-// Not even mid-login — redirect to login
+// Not even mid-login
 if (!$email) {
     header("Location: login.php");
     exit;
@@ -53,12 +49,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $student->getStudentName(),
         ]);
 
-        SessionManager::set('2fa_verified', true);
+        // ✅ Log successful 2FA login
+        logEvent('info', 'Login complete (2FA verified)', [
+            'studentId' => $student->getStudentID(),
+            'email'     => $student->getEmail()
+        ]);
+
+        // Clear 2FA session data after successful setup
+        SessionManager::set('2fa_verified', true); 
         SessionManager::set2FA(null, null);
 
         header('Location: ' . $result['redirect']);
         exit;
     } else {
+        logEvent('warn', '2FA verification failed', [
+            'email' => $email
+        ]);
         $error = $result['message'];
     }
 }
@@ -66,3 +72,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = "Verify 2FA";
 ob_start();
 ?>
+
+<div class="container w-50 twofa-wrapper">
+    <div class="card shadow p-4">
+        <h2 class="mb-4 text-center">Enter Your 2FA Code</h2>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="post">
+            <div class="mb-3">
+                <input type="text" name="code" id="code" class="form-control" placeholder="Enter Code" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Verify</button>
+        </form>
+    </div>
+</div>
+
+<?php
+$content = ob_get_clean();
+include '_layout.php';
