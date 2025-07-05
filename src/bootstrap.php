@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Set default timezone to Singapore
 date_default_timezone_set('Asia/Singapore');
 
 use App\Mapper\GroupMapper;
@@ -26,20 +27,52 @@ use App\Boundary\StudentPageController;
 use App\Boundary\ReviewPageController;
 use App\Boundary\ReplyPageController;
 
-use App\Service\AuthService; // ✅ Make sure this line is added
 use App\SessionManager;
 
+// 🔴 Commented out error handlers for debugging
+/*
+set_exception_handler(function ($e) {
+    error_log("Uncaught exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+    if (!headers_sent()) {
+        header("Location: /error.php");
+        exit();
+    }
+});
+
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
+    if (!headers_sent()) {
+        header("Location: /error.php");
+        exit();
+    }
+});
+
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        error_log("Fatal error: " . $error['message'] . " in " . $error['file'] . " on line " . $error['line']);
+        if (!headers_sent()) {
+            header("Location: /error.php");
+            exit();
+        }
+    }
+});
+*/
+
+// Start session only if not already active
 SessionManager::start();
 
 function logEvent(string $type, string $message, array $context = []): void
 {
     $logPath = '/var/www/logs/app.log';
+
+    // ✅ Real client IP first, fallback to Docker internal
     $ip = $_SERVER['HTTP_X_REAL_IP']
         ?? $_SERVER['HTTP_X_FORWARDED_FOR']
         ?? $_SERVER['REMOTE_ADDR']
         ?? 'unknown';
 
-    $userData = SessionManager::getUser();
+    $userData = \App\SessionManager::getUser();
     $user = $userData['id'] ?? 'guest';
 
     $entry = sprintf(
@@ -54,6 +87,7 @@ function logEvent(string $type, string $message, array $context = []): void
 
     file_put_contents($logPath, $entry, FILE_APPEND);
 }
+
 
 function displayErrorMessage(): void
 {
@@ -71,12 +105,16 @@ function displaySuccessMessage(): void
     }
 }
 
+// Autoload classes from Composer (e.g. Dotenv, custom namespaces)
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// ✅ Load environment variables from .env
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../', '.env.prod');
 $dotenv->load();
 
 require_once __DIR__ . '/db.php';
 
-// Instantiate mappers
+// Instantiate mappers and controls
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
@@ -87,24 +125,18 @@ $moduleRepo = new ModuleMapper($pdo);
 $labGroupRepo = new LabGroupMapper($pdo);
 $studentStatsRepo = new StudentStatsMapper($pdo);
 
-// Instantiate controls
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
-// ✅ FIX: Create AuthService instance
-$authService = new AuthService();
-
-// Instantiate controllers
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl);
-$studentPageController = new StudentPageController($studentControl, $authService); // ✅ Now passing 2 args
-$reviewPageController = new ReviewPageController($reviewControl);
-$replyPageController = new ReplyPageController($replyControl);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
+$studentPageController = new StudentPageController($studentControl);
+$reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
+$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
 
-// Return config
 return [
     'studentControl' => $studentControl,
     'groupPageController' => $groupPageController,

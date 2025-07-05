@@ -3,20 +3,17 @@ namespace App\Boundary;
 
 use App\Entity\Reply;
 use App\Control\ReplyControl;
-use App\Control\ReviewControl;
 use PDO;
 use Exception;
 
 class ReplyPageController
 {
     private ReplyControl $replyControl;
-    private ReviewControl $reviewControl;
     // private PDO $pdo;
 
-    public function __construct(ReplyControl $replyControl, ReviewControl $reviewControl/*, PDO $pdo*/)
+    public function __construct(ReplyControl $replyControl/*, PDO $pdo*/)
     {
         $this->replyControl = $replyControl;
-        $this->reviewControl = $reviewControl;
         // $this->pdo = $pdo;
     }
 
@@ -47,11 +44,6 @@ class ReplyPageController
 
         if ($this->replyControl->hasUserReplied($reviewId)) {
             throw new Exception("You have already replied to this review.");
-        }
-
-        $onCheckProfanities = $this->reviewControl->containsProfanity($justification);
-        if ($onCheckProfanities) {
-            throw new Exception("Your reply contains inappropriate content. Please revise your justification.");
         }
 
         try {

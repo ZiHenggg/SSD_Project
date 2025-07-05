@@ -2,19 +2,16 @@
 namespace App\Boundary;
 
 use App\Control\StudentControl;
-use App\Control\ReviewControl;
 use App\Entity\Student;
 use DivineOmega\PasswordExposed\Enums\PasswordStatus;
 
 class StudentPageController
 {
     private StudentControl $studentControl;
-    private ReviewControl $reviewControl;
 
-    public function __construct(StudentControl $studentControl, ReviewControl $reviewControl)
+    public function __construct(StudentControl $studentControl)
     {
         $this->studentControl = $studentControl;
-        $this->reviewControl = $reviewControl;
     }
 
     public function validatePassword(string $password): ?string
@@ -56,11 +53,6 @@ class StudentPageController
 
         if (!preg_match('/^[\w\.\-]+@sit\.singaporetech\.edu\.sg$/', $email)) {
             return "Email must be a SIT address.";
-        }
-
-        $onCheckProfanities = $this->reviewControl->containsProfanity($studentName);
-        if ($onCheckProfanities) {
-            return "Your name contains inappropriate content. Please revise your name.";
         }
 
         $passwordError = $this->validatePassword($password);
@@ -160,10 +152,5 @@ class StudentPageController
     public function verify2FACodeForPasswordUpdate(string $secret, string $code): bool
     {
         return $this->studentControl->verify2FACodeWithSecret($secret, $code);
-    }
-
-    public function is2FAEnabled(string $email): bool
-    {
-        return $this->studentControl->is2FAEnabled($email);
     }
 }
