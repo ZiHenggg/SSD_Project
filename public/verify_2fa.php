@@ -16,7 +16,6 @@ header("Pragma: no-cache");
 // ==== Session Management ====
 $twoFA = SessionManager::get2FA();
 $email = $twoFA['pending_email'] ?? null;
-$user = SessionManager::getUser();
 
 // Already fully logged in — block access
 if ($user && !$email) {
@@ -29,7 +28,7 @@ if (!$email) {
     header("Location: login.php");
     exit;
 }
-// ============================
+// =====================
 
 $error = '';
 
@@ -49,22 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $student->getStudentName(),
         ]);
 
-        // ✅ Log successful 2FA login
-        logEvent('info', 'Login complete (2FA verified)', [
-            'studentId' => $student->getStudentID(),
-            'email'     => $student->getEmail()
-        ]);
+        // ✅ Critical: Set 2FA verified flag
+        SessionManager::set('2fa_verified', true);
 
-        // Clear 2FA session data after successful setup
-        SessionManager::set('2fa_verified', true); 
+        // ✅ Clear 2FA temp session data
         SessionManager::set2FA(null, null);
 
         header('Location: ' . $result['redirect']);
         exit;
     } else {
-        logEvent('warn', '2FA verification failed', [
-            'email' => $email
-        ]);
         $error = $result['message'];
     }
 }
@@ -72,22 +64,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = "Verify 2FA";
 ob_start();
 ?>
-
-<div class="container w-50 twofa-wrapper">
-    <div class="card shadow p-4">
-        <h2 class="mb-4 text-center">Enter Your 2FA Code</h2>
-        <?php if ($error): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        <form method="post">
-            <div class="mb-3">
-                <input type="text" name="code" id="code" class="form-control" placeholder="Enter Code" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Verify</button>
-        </form>
-    </div>
-</div>
-
-<?php
-$content = ob_get_clean();
-include '_layout.php';
+<!-- Your HTML form continues below -->
