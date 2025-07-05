@@ -1,0 +1,36 @@
+#Just to test the forwarding
+sudo apt update
+sudo apt install -y snort
+sudo nano /etc/snort/rules/local.rules
+#Add this to local rules and comment out all the other rules first. 
+alert icmp any any -> any any (msg:"Test ICMP Ping"; sid:1000001; rev:1;)
+#Check include $RULE_PATH/local.rules
+sudo nano /etc/snort/snort.conf 
+#Run snort in Logging mode to test 
+sudo mkdir -p /var/log/snort
+sudo snort -i lo -A fast -c /etc/snort/snort.conf -l /var/log/snort
+#trigger the logs, ping 8.8.8.8 or l0
+
+#Check the logs
+sudo tail -f /var/log/snort/alert
+
+
+#Install and start splunk forwarder
+wget -O splunkforwarder-9.4.3-237ebbd22314-linux-amd64.tgz "https://download.splunk.com/products/universalforwarder/releases/9.4.3/linux/splunkforwarder-9.4.3-237ebbd22314-linux-amd64.tgz"
+tar -xvzf splunkforwarder-9.4.3-*.tgz
+sudo mv splunkforwarder /opt/
+sudo /opt/splunkforwarder/bin/splunk start --accept-license
+sudo /opt/splunkforwarder/bin/splunk enable boot-start
+
+#Add the splunk server 
+sudo /opt/splunkforwarder/bin/splunk add forward-server 127.0.0.1:9997
+#add the Snort alert files to the monitored files in splunk
+sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/snort/alert -sourcetype snort_alerts
+#Restart splunk
+sudo /opt/splunkforwarder/bin/splunk restart
+
+
+#Verify that it is active
+sudo /opt/splunkforwarder/bin/splunk list forward-server
+#Active forwards:    127.0.0.1:9997
+#Search in splunk web ui : index=* sourcetype="snort_alerts"
