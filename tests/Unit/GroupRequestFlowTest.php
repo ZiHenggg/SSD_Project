@@ -12,6 +12,7 @@ namespace Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use App\Boundary\GroupMembershipController;
 use App\Control\GroupMembershipControl;
+use App\Control\GroupControl;
 use App\Entity\Group;
 use App\Entity\GroupJoinRequests;
 use App\SessionManager;
