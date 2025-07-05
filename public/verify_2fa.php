@@ -18,7 +18,7 @@ $twoFA = SessionManager::get2FA();
 $email = $twoFA['pending_email'] ?? null;
 
 // Already fully logged in — block access
-if ($user && !$email) {
+if ($user && SessionManager::get('2fa_verified')) {
     header("Location: dashboard.php");
     exit;
 }
