@@ -5,10 +5,38 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\SessionManager;
 use Predis\Client as RedisClient;
 
-// Start session
-SessionManager::start();
+// Load CSRF protection
+require_once __DIR__ . '/../src/CsrfManager.php';
 
-// Redis for rate limiting
+
+
+// CSRF token validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy(); // 🔒 Full logout
+        header('Location: error.php'); // 🚫 Redirect to user-friendly error page
+        exit;
+    }
+}
+
+
+// ==== CI MODE ====
+if (getenv('CI') === 'true') {
+    $pageController = $pageControllers['studentPageController'];
+    $result = $pageController->loginStudent($_POST);
+
+    if ($result['success']) {
+        SessionManager::setLoginError(null);
+        header("Location: " . $result['redirect']);
+        exit;
+    } else {
+        SessionManager::setLoginError("CI mode login failed: " . ($result['message'] ?? 'Unknown error'));
+        header("Location: login.php");
+        exit;
+    }
+}
+
+// ==== Redis Rate Limiting ====
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host'   => 'redis',
@@ -36,6 +64,7 @@ if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
     exit;
 }
 
+// ==== Actual Login ====
 $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 

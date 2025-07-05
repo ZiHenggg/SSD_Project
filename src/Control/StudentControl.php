@@ -40,7 +40,7 @@ class StudentControl
             'password' => $hashedPassword,
         ]);
 
-        SessionManager::setOTP($otp, $otpExpiry);
+        SessionManager::setRegisterOTP($otp, $otpExpiry);
 
         $this->sendOtpEmail($email, $otp);
     }
@@ -70,7 +70,7 @@ class StudentControl
 
     public function verifyOtp(string $inputOtp): array
     {
-        $otpSession = SessionManager::getOTP();
+        $otpSession = SessionManager::getRegisterOTP();
         $registration = SessionManager::getRegistration();
 
         if (!$otpSession || !$registration) {
@@ -95,7 +95,7 @@ class StudentControl
         $this->studentRepo->createStudentAccount($student);
         $this->studentRepo->verifyStudentEmail($student->getEmail());
 
-        SessionManager::remove('otp');
+        SessionManager::remove('register_otp');
         SessionManager::remove('registration');
 
         return ['success' => true, 'message' => 'Registration complete!'];
@@ -245,5 +245,11 @@ class StudentControl
         SessionManager::setOTP($otp, $otpExpiry);
 
         $this->sendOtpEmail($email, $otp);
+    }
+
+    public function is2FAEnabled(string $email): bool
+    {
+        $student = $this->studentRepo->getStudentByEmail($email);
+        return $student ? $student->is2FAEnabled() : false;
     }
 }

@@ -22,14 +22,12 @@ class GroupPageController
 
     public function onCreateGroup(array $formData, string $studentId): void
     {
-        // Fetch lab groups from the database
-        $stmt = $this->pdo->query("SELECT labGroupCode, moduleCode FROM labGroups");
-        $labGroupRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $labGroupsRows = $this->groupControl->getAllLabGroups();
 
         // Group lab groups by moduleCode
         $labGroups = [];
-        foreach ($labGroupRows as $row) {
-            $labGroups[$row['moduleCode']][] = $row['labGroupCode'];
+        foreach ($labGroupsRows as $row) {
+            $labGroups[$row->getModuleCode()][] = $row->getLabGroupCode();
         }
 
         // Get form data
@@ -77,24 +75,13 @@ class GroupPageController
 
     public function listAllActiveGroups(): array
     {
-        // return $this->groupControl->getGroupsByUser($studentId);
         return $this->groupControl->getAllActiveGroups();
     }
-
-    // public function listUserGroups(int $studentId): array
-    // {
-    //     return $this->groupControl->getGroupsByUser($studentId);
-    // }
 
     public function listActiveUserGroups(int $studentId): array
     {
         return $this->groupControl->getActiveGroupsByUser($studentId);
     }
-
-    // public function getUserRoleInGroup(int $groupId, int $studentId): ?string
-    // {
-    //     return $this->groupMembershipControl->getUserRole($groupId, $studentId);
-    // }
 
     public function getUserRolesForGroups(int $studentId, array $groups): array
     {

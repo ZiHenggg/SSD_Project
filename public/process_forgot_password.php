@@ -1,18 +1,17 @@
 <?php
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Mapper\StudentMapper;
-use App\Control\StudentControl;
-use App\Boundary\StudentPageController;
 use App\SessionManager;
 use Predis\Client as RedisClient;
 
 SessionManager::start();
 
 $repo = new StudentMapper($pdo);
-$control = new StudentControl($repo);
-$pageController  =  new StudentPageController($control);
+$control = $pageControllers['studentControl'];
+$pageController = $pageControllers['studentPageController'];
+
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host' => 'redis',
@@ -207,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
         $repo->updatePassword($email, $hashed);
-        $repo->disable2FA($email);
+        $repo->disable2FA($email); // Require re-setup of 2FA on next login
 
         $redis->del($resendKey);
 

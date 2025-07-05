@@ -100,8 +100,6 @@ class GroupControl
     {
         $group = $this->getGroupInfo($groupId);
         if ($group) {
-            // $group->setIsActive(false); // Set the group as inactive
-            // $this->groupRepo->updateGroup($group); // Update the group in the repository
             $this->groupRepo->updateGroupStatus($groupId, 'inactive');
         }
     }
@@ -114,6 +112,11 @@ class GroupControl
     public function getLabGroupsByModuleCode(string $moduleCode): array
     {
         return $this->labGroupRepo->getLabGroupsByModuleCode($moduleCode);
+    }
+
+    public function getAllLabGroups(): array
+    {
+        return $this->labGroupRepo->getAllLabGroups();
     }
 }
 ?>

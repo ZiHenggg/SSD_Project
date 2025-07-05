@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../src/bootstrap.php';
+$pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 
 use RobThree\Auth\TwoFactorAuth;
 use App\SessionManager;
@@ -20,11 +20,10 @@ if (!$email) {
 // ==========================
 
 // Check if already has 2FA
-$stmt = $pdo->prepare("SELECT is_2fa_enabled FROM students WHERE email = ?");
-$stmt->execute([$email]);
-$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$studentController = $pageControllers['studentPageController'];
+$is2FAEnabled = $studentController->is2FAEnabled($email);
 
-if ($result && $result['is_2fa_enabled']) {
+if ($is2FAEnabled) {
     header("Location: verify_2fa.php");
     exit;
 }

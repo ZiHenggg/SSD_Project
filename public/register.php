@@ -5,6 +5,9 @@ use App\SessionManager;
 
 SessionManager::start();
 
+// Clear forgot password flow if it exists
+SessionManager::resetForgotFlow();
+
 // If already logged in, redirect to dashboard
 if (SessionManager::getUser()) {
     header("Location: dashboard.php");

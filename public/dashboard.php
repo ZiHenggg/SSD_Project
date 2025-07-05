@@ -164,8 +164,8 @@ ob_start();
                                 <div class="delete-group-wrapper">
                                     <form class="delete-form" action="process_group_delete.php" method="post">
                                         <input type="hidden" class="delete-group-id" name="group_id" value="<?= htmlspecialchars($group->getGroupId()) ?>">
-                                        <h5><strong>Delete “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
-                                        <p>This action cannot be undone. Current members will have to find another group.</p>
+                                        <h5><strong>Archive “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
+                                        <p>This action cannot be undone. No additional reviews and replies can be added, existing reviews and replies will still be visible on profiles.</p>
                                         <input type="checkbox" name="delete_group" required value="true"> I acknowledge and agree.
                                         <div class="delete-group-footer d-flex flex-row align-items-center justify-content-end">
                                             <span class="cancel-section text-center mx-4"><small>Cancel</small></span>
