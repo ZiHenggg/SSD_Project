@@ -11,13 +11,11 @@ class GroupMembershipController
 {
     private GroupMembershipControl $groupMembershipControl;
     private GroupControl $groupControl;
-    // private PDO $pdo;
 
-    public function __construct(GroupMembershipControl $groupMembershipControl, GroupControl $groupControl/*, PDO $pdo*/)
+    public function __construct(GroupMembershipControl $groupMembershipControl, GroupControl $groupControl)
     {
         $this->groupMembershipControl = $groupMembershipControl;
         $this->groupControl = $groupControl;
-        // $this->pdo = $pdo;
     }
 
     public function displayGroupId(int $groupMembersId): string

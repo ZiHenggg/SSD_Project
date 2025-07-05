@@ -38,6 +38,7 @@ class GroupRequestFlowTest extends TestCase
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
 
         $control = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
+        $groupControl = $this->createMock(GroupControl::class);
 
         $pdoStmt = $this->createMock(PDOStatement::class);
         $pdoStmt->method('fetchAll')->willReturn([]);
@@ -45,7 +46,7 @@ class GroupRequestFlowTest extends TestCase
         $pdo = $this->createMock(PDO::class);
         $pdo->method('query')->willReturn($pdoStmt);
 
-        $this->controller = new GroupMembershipController($control, $pdo);
+        $this->controller = new GroupMembershipController($control, $groupControl);
 
         // Shared group mock (correct int type for maxMembers)
         $group = new Group('2025', 'T1', 'ICT2206', 'G1', 1, 4);
