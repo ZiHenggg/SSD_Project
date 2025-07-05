@@ -29,7 +29,7 @@ if ($user && SessionManager::get('2fa_verified')) {
 if (!$email) {
     SessionManager::set2FA(null, null);
     SessionManager::set('2fa_verified', false);
-    SessionManager::setUser(null);
+    SessionManager::setUser([]);
 
     header("Location: login.php");
     exit;
