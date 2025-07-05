@@ -1,8 +1,8 @@
 <?php
 /**
- * ✅ testUpdatePasswordSuccess – Successfully updates password with correct old password and valid SIT email
- * ✅ testUpdatePasswordThrowsWhenStudentNotFound – Throws exception when student email not found
- * ✅ testUpdatePasswordThrowsWhenOldPasswordIncorrect – Throws exception when old password does not match
+ * testUpdatePasswordSuccess – Successfully updates password with correct old password and valid SIT email
+ * testUpdatePasswordThrowsWhenStudentNotFound – Throws exception when student email not found
+ * testUpdatePasswordThrowsWhenOldPasswordIncorrect – Throws exception when old password does not match
  */
 
 namespace Tests\Unit;
@@ -24,7 +24,6 @@ class UpdatePasswordTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',

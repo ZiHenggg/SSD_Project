@@ -1,12 +1,12 @@
 <?php
 /**
- * ✅ testSubmitReviewSuccess – Submits a valid review
- * ✅ testSubmitReplySuccess – Submits a valid reply
- * ✅ testSubmitReviewMissingContext – Safe call with no context (now passes)
- * ✅ testSubmitReviewInvalidRating – Rejects invalid rating or empty description
- * ✅ testSubmitReplyDuplicate – Rejects duplicate reply attempt
- * ✅ testSubmitReplyNotInSameGroup – Rejects if not in same group (simulated)
- * ✅ testSubmitReplyMissingFields – Rejects if any required input is missing
+ * testSubmitReviewSuccess – Submits a valid review
+ * testSubmitReplySuccess – Submits a valid reply
+ * testSubmitReviewMissingContext – Safe call with no context (now passes)
+ * testSubmitReviewInvalidRating – Rejects invalid rating or empty description
+ * testSubmitReplyDuplicate – Rejects duplicate reply attempt
+ * testSubmitReplyNotInSameGroup – Rejects if not in same group (simulated)
+ * testSubmitReplyMissingFields – Rejects if any required input is missing
  */
 
 namespace Tests\Unit;
@@ -47,7 +47,6 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',
@@ -172,7 +171,6 @@ class ReviewReplyFlowTest extends TestCase
             ->onlyMethods([
                 'getStudentById',
                 'getStudentByEmail',
-                // 'getAllStudents',
                 'createStudentAccount',
                 'isStudentExists',
                 'updatePassword',

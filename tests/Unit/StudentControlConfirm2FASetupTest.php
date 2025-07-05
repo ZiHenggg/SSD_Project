@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ✅ StudentControlConfirm2FASetupTest
+ * StudentControlConfirm2FASetupTest
  *
  * This test suite verifies the logic for confirming 2FA setup after scanning the QR code.
  *
@@ -9,7 +9,7 @@
  * - confirm2FASetup() with valid TOTP code
  * - confirm2FASetup() with invalid code
  *
- * 🔐 Ensures:
+ * Ensures:
  * - Correct codes trigger persistence of 2FA secret
  * - Incorrect codes are rejected and nothing is persisted
  */

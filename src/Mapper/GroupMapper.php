@@ -137,44 +137,7 @@ class GroupMapper implements GroupRepository
         }
         return null; // Return null if no group found
     }
-
-    // public function getGroupByName(string $groupName): ?Group
-    // {
-    //     $stmt = $this->dbConnection->prepare("
-    //         SELECT * 
-    //         FROM `groups` 
-    //         WHERE groupName = :groupName
-    //     ");
-    //     $stmt->bindParam(':groupName', $groupName);
-    //     $stmt->execute();
-
-    //     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    //     if ($result) {
-    //         $group = $this->mapRowToGroup($result);
-    //         return $group;
-    //     }
-    //     return null; // Return null if no group found
-    // }
-
-    // public function getGroupsByUser(int $studentId): array
-    // {
-    //     $stmt = $this->dbConnection->prepare("
-    //         SELECT g.*
-    //         FROM `groups` g
-    //         INNER JOIN groupMembers gm ON g.groupId = gm.groupId
-    //         WHERE gm.studentId = :studentId
-    //     ");
-    //     $stmt->bindParam(':studentId', $studentId);
-    //     $stmt->execute();
-
-    //     $groups = [];
-    //     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    //     foreach ($results as $row) {
-    //         $group = $this->mapRowToGroup($row);
-    //         $groups[] = $group;
-    //     }
-    //     return $groups; // Return an array of Group objects
-    // }
+    
     public function getActiveGroupsByUser(int $studentId): array
     {
         $stmt = $this->dbConnection->prepare("

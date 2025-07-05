@@ -3,22 +3,22 @@
 /**
  * Tests the Forgot Password flow using StudentControl:
  *
- * ✅ Email submission
+ * Email submission
  * - Valid email triggers OTP and updates session
  * - Invalid format or non-existent email throws
  * - IP-based rate limit blocks spam
  *
- * ✅ OTP resend
+ * OTP resend
  * - Resends OTP if under limit
  * - Blocks if resend rate exceeded
  * - Fails if session is missing email
  *
- * ✅ OTP verification
+ * OTP verification
  * - Accepts correct code within time
  * - Fails on wrong or expired code
  * - Simulates Redis-based lockout
  *
- * ✅ Password reset
+ * Password reset
  * - Updates password and disables 2FA
  * - Fails if session has expired
  *

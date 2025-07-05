@@ -3,12 +3,12 @@
 /**
  * Class StudentPageControllerTest
  *
- * ✅ Unit tests for validating student registration input
+ * Unit tests for validating student registration input
  * Covers `validateStudentInput` from StudentPageController:
  *
- * - ❌ Detects missing fields
- * - ❌ Catches invalid email format
- * - ✔️ Accepts valid SIT email and matching Student ID
+ * - Detects missing fields
+ * - Catches invalid email format
+ * - Accepts valid SIT email and matching Student ID
  */
 
 namespace Tests\Unit;
@@ -29,7 +29,7 @@ class StudentPageControllerTest extends TestCase
         $this->controller = new StudentPageController($mockControl, $reviewControl);
     }
 
-    /** ❌ Fails if required fields are left empty */
+    /** Fails if required fields are left empty */
     public function testEmptyFieldsValidation()
     {
         $data = [
@@ -43,7 +43,7 @@ class StudentPageControllerTest extends TestCase
         $this->assertNotEmpty($error, "Validation should fail with empty fields.");
     }
 
-    /** ❌ Fails if email is not a valid format */
+    /** Fails if email is not a valid format */
     public function testInvalidEmailValidation()
     {
         $data = [

@@ -7,7 +7,6 @@ interface GroupRepository
     public function getLastGroupNumberByParams(string $acadYear, string $trimester, string $moduleCode, string $labGroup): int;
     public function addGroup(Group $group): void;
     public function getGroup(int $groupId): ?Group;
-    // public function getGroupsByUser(int $studentId): array;
     public function getActiveGroupsByUser(int $studentId): array;
     public function getGroupsByModuleName(string $moduleName): array;
     public function updateGroup(Group $group): void;

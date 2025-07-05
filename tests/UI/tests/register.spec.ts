@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * ✅ UI Test: Registration Flow (Happy Path Only)
+ * UI Test: Registration Flow (Happy Path Only)
  *
  * Verifies the following in-browser flow:
  *

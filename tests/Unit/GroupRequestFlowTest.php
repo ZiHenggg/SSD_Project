@@ -1,10 +1,10 @@
 <?php
 /**
- * ✅ testSendJoinRequestSuccess – Simulates valid join request flow
- * ✅ testSendJoinRequestBlockedByRateLimit – Rejects request after 5 tries
- * ✅ testAcceptJoinRequestSuccess – Accepts request, adds member, removes others if full
- * ✅ testRejectJoinRequestSuccess – Rejects request properly
- * ✅ testRemoveJoinRequestSuccess – Removes student’s join request from group
+ * testSendJoinRequestSuccess – Simulates valid join request flow
+ * testSendJoinRequestBlockedByRateLimit – Rejects request after 5 tries
+ * testAcceptJoinRequestSuccess – Accepts request, adds member, removes others if full
+ * testRejectJoinRequestSuccess – Rejects request properly
+ * testRemoveJoinRequestSuccess – Removes student’s join request from group
  */
 
 namespace Tests\Unit;

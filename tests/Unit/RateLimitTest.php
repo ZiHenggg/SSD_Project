@@ -3,13 +3,13 @@
 /**
  * Tests rate limiting scenarios related to registration and OTP:
  *
- * ✅ testRegistrationRateLimitExceeded()
+ * testRegistrationRateLimitExceeded()
  * - Simulates too many registration attempts from a single IP
  *
- * ✅ testOtpVerificationRateLimitExceeded()
+ * testOtpVerificationRateLimitExceeded()
  * - Simulates too many failed OTP submissions for the same email
  *
- * ✅ testResendOtpRateLimitExceeded()
+ * testResendOtpRateLimitExceeded()
  * - Simulates exceeding the limit for OTP resends
  *
  * These tests are structured to assert that exceptions are thrown with

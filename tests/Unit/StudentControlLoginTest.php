@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ✅ StudentControlLoginTest
+ * StudentControlLoginTest
  *
  * This test suite verifies all login logic in StudentControl::loginStudent().
  *
@@ -11,7 +11,7 @@
  * - Login succeeds with valid credentials and 2FA enabled
  * - Login succeeds with valid credentials and no 2FA
  *
- * 🔐 Ensures:
+ * Ensures:
  * - Passwords are validated securely
  * - Session data is set correctly
  * - Users are redirected based on 2FA status

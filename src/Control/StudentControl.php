@@ -119,11 +119,6 @@ class StudentControl
             return ['success' => true, 'redirect' => 'setup_2fa.php'];
         }
         
-        // SessionManager::setUser([
-        //     'id' => $student->getStudentId(),
-        //     'email' => $student->getEmail(),
-        //     'name' => $student->getStudentName(),
-        // ]);
     }
 
     public function verify2FACode(string $email, string $code): array
@@ -164,23 +159,6 @@ class StudentControl
         $this->studentRepo->enable2FAForUser($email, $secret);
         return true;
     }
-
-    // public function deleteStudent(string $studentId): void
-    // {
-    //     if (!$this->studentRepo->isStudentExists($studentId)) {
-    //         throw new \Exception("Student with ID $studentId does not exist.");
-    //     }
-    // }
-
-    // public function sendResetToken(string $email): void
-    // {
-    //     $student = $this->studentRepo->getStudentByEmail($email);
-    //     if (!$student) {
-    //         throw new \Exception("No student found with email $email.");
-    //     }
-
-    //     // TODO: Implement logic to send reset token
-    // }
 
     public function updatePassword(string $email, string $oldPassword, string $newPassword): void
     {

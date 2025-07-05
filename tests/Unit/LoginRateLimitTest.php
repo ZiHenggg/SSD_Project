@@ -3,10 +3,10 @@
 /**
  * Tests login rate limiting logic:
  *
- * ✅ testLoginRateLimitExceededByUser()
+ * testLoginRateLimitExceededByUser()
  * - Simulates a user account hitting max login attempts
  *
- * ✅ testLoginRateLimitExceededByIP()
+ * testLoginRateLimitExceededByIP()
  * - Simulates an IP hitting max login attempts
  *
  * These tests assert that appropriate errors are thrown

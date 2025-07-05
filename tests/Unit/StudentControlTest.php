@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ✅ StudentControlTest
+ * StudentControlTest
  *
  * This test suite verifies the registration logic in StudentControl::registerStudentAccount().
  *
@@ -10,7 +10,7 @@
  * - OTP generation and session storage
  * - Invocation of OTP email sending logic
  *
- * 🔐 Ensures:
+ * Ensures:
  * - Session contains the pending registration data
  * - OTP is a valid 6-digit code
  * - Password is securely hashed before storing
@@ -59,7 +59,7 @@ class StudentControlTest extends TestCase
         );
 
         $pending = SessionManager::getRegistration();
-        $otpData = SessionManager::getRegisterOTP();  // ✅ FIXED: was getOTP()
+        $otpData = SessionManager::getRegisterOTP();
 
         $this->assertEquals(1234567, $pending['studentId']);
         $this->assertEquals('Jane Doe', $pending['studentName']);

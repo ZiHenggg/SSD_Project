@@ -60,17 +60,6 @@ class GroupControl
         return $this->groupRepo->getGroupsByModuleName($moduleName);
     }
 
-
-    // public function isMember(int $groupId, int $studentId): bool
-    // {
-    //     return $this->groupMembershipRepo->isMember($groupId, $studentId);
-    // }
-
-    // public function getGroupsByUser(int $studentId): array
-    // {
-    //     return $this->groupRepo->getGroupsByUser($studentId);
-    // }
-
     public function getActiveGroupsByUser(int $studentId): array
     {
         return $this->groupRepo->getActiveGroupsByUser($studentId);

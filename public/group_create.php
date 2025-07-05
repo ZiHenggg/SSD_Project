@@ -13,8 +13,7 @@ $labGroups = [];
 foreach ($modules as $module) {
     $labGroups[$module->getModuleCode()] = array_map(function($group) {
         return [
-            'labGroupCode' => $group->getLabGroupCode(),  // or whatever method gives you the code
-            // add more fields if needed
+            'labGroupCode' => $group->getLabGroupCode(),
         ];
     }, $groupPageController->getLabGroupsByModuleCode($module->getModuleCode()));
 }

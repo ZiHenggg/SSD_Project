@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { authenticator } from 'otplib'
 
 /**
- * ✅ UI Test: Login + 2FA Redirect and Verification
+ * UI Test: Login + 2FA Redirect and Verification
  *
  * Verifies:
  * 1. 2FA-enabled user logs in → redirected to /verify_2fa.php → enters OTP → dashboard

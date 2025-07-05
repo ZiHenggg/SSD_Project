@@ -25,8 +25,6 @@ if (!$email || !$secret) {
 }
 // ==========================
 
-
-
 // ===== CONFIRMATION LOGIC =====
 $control = new StudentControl(new StudentMapper($pdo));
 

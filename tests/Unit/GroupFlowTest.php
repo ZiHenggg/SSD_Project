@@ -1,9 +1,9 @@
 <?php
 /**
- * ✅ testCreateGroupSuccess() - Simulates successful group creation under rate limit
- * ❌ testCreateGroupBlockedByRateLimit() - Ensures blocking occurs after 3 attempts
- * ✅ testDeleteGroupSuccess() - Confirms group deletion sets success session flag
- * ❌ testDeleteGroupMissingParams() - Checks error set when deletion params missing
+ * testCreateGroupSuccess() - Simulates successful group creation under rate limit
+ * testCreateGroupBlockedByRateLimit() - Ensures blocking occurs after 3 attempts
+ * testDeleteGroupSuccess() - Confirms group deletion sets success session flag
+ * testDeleteGroupMissingParams() - Checks error set when deletion params missing
  */
 
 namespace Tests\Unit;
@@ -38,9 +38,9 @@ class GroupFlowTest extends TestCase
         $groupMembershipRepo = $this->createMock(GroupMembershipRepository::class);
         $groupJoinRequestsRepo = $this->createMock(GroupJoinRequestsRepository::class);
         $moduleRepo = $this->createMock(ModuleRepository::class);
-        $labGroupRepo = $this->createMock(LabGroupRepository::class); // ✅ Added
+        $labGroupRepo = $this->createMock(LabGroupRepository::class);
 
-        // ✅ Mock GroupControl and patch createGroup()
+        // Mock GroupControl and patch createGroup()
         $groupControl = $this->getMockBuilder(GroupControl::class)
             ->setConstructorArgs([$groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo])
             ->onlyMethods(['createGroup'])
@@ -55,7 +55,7 @@ class GroupFlowTest extends TestCase
             $groupJoinRequestsRepo
         );
 
-        // ✅ Mock PDO::query() to return empty lab group list
+        // Mock PDO::query() to return empty lab group list
         $pdoStmtMock = $this->createMock(PDOStatement::class);
         $pdoStmtMock->method('fetchAll')->willReturn([]);
 

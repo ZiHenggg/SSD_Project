@@ -36,18 +36,6 @@ class StudentMapper implements StudentRepository
         return $result ? $this->mapRowToStudent($result) : null;
     }
 
-    // public function getAllStudents(): array
-    // {
-    //     $stmt = $this->dbConnection->query("SELECT * FROM students");
-    //     $students = [];
-
-    //     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    //         $students[] = $this->mapRowToStudent($row);
-    //     }
-
-    //     return $students;
-    // }
-
     public function createStudentAccount(Student $student): void
     {
         $stmt = $this->dbConnection->prepare("
