@@ -8,8 +8,6 @@ use Predis\Client as RedisClient;
 // Load CSRF protection
 require_once __DIR__ . '/../src/CsrfManager.php';
 
-
-
 // CSRF token validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {

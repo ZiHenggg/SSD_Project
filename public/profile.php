@@ -274,6 +274,10 @@ ob_start();
                                 <?php elseif ($student->getStudentId() === $loggedInId): ?>
                                     <div class="reply-section mt-3">
                                         <form action="process_reply_create.php" method="post">
+                                            <!-- CSRF Token -->
+                                            <input type="hidden" name="csrf_token"
+                                                value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
+                                                
                                             <input type="hidden" name="review_id"
                                                 value="<?= htmlspecialchars($review->getReviewId()) ?>">
                                             <input type="hidden" name="reviewer_id"

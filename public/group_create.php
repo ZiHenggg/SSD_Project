@@ -1,6 +1,7 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
@@ -29,6 +30,9 @@ ob_start();
 
     <div class="form-wrapper">
         <form action="process_group_create.php" method="POST">
+
+        <!-- CSRF Token -->
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
 
         <?php if (!empty($_SESSION['error'])): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>

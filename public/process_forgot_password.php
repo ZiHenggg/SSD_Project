@@ -33,6 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Validate CSRF token
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy();
+        header('Location: error.php');
+        exit;
+    }
+
     // Step 1: Email Submission
     if (isset($_POST['email'])) {
         $email = trim($_POST['email']);

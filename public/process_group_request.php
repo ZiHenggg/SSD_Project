@@ -2,9 +2,20 @@
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Redis
+require_once __DIR__ . '/../src/CsrfManager.php';
+
 
 use Predis\Client as RedisClient;
 use App\SessionManager;
+
+// CSRF check before doing anything else
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy();
+        header('Location: error.php');
+        exit;
+    }
+}
 
 // Redis setup
 $redis = new RedisClient([

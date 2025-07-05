@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
-SessionManager::start();
+//SessionManager::start();
 
 // If already logged in, redirect to dashboard
 if (SessionManager::getUser()) {
@@ -57,6 +58,9 @@ ob_start();
 
     <?php if ($step === 'form'): ?>
         <form method="post" action="process_forgot_password.php">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+
             <div class="mb-3">
                 <label for="email" class="form-label">Student Email</label>
                 <input type="email" name="email" id="email" class="form-control" required>

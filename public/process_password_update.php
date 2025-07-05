@@ -1,9 +1,17 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
-SessionManager::start();
+// CSRF token validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy();
+        header('Location: error.php');
+        exit;
+    }
+}
 
 $oldPassword = $_POST['old_password'] ?? '';
 $newPassword = $_POST['new_password'] ?? '';
