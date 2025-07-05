@@ -19,7 +19,7 @@ $groupMembershipController = $pageControllers['groupMembershipController'];
 $studentController = $pageControllers['studentPageController'];
 $reviewController = $pageControllers['reviewPageController'];
 
-// Fetch student groups
+// Fetch student groupss
 $groups = $groupPageController->listActiveUserGroups($studentId);
 $roles = $groupPageController->getUserRolesForGroups($studentId, $groups);
 
