@@ -131,7 +131,24 @@ class SessionManager
 
     public static function destroy(): void
     {
+        // Unset all session variables
         $_SESSION = [];
+
+        // If session uses cookies, delete the session cookie (For extra confirmation)
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000, // set expiration in the past
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
+            );
+        }
+
+        // Destroy the session
         session_destroy();
     }
 
@@ -173,19 +190,6 @@ class SessionManager
     public static function getOTP(): ?array
     {
         return self::get('otp');
-    }
-
-    public static function setRegisterOTP(string $code, int $expiry): void
-    {
-        self::set('register_otp', [
-            'code'   => $code,
-            'expiry' => $expiry,
-        ]);
-    }
-
-    public static function getRegisterOTP(): ?array
-    {
-        return self::get('register_otp');
     }
 
     public static function setRegistration(array $data): void

@@ -3,12 +3,12 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 use App\SessionManager;
 
-SessionManager::start();
+// Load CSRF Manager
+require_once __DIR__ . '/../src/CsrfManager.php';
 
-// Clear forgot password flow if it exists
+//SessionManager::start(); — already handled in bootstrap
 SessionManager::resetForgotFlow();
 
-// ===== SESSION STUFF =====
 // If already logged in, redirect to dashboard
 if (SessionManager::getUser()) {
     header("Location: dashboard.php");
@@ -23,15 +23,18 @@ ob_start();
     <h2 class="mb-4">Login</h2>
 
     <?php
-    // ===== DISPLAY LOGIN ERROR IF SET =====
     $error = SessionManager::getLoginError();
     if ($error) {
         echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>';
-        SessionManager::setLoginError(null); // Clear after showing
+        SessionManager::setLoginError(null);
     }
     ?>
 
     <form method="post" action="process_login.php" class="needs-validation" novalidate>
+
+        <!-- CSRF Token Field -->
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+
         <div class="mb-3">
             <label for="email" class="form-label">Student Email</label>
             <input type="email" class="form-control" name="email" required>
@@ -49,3 +52,4 @@ ob_start();
 <?php
 $content = ob_get_clean();
 include '_layout.php';
+?>
