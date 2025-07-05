@@ -285,12 +285,22 @@ ob_start();
                                                 value="<?= htmlspecialchars($review->getReviewerId()) ?>">
                                             <input type="hidden" name="responder_id"
                                                 value="<?= htmlspecialchars($review->getRevieweeId()) ?>">
-                                            <div class="d-flex flex-row align-items-center justify-content-around">
-                                                <textarea name="justification" class="form-control m-0" placeholder="Enter a reply"
-                                                    rows="1" required=""></textarea>
-                                                <button type="submit"
-                                                    class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
-                                            </div>
+                                            <?php if ($group->getGroupStatus() === 'active'): ?>
+                                                <div class="d-flex flex-row align-items-center justify-content-around">
+                                                    <textarea name="justification" class="form-control m-0" placeholder="Enter a reply"
+                                                        rows="1" required=""></textarea>
+                                                    <button type="submit"
+                                                        class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="d-flex flex-row align-items-center justify-content-around">
+                                                    <textarea name="justification" class="form-control m-0" placeholder="Group is archived, cannot reply"
+                                                        rows="1" disabled></textarea>
+                                                    <button type="submit" disabled
+                                                        class="text-decoration-none text-center reply-button d-flex align-items-center justify-content-center mx-4">Reply</button>
+                                                </div>
+
+                                            <?php endif; ?>
                                         </form>
                                     </div>
                                 <?php endif; ?>

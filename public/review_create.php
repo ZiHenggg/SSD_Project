@@ -21,6 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $revieweeId = (int) ($_POST['reviewee_id'] ?? 0);
     $groupId = (int) ($_POST['group_id'] ?? 0);
 
+    $group = $groupController->displayGroupDetails($groupId)['group'] ?? null;
+
     // Validate input
     if ($revieweeId <= 0 || $groupId <= 0 || $revieweeId === $reviewerId) {
         SessionManager::setError("Something went wrong. Please try again.");
@@ -34,6 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !$groupMembershipController->OnCheckIfMember($groupId, $revieweeId)
     ) {
         SessionManager::setError("Something went wrong. Please try again.");
+        header("Location: dashboard.php");
+        exit;
+    }
+
+    if ($group->getGroupStatus() !== 'active') {
+        SessionManager::setError("Group has been archived. Cannot submit review.");
         header("Location: dashboard.php");
         exit;
     }

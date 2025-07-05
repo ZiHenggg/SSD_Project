@@ -45,7 +45,9 @@ $moduleData = $groupData['module'];
             <h2><?= htmlspecialchars($group->getGroupName()) ?></h2>
             <p><?= htmlspecialchars($group->getModuleCode()) ?>, <?= htmlspecialchars($moduleData->getModuleName($group->getModuleCode())) ?></p>
         </div>
-        <?php if (!$isMember && count($members) < $group->getMaxMembers()): ?>
+        <?php if ($group->getGroupStatus() === 'inactive'): ?>
+            <button class="join-button" disabled>Group Archived</button>
+        <?php elseif (!$isMember && count($members) < $group->getMaxMembers()): ?>
             <form method="POST" action="<?= ($hasRequested && ($joinStatus === 'pending')) ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
                 <!-- CSRF Token -->
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
