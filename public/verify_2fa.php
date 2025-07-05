@@ -19,16 +19,22 @@ $email = $twoFA['pending_email'] ?? null;
 $user = SessionManager::getUser();
 
 // Already fully logged in — block access
-if ($user && !$email) {
+// Fully logged in *and* passed 2FA
+if ($user && SessionManager::get('2fa_verified')) {
     header("Location: dashboard.php");
     exit;
 }
 
-// Not even mid-login
+// User has no 2FA session — wipe and reset
 if (!$email) {
+    SessionManager::set2FA(null, null);
+    SessionManager::set('2fa_verified', false);
+    SessionManager::setUser(null);
+
     header("Location: login.php");
     exit;
 }
+
 // ============================
 
 $error = '';
