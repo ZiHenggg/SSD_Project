@@ -47,6 +47,9 @@ $moduleData = $groupData['module'];
         </div>
         <?php if (!$isMember && count($members) < $group->getMaxMembers()): ?>
             <form method="POST" action="<?= ($hasRequested && ($joinStatus === 'pending')) ? 'process_remove_request.php' : 'process_group_request.php' ?>" style="display: inline;">
+                <!-- CSRF Token -->
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
+                
                 <input type="hidden" name="groupId" value="<?= $groupId ?>">
                 <?php if ($hasRequested && ($joinStatus === 'pending')): ?>
                     <button class="join-button" type="submit">Cancel Request</button>

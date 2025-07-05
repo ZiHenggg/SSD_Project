@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
@@ -22,6 +23,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <?php if ($isLoggedIn): ?>
             <div class="nav-group">
                 <form class="search-wrapper d-flex m-0" role="search" method="GET" action="groups.php">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>" /> 
                     <input 
                         class="search form-control me-2" 
                         type="search" 

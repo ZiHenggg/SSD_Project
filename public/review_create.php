@@ -99,6 +99,9 @@ ob_start();
                 <div class="alert alert-danger"><?= htmlspecialchars(SessionManager::getError()) ?></div>
                 <?php SessionManager::setError(null); ?>
             <?php endif; ?>
+            
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
 
             <label for="rating">Rating</label>
             <select name="rating" id="rating" class="form-select" required>

@@ -29,35 +29,7 @@ use App\Boundary\ReplyPageController;
 
 use App\SessionManager;
 
-// 🔴 Commented out error handlers for debugging
-/*
-set_exception_handler(function ($e) {
-    error_log("Uncaught exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
-    if (!headers_sent()) {
-        header("Location: /error.php");
-        exit();
-    }
-});
 
-set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    error_log("PHP Error [$errno]: $errstr in $errfile on line $errline");
-    if (!headers_sent()) {
-        header("Location: /error.php");
-        exit();
-    }
-});
-
-register_shutdown_function(function () {
-    $error = error_get_last();
-    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-        error_log("Fatal error: " . $error['message'] . " in " . $error['file'] . " on line " . $error['line']);
-        if (!headers_sent()) {
-            header("Location: /error.php");
-            exit();
-        }
-    }
-});
-*/
 
 // Start session only if not already active
 SessionManager::start();

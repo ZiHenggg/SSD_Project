@@ -8,6 +8,20 @@ use Predis\Client as RedisClient;
 // Load CSRF protection
 require_once __DIR__ . '/../src/CsrfManager.php';
 
+// CSRF token validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy(); // 🔒 Full logout
+        header('Location: error.php'); // 🚫 Redirect to user-friendly error page
+        exit;
+    }
+}
+
+
+// ==== CI MODE ====
+// Load CSRF protection
+require_once __DIR__ . '/../src/CsrfManager.php';
+
 
 
 // CSRF token validation
@@ -37,6 +51,7 @@ if (getenv('CI') === 'true') {
 }
 
 // ==== Redis Rate Limiting ====
+// ==== Redis Rate Limiting ====
 $redis = new RedisClient([
     'scheme' => 'tcp',
     'host'   => 'redis',
@@ -64,6 +79,7 @@ if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
     exit;
 }
 
+// ==== Actual Login ====
 // ==== Actual Login ====
 $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);

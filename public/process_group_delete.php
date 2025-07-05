@@ -1,6 +1,7 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
@@ -10,10 +11,19 @@ $groupMembershipController = $pageControllers['groupMembershipController'];
 $studentId = SessionManager::getUser()['id'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['delete_group'])) {
+    
+    // CSRF check before doing anything else
+    if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
+        SessionManager::destroy();
+        header('Location: error.php');
+        exit;
+    }
+
     $groupId = (int) $_POST['group_id'];
 
     $ifMember = $groupMembershipController->onCheckIfMember($groupId, $studentId);
     $isAdmin = $groupMembershipController->onCheckUserRole($groupId, $studentId) === 'admin';
+
 
     if (!$ifMember) {
         logEvent('warn', 'Group deletion blocked – not a member', [

@@ -1,6 +1,7 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\SessionManager;
 
@@ -99,6 +100,8 @@ ob_start();
                                                 </a>
                                                 <div class="pending-form-wrapper">
                                                     <form class="pending-form" action="process_reject_request.php" method="post" style="display:inline;">
+                                                        <!-- CSRF Token -->
+                                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
                                                         <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
                                                         <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
                                                         <button class="btn reject-btn" type="submit">
@@ -107,6 +110,8 @@ ob_start();
                                                     </form>
 
                                                     <form class="pending-form" action="process_accept_request.php" method="post" style="display:inline;">
+                                                        <!-- CSRF Token -->
+                                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
                                                         <input type="hidden" name="requestId" value="<?= $request->getRequestId() ?>">
                                                         <input type="hidden" name="requesterId" value="<?= $requesterId ?>">
                                                         <button class="btn accept-btn" type="submit">
@@ -143,6 +148,9 @@ ob_start();
                                         <?php if (!$isSelf): ?>
                                             <div class="reply-section my-2 py-1">
                                                 <form action="review_create.php" method="post">
+                                                    <!-- CSRF Token -->
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">   
+                                                    
                                                     <input type="hidden" name="group_id" value="<?= $group->getGroupId() ?>">
                                                     <input type="hidden" name="reviewee_id" value="<?= $member->getStudentId() ?>">
                                                     <button <?= $reviewPageController->onCheckIfReviewed($studentId, $member->getStudentId(), $group->getGroupId()) ? 'disabled class="disabled reply-button"' : 'type="submit" class="reply-button"' ?>>
@@ -163,6 +171,9 @@ ob_start();
                             <div class="delete-modal" data-group-id="<?= htmlspecialchars($group->getGroupId()) ?>">
                                 <div class="delete-group-wrapper">
                                     <form class="delete-form" action="process_group_delete.php" method="post">
+                                        <!-- CSRF Token -->
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(CsrfManager::generateToken()) ?>">
+
                                         <input type="hidden" class="delete-group-id" name="group_id" value="<?= htmlspecialchars($group->getGroupId()) ?>">
                                         <h5><strong>Archive “<?= htmlspecialchars($group->getGroupName()) ?>”?</strong></h5>
                                         <p>This action cannot be undone. No additional reviews and replies can be added, existing reviews and replies will still be visible on profiles.</p>

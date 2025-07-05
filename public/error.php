@@ -30,7 +30,7 @@ ob_start();
         </p>
     </div>
 
-    <div class="alert alert-warning mx-auto w-75 text-start">
+    <div class="alert alert-info mx-auto w-75 text-start">
         <h5 class="fw-bold">🔒 OWASP A01:2021 – Broken Access Control</h5>
         <p class="mb-0">
             Access control ensures users only perform actions within their permissions.

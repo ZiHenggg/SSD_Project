@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
+require_once __DIR__ . '/../src/CsrfManager.php';
+
 
 use App\SessionManager;
 
@@ -19,6 +21,10 @@ ob_start();
         }?>
 
         <form method="post" action="process_password_update.php">
+            
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+
             <div class="mb-3">
                 <label for="old_password" class="form-label">Current Password</label>
                 <input type="password" name="old_password" class="form-control" required>
