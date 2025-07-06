@@ -33,7 +33,7 @@ class SessionManager
     ];
 
     public const INACTIVITY_TIMEOUT = 900;   // 15 minutes
-    public const ABSOLUTE_TIMEOUT   = 3600;  // 1 hour
+    public const ABSOLUTE_TIMEOUT   = 3600;  // 1 hours
 
     public static function start(): void
     {
