@@ -1,0 +1,24 @@
+SNORT READ ME
+local.rules
+Grouped by protocol and layer
+
+Layer 3: IP & ICMP        (SID 100000–100999)
+
+Layer 4: TCP & UDP        (SID 110000–110999)
+
+DNS/NTP/SNMP Protocols    (SID 120000–120999)
+
+HTTP/HTTPS               (SID 130000–130999)
+
+SMTP & FTP               (SID 140000–140999)
+
+Data Exfiltration & Policy (SID 150000–150999)
+
+At the hundreds column each number represents:
+0=info
+3=low
+5=medium
+7=high
+8-9=critical
+
+e.g. 1390901 HTTP SSRF to EC2 (Critical)

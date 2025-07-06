@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $groupMembershipController = $pageControllers['groupMembershipController'];
 $replyController = $pageControllers['replyPageController'];
 $reviewPageController = $pageControllers['reviewPageController'];
+$groupController = $pageControllers['groupPageController'];
 
 // Session check
 $loggedInId = SessionManager::getUser()['id'] ?? 0;
@@ -46,6 +47,8 @@ try {
 
     $groupId = $groupMembershipController->displayGroupId($review->getGroupMembersId());
 
+    $group = $groupController->displayGroupDetails($groupId)['group'] ?? null;
+
     // Check both reviewer and responder are in the same group
     if (!$groupMembershipController->OnCheckIfMember($groupId, $reviewerId) || !$groupMembershipController->OnCheckIfMember($groupId, $responderId)) {
         throw new Exception("Something went wrong. Please try again.");
@@ -54,6 +57,12 @@ try {
     // Prevent duplicate reply
     if ($replyController->checkIfReplyExists($reviewId)) {
         throw new Exception("You have already replied to this review.");
+    }
+
+    if ($group->getGroupStatus() !== 'active') {
+        SessionManager::setError("Group has been archived. Cannot submit reply.");
+        header("Location: profile.php");
+        exit;
     }
 
     // Submit reply

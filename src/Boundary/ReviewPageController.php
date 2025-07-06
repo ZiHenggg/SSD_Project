@@ -9,12 +9,10 @@ use Exception;
 class ReviewPageController
 {
     private ReviewControl $reviewControl;
-    // private PDO $pdo;
 
-    public function __construct(ReviewControl $reviewControl/*, PDO $pdo*/)
+    public function __construct(ReviewControl $reviewControl)
     {
         $this->reviewControl = $reviewControl;
-        // $this->pdo = $pdo;
     }
 
     public function onViewReceivedReviews(int $studentId): array

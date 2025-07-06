@@ -3,18 +3,19 @@ namespace App\Boundary;
 
 use App\Entity\GroupMembership;
 use App\Control\GroupMembershipControl;
+use App\Control\GroupControl;
 use PDO;
 use Exception;
 
 class GroupMembershipController
 {
     private GroupMembershipControl $groupMembershipControl;
-    // private PDO $pdo;
+    private GroupControl $groupControl;
 
-    public function __construct(GroupMembershipControl $groupMembershipControl/*, PDO $pdo*/)
+    public function __construct(GroupMembershipControl $groupMembershipControl, GroupControl $groupControl)
     {
         $this->groupMembershipControl = $groupMembershipControl;
-        // $this->pdo = $pdo;
+        $this->groupControl = $groupControl;
     }
 
     public function displayGroupId(int $groupMembersId): string
@@ -96,7 +97,11 @@ class GroupMembershipController
     {
         // Get the group ID from the request
         $groupId = $this->groupMembershipControl->getGroupIdByRequestId($requestId);
-
+        $group = $this->groupControl->getGroupInfo($groupId);
+        $groupStatus = $group->getGroupStatus();
+        if ($groupStatus !== 'active') {
+            throw new \Exception("Group with ID $groupId is not active. Cannot submit join request.");
+        }
         $role = $this->groupMembershipControl->getUserRole($groupId, $approverId);
         if ($role !== 'admin') {
             throw new Exception("Only group admins can accept join requests.");
@@ -128,6 +133,17 @@ class GroupMembershipController
         // Reject the join request
         $this->groupMembershipControl->rejectJoinRequest($requestId, $requesterId, $approverId);
     }
+
+    public function removeRemainingRequests(int $groupId, int $approverId): void
+    {
+        $role = $this->groupMembershipControl->getUserRole($groupId, $approverId);
+        if ($role !== 'admin') {
+            throw new Exception("Only group admins can remove remaining requests.");
+        }
+
+        $this->groupMembershipControl->removeRemainingRequests($groupId, $approverId);
+    }
+
 
 }
 ?>

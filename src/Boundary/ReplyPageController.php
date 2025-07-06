@@ -3,18 +3,18 @@ namespace App\Boundary;
 
 use App\Entity\Reply;
 use App\Control\ReplyControl;
-use PDO;
+use App\Control\ReviewControl;
 use Exception;
 
 class ReplyPageController
 {
     private ReplyControl $replyControl;
-    // private PDO $pdo;
+    private ReviewControl $reviewControl;
 
-    public function __construct(ReplyControl $replyControl/*, PDO $pdo*/)
+    public function __construct(ReplyControl $replyControl, ReviewControl $reviewControl)
     {
         $this->replyControl = $replyControl;
-        // $this->pdo = $pdo;
+        $this->reviewControl = $reviewControl;
     }
 
     public function onViewReply(int $reviewId): Reply

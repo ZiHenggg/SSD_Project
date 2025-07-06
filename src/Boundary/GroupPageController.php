@@ -4,20 +4,17 @@ namespace App\Boundary;
 use App\Entity\Module;
 use App\Control\GroupControl;
 use App\Control\GroupMembershipControl;
-use PDO;
 use Exception;
 
 class GroupPageController
 {
     private GroupControl $groupControl;
     private GroupMembershipControl $groupMembershipControl;
-    private PDO $pdo;
 
-    public function __construct(GroupControl $groupControl, GroupMembershipControl $groupMembershipControl, PDO $pdo)
+    public function __construct(GroupControl $groupControl, GroupMembershipControl $groupMembershipControl)
     {
         $this->groupControl = $groupControl;
         $this->groupMembershipControl = $groupMembershipControl;
-        $this->pdo = $pdo;
     }
 
     public function onCreateGroup(array $formData, string $studentId): void

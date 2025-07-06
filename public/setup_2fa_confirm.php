@@ -21,6 +21,7 @@ if (!$email || !$secret) {
     exit;
 }
 
+// ===== CONFIRMATION LOGIC =====
 $control = new StudentControl(new StudentMapper($pdo));
 
 if ($control->confirm2FASetup($email, $code, $secret)) {
@@ -32,13 +33,13 @@ if ($control->confirm2FASetup($email, $code, $secret)) {
         'name'  => $student->getStudentName(),
     ]);
 
-    // ✅ Log 2FA setup confirmation
+    // Log 2FA setup confirmation
     logEvent('info', '2FA setup confirmed', [
         'studentId' => $student->getStudentID(),
         'email'     => $student->getEmail()
     ]);
 
-    // ✅ Log full login success
+    // Log full login success
     logEvent('info', 'Login complete (via 2FA setup)', [
         'studentId' => $student->getStudentID(),
         'email'     => $student->getEmail()
@@ -51,7 +52,7 @@ if ($control->confirm2FASetup($email, $code, $secret)) {
     exit;
 }
 
-// ❌ Log failed setup attempt
+// Log failed setup attempt
 logEvent('warn', '2FA setup failed - invalid code', [
     'email' => $email
 ]);

@@ -66,7 +66,7 @@ function logEvent(string $type, string $message, array $context = []): void
 {
     $logPath = '/var/www/logs/app.log';
 
-    // ✅ Real client IP first, fallback to Docker internal
+    // Real client IP first, fallback to Docker internal
     $ip = $_SERVER['HTTP_X_REAL_IP']
         ?? $_SERVER['HTTP_X_FORWARDED_FOR']
         ?? $_SERVER['REMOTE_ADDR']
@@ -108,7 +108,7 @@ function displaySuccessMessage(): void
 // Autoload classes from Composer (e.g. Dotenv, custom namespaces)
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// ✅ Load environment variables from .env
+// Load environment variables from .env
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../', '.env.prod');
 $dotenv->load();
 
@@ -131,11 +131,11 @@ $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
-$groupPageController = new GroupPageController($groupControl, $groupMembershipControl, $pdo);
-$groupMembershipController = new GroupMembershipController($groupMembershipControl/*, $pdo*/);
-$studentPageController = new StudentPageController($studentControl);
-$reviewPageController = new ReviewPageController($reviewControl/*, $pdo*/);
-$replyPageController = new ReplyPageController($replyControl/*, $pdo*/);
+$groupPageController = new GroupPageController($groupControl, $groupMembershipControl);
+$groupMembershipController = new GroupMembershipController($groupMembershipControl, $groupControl);
+$studentPageController = new StudentPageController($studentControl, $reviewControl);
+$reviewPageController = new ReviewPageController($reviewControl);
+$replyPageController = new ReplyPageController($replyControl, $reviewControl);
 
 return [
     'studentControl' => $studentControl,

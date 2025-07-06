@@ -104,6 +104,11 @@
     box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
 }
 
+.reply-button[disabled], .reply-button:hover[disabled] {
+    background-color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
 @media screen and (max-width: 1280px) {
     .profile .info-pending-wrapper, .profile .review-wrapper {
         width: 100%;

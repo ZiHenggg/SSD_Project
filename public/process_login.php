@@ -11,8 +11,8 @@ require_once __DIR__ . '/../src/CsrfManager.php';
 // CSRF token validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!CsrfManager::validateToken($_POST['csrf_token'] ?? '')) {
-        SessionManager::destroy(); // 🔒 Full logout
-        header('Location: error.php'); // 🚫 Redirect to user-friendly error page
+        SessionManager::destroy(); // Full logout
+        header('Location: error.php'); // Redirect to user-friendly error page
         exit;
     }
 }

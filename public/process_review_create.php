@@ -34,7 +34,6 @@ if ($rating < 1 || $rating > 5 || empty($description)) {
     exit;
 }
 
-
 $reviewController = $pageControllers['reviewPageController'];
 
 try {

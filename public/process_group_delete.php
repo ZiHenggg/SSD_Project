@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['group_id'], $_POST['d
         ]);
         SessionManager::setError("You do not have permission to delete this group.");
     } else {
+        $groupMembershipController->removeRemainingRequests($groupId, $studentId);
         $groupPageController->onDeleteGroup($groupId);
         logEvent('info', 'Group deleted', [
             'studentId' => $studentId,
