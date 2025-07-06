@@ -72,6 +72,9 @@ ob_start();
 
     <?php elseif ($step === 'otp'): ?>
         <form method="post" action="process_forgot_password.php" class="mb-3">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+
             <label for="otp" class="form-label">Enter the OTP sent to your email</label>
             <input type="text" name="otp" id="otp" class="form-control mb-3" required>
 
@@ -80,6 +83,9 @@ ob_start();
         </form>
 
         <form method="post" action="process_forgot_password.php">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+
             <input type="hidden" name="resend_otp" value="1">
             <button type="submit" class="btn btn-danger">Resend OTP</button>
         </form>
@@ -87,6 +93,9 @@ ob_start();
 
     <?php elseif ($step === 'reset'): ?>
         <form method="post" action="process_forgot_password.php">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CsrfManager::generateToken()); ?>">
+            
             <div class="mb-3">
                 <label for="new_password" class="form-label">Enter New Password</label>
                 <input type="password" name="new_password" id="new_password" class="form-control" required>
