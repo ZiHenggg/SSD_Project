@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $student->getStudentName(),
         ]);
 
-        // ✅ Log successful 2FA login
+        // Log successful 2FA login
         logEvent('info', 'Login complete (2FA verified)', [
             'studentId' => $student->getStudentID(),
             'email'     => $student->getEmail()

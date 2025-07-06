@@ -58,6 +58,11 @@ class StudentPageController
             return "Email must be a SIT address.";
         }
 
+        $onCheckProfanities = $this->reviewControl->containsProfanity($studentName);
+        if ($onCheckProfanities) {
+            return "Your name contains inappropriate content. Please revise your name.";
+        }
+
         $passwordError = $this->validatePassword($password);
         if ($passwordError !== null) {
             return $passwordError;
@@ -157,7 +162,7 @@ class StudentPageController
         return $this->studentControl->verify2FACodeWithSecret($secret, $code);
     }
 
-        public function is2FAEnabled(string $email): bool
+    public function is2FAEnabled(string $email): bool
     {
         return $this->studentControl->is2FAEnabled($email);
     }

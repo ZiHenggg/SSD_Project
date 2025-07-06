@@ -46,6 +46,11 @@ class ReplyPageController
             throw new Exception("You have already replied to this review.");
         }
 
+        $onCheckProfanities = $this->reviewControl->containsProfanity($justification);
+        if ($onCheckProfanities) {
+            throw new Exception("Your reply contains inappropriate content. Please revise your justification.");
+        }
+
         try {
             $this->replyControl->submitReply($reviewId, $responderId, $justification);
         } catch (Exception $e) {
