@@ -4,6 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Mapper\StudentMapper;
 use App\SessionManager;
+use App\CsrfManager;
 use Predis\Client as RedisClient;
 
 SessionManager::start();
