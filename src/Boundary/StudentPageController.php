@@ -2,16 +2,19 @@
 namespace App\Boundary;
 
 use App\Control\StudentControl;
+use App\Control\ReviewControl;
 use App\Entity\Student;
 use DivineOmega\PasswordExposed\Enums\PasswordStatus;
 
 class StudentPageController
 {
     private StudentControl $studentControl;
+    private ReviewControl $reviewControl;
 
-    public function __construct(StudentControl $studentControl)
+    public function __construct(StudentControl $studentControl, ReviewControl $reviewControl)
     {
         $this->studentControl = $studentControl;
+        $this->reviewControl = $reviewControl;
     }
 
     public function validatePassword(string $password): ?string
