@@ -20,11 +20,13 @@ RUN docker-php-ext-install pdo pdo_mysql
 RUN echo "ServerTokens Prod\nServerSignature Off" > /etc/apache2/conf-available/security.conf \
  && [ -e /etc/apache2/conf-enabled/security.conf ] || ln -s ../conf-available/security.conf /etc/apache2/conf-enabled/security.conf
 
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 # Copy application code
 COPY src/ /var/www/html/
 
 # Copy the production PHP config
 COPY php-production.ini /usr/local/etc/php/conf.d/error-config.ini
-
 
 EXPOSE 9000
