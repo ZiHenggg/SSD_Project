@@ -68,5 +68,15 @@ class ActionController
         }
         return true;
     }
+
+    public function pruneOldActions(): void
+    {
+        try {
+            $this->actionControl->pruneOldActions();
+        } catch (Exception $e) {
+            // Handle exception
+            throw new Exception("Failed to prune old actions: " . $e->getMessage());
+        }
+    }
 }
 ?>

@@ -66,5 +66,10 @@ class ActionControl
         return $this->ipActionRepo->getActionCountByIpAddress($ipAddress, $actionId, $windowSeconds);
     }
 
+    public function pruneOldActions(): void
+    {
+        $this->actionRepo->pruneOldActions();
+    }
+
 }
 ?>

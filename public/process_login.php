@@ -71,6 +71,7 @@ $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
     // $redis->del([$userKey, $ipKey]);
+    $actionController->pruneOldActions(); // Clean up old actions to prevent DB bloat
     SessionManager::setLoginError(null);
     header("Location: " . $result['redirect']);
     exit;

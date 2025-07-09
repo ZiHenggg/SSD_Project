@@ -41,5 +41,13 @@ class ActionMapper implements ActionRepository {
         }
         return null;
     }
+    
+    // delete actions older than 1 day
+    public function pruneOldActions(): void {
+        $stmt = $this->dbConnection->prepare("DELETE FROM userActions WHERE actionTimestamp < NOW() - INTERVAL 1 DAY");
+        $stmt->execute();
+        $stmt = $this->dbConnection->prepare("DELETE FROM ipActions WHERE actionTimestamp < NOW() - INTERVAL 1 DAY");
+        $stmt->execute();
+    }
 } 
 ?>
