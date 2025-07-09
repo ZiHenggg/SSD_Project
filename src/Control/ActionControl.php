@@ -3,20 +3,25 @@ namespace App\Control;
 
 use App\Entity\Action;
 use App\Entity\UserAction;
+use App\Entity\IpAction;
 use App\Repository\UserActionRepository;
+use App\Repository\IpActionRepository;
 use App\Repository\ActionRepository;
 
 class ActionControl
 {
-    private UserActionRepository $userActionRepo;
     private ActionRepository $actionRepo;
+    private UserActionRepository $userActionRepo;
+    private IpActionRepository $ipActionRepo;
 
     public function __construct(
+        ActionRepository $actionRepo,
         UserActionRepository $userActionRepo,
-        ActionRepository $actionRepo
+        IpActionRepository $ipActionRepo
     ) {
-        $this->userActionRepo = $userActionRepo;
         $this->actionRepo = $actionRepo;
+        $this->userActionRepo = $userActionRepo;
+        $this->ipActionRepo = $ipActionRepo;
     }
 
     public function getAction(int $actionId): ?Action
@@ -43,6 +48,22 @@ class ActionControl
     {
         $windowSeconds = $this->getAction($actionId)->getWindowSeconds();
         return $this->userActionRepo->getActionCountByStudentId($studentId, $actionId, $windowSeconds);
+    }
+
+    public function recordIpAction(string $ipAddress, int $actionId): void
+    {
+        $ipAction = new IpAction(
+            $ipAddress,
+            $actionId
+        );
+
+        $this->ipActionRepo->addAction($ipAction);
+    }
+
+    public function getActionCountByIpAddress(string $ipAddress, int $actionId): int
+    {
+        $windowSeconds = $this->getAction($actionId)->getWindowSeconds();
+        return $this->ipActionRepo->getActionCountByIpAddress($ipAddress, $actionId, $windowSeconds);
     }
 
 }

@@ -3,7 +3,7 @@ $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\SessionManager;
-use Predis\Client as RedisClient;
+// use Predis\Client as RedisClient;
 
 // Load CSRF protection
 require_once __DIR__ . '/../src/CsrfManager.php';
@@ -35,25 +35,32 @@ if (getenv('CI') === 'true') {
 }
 
 // ==== Redis Rate Limiting ====
-$redis = new RedisClient([
-    'scheme' => 'tcp',
-    'host'   => 'redis',
-    'port'   => 6379,
-]);
+// $redis = new RedisClient([
+//     'scheme' => 'tcp',
+//     'host'   => 'redis',
+//     'port'   => 6379,
+// ]);
 
 $username = $_POST['username'] ?? '';
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$actionController = $pageControllers['actionController'];
 
-$userKey = "login_attempts:user:" . $username;
-$ipKey   = "login_attempts:ip:" . $ip;
-$maxAttempts = 5;
-$lockoutDuration = 900;
+// $userKey = "login_attempts:user:" . $username;
+// $ipKey   = "login_attempts:ip:" . $ip;
+// $maxAttempts = 5;
+// $lockoutDuration = 900;
 
-$userAttempts = (int) $redis->get($userKey);
-$ipAttempts   = (int) $redis->get($ipKey);
+// $userAttempts = (int) $redis->get($userKey);
+// $ipAttempts   = (int) $redis->get($ipKey);
 
-if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
-    SessionManager::setLoginError("Account temporarily locked. Try again later.");
+// if ($userAttempts >= $maxAttempts || $ipAttempts >= $maxAttempts) {
+//     SessionManager::setLoginError("Account temporarily locked. Try again later.");
+//     header("Location: login.php");
+//     exit;
+// }
+
+if (!$actionController->onIpAction($ip, 'login')) {
+    SessionManager::setLoginError("Too many login attempts. Please try again later.");
     header("Location: login.php");
     exit;
 }
@@ -63,20 +70,20 @@ $pageController = $pageControllers['studentPageController'];
 $result = $pageController->loginStudent($_POST);
 
 if ($result['success']) {
-    $redis->del([$userKey, $ipKey]);
+    // $redis->del([$userKey, $ipKey]);
     SessionManager::setLoginError(null);
     header("Location: " . $result['redirect']);
     exit;
 } else {
-    $redis->incr($userKey);
-    $redis->incr($ipKey);
+//     $redis->incr($userKey);
+//     $redis->incr($ipKey);
 
-    if ($redis->ttl($userKey) <= 0) {
-        $redis->expire($userKey, $lockoutDuration);
-    }
-    if ($redis->ttl($ipKey) <= 0) {
-        $redis->expire($ipKey, $lockoutDuration);
-    }
+//     if ($redis->ttl($userKey) <= 0) {
+//         $redis->expire($userKey, $lockoutDuration);
+//     }
+//     if ($redis->ttl($ipKey) <= 0) {
+//         $redis->expire($ipKey, $lockoutDuration);
+//     }
 
     SessionManager::setLoginError("Invalid credentials. Please try again.");
     header("Location: login.php");

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../src/CsrfManager.php';
 date_default_timezone_set('Asia/Singapore');
 
 use App\Mapper\ActionMapper;
+use App\Mapper\IpActionMapper;
 use App\Mapper\UserActionMapper;
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupJoinRequestsMapper;
@@ -65,6 +66,7 @@ require_once __DIR__ . '/db.php';
 
 // Instantiate mappers and controls
 $actionRepo = new ActionMapper($pdo);
+$ipActionRepo = new IpActionMapper($pdo);
 $userActionRepo = new UserActionMapper($pdo);
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
@@ -76,7 +78,7 @@ $moduleRepo = new ModuleMapper($pdo);
 $labGroupRepo = new LabGroupMapper($pdo);
 $studentStatsRepo = new StudentStatsMapper($pdo);
 
-$actionControl = new ActionControl($userActionRepo, $actionRepo);
+$actionControl = new ActionControl($actionRepo, $userActionRepo, $ipActionRepo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);

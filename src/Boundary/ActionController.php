@@ -3,6 +3,7 @@ namespace App\Boundary;
 
 use App\Entity\Action;
 use App\Entity\UserAction;
+use App\Entity\IpAction;
 use App\Control\ActionControl;
 use App\Control\StudentControl;
 use Exception;
@@ -43,6 +44,29 @@ class ActionController
             // Handle exception
             throw new Exception($e->getMessage());
         }
+    }
+
+    public function onIpAction(string $ipAddress, string $actionType): bool
+    {
+        try {
+            $actionId = $this->actionControl->getActionIdByType($actionType);
+            
+            if ($actionId === null) {
+                throw new Exception("Invalid action type.");
+            }
+
+            // Check rate limiting
+            $maxActionCount = $this->actionControl->getAction($actionId)->getMaxActionCount();
+
+            if ($this->actionControl->getActionCountByIpAddress($ipAddress, $actionId) >= $maxActionCount) {
+                throw new Exception("Rate limit exceeded. Please try again later.");
+            }
+
+            $this->actionControl->recordIpAction($ipAddress, $actionId);
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
     }
 }
 ?>

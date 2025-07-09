@@ -129,7 +129,7 @@ CREATE TABLE reply (
 
 CREATE TABLE actions (
     actionId INT AUTO_INCREMENT PRIMARY KEY,
-    actionType VARCHAR(50) NOT NULL,
+    actionType VARCHAR(50) UNIQUE NOT NULL,
     maxActionCount INT NOT NULL DEFAULT 5,
     windowSeconds INT NOT NULL DEFAULT 600
 );
@@ -140,7 +140,15 @@ CREATE TABLE userActions (
     actionId INT NOT NULL,
     actionTimestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (studentId) REFERENCES students(studentId),
-    FOREIGN KEY (actionId) REFERENCES `action`(actionId)
+    FOREIGN KEY (actionId) REFERENCES `actions`(actionId)
+);
+
+CREATE TABLE ipActions (
+    ipActionId INT AUTO_INCREMENT PRIMARY KEY,
+    ipAddress VARCHAR(45) NOT NULL,
+    actionId INT NOT NULL,
+    actionTimestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (actionId) REFERENCES `actions`(actionId)
 );
 
 
@@ -196,8 +204,11 @@ INSERT INTO reply (reviewId, responderId, justification) VALUES
 INSERT INTO actions (actionType, maxActionCount, windowSeconds) VALUES 
 ('join_request', 5, 30), 
 ('create_group', 3, 60),
+('forgot_password', 10, 600),
+('resend_otp', 5, 600),
+('incorrect_otp', 5, 600),
 ('register', 10, 600),
-('login', 10, 600);
+('login', 5, 900);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
