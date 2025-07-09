@@ -39,7 +39,7 @@ if (!$groupId || !$studentId) {
 // // Rate limiting
 // $rateKey = "join_request:student:$studentId";
 // $maxRequests = 5;
-// $windowSeconds = 600; // 10 minutes
+// $windowSeconds = 600; // 10 minutes - i changed to 5mins bc 10min for 5req like abit stingy/too strict
 
 // if ((int)$redis->get($rateKey) >= $maxRequests) {
 //     SessionManager::setError("You've reached the join request limit. Please try again later.");

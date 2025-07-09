@@ -202,8 +202,8 @@ INSERT INTO reply (reviewId, responderId, justification) VALUES
 (4, 1000001, 'Thanks!');
 
 INSERT INTO actions (actionType, maxActionCount, windowSeconds) VALUES 
-('join_request', 5, 30), 
-('create_group', 3, 60),
+('join_request', 5, 300), 
+('create_group', 3, 600),
 ('forgot_password', 10, 600),
 ('resend_otp', 5, 600),
 ('incorrect_otp', 5, 600),

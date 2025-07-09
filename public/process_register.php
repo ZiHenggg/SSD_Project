@@ -2,21 +2,23 @@
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // Include Predis
 
-use Predis\Client as RedisClient;
+// use Predis\Client as RedisClient;
 use App\SessionManager;
 
 SessionManager::start();
 
 $page = $pageControllers['studentPageController'];
 $control = $pageControllers['studentControl'];
+$actionController = $pageControllers['actionController'];
 
-$redis = new RedisClient([
-    'scheme' => 'tcp',
-    'host' => 'redis',
-    'port' => 6379,
-]);
+// $redis = new RedisClient([
+//     'scheme' => 'tcp',
+//     'host' => 'redis',
+//     'port' => 6379,
+// ]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $ip = $_SERVER['REMOTE_ADDR'];
 
     // Step 1: Form Submission (rate-limit this)
     if (isset($_POST['studentId'])) {
@@ -31,13 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $ip = $_SERVER['REMOTE_ADDR'];
-        $ipKey = "register_attempts:ip:" . $ip;
-        $maxAttempts = 10;
-        $lockoutDuration = 600; // 10 minutes
+        // $ipKey = "register_attempts:ip:" . $ip;
+        // $maxAttempts = 10;
+        // $lockoutDuration = 600; // 10 minutes
 
-        $ipAttempts = (int) $redis->get($ipKey);
-        if ($ipAttempts >= $maxAttempts) {
+        // $ipAttempts = (int) $redis->get($ipKey);
+        // if ($ipAttempts >= $maxAttempts) {
+        if (!$actionController->onIpAction($ip, 'register')) {
             SessionManager::setRegisterMessage("Too many registration attempts. Please try again later.");
             SessionManager::setRegisterStep('form');
             header('Location: register.php');
@@ -74,21 +76,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::setRegisterStep('otp');
         }
 
-        $redis->incr($ipKey);
-        if ($redis->ttl($ipKey) <= 0) {
-            $redis->expire($ipKey, $lockoutDuration);
-        }
+        // $redis->incr($ipKey);
+        // if ($redis->ttl($ipKey) <= 0) {
+        //     $redis->expire($ipKey, $lockoutDuration);
+        // }
 
     // Step 2: Resend OTP
     } elseif (isset($_POST['resend_otp'])) {
         $email = SessionManager::get('email');
-        $resendKey = "resend_otp:" . $email;
-        $maxResends = 3;
-        $resendTTL = 900;
+        // $resendKey = "resend_otp:" . $email;
+        // $maxResends = 3;
+        // $resendTTL = 900;
 
-        $resends = (int) $redis->get($resendKey);
-        if ($resends >= $maxResends) {
-            SessionManager::setRegisterMessage("OTP resend limit reached. Please try again later in 15 minutes.");
+        // $resends = (int) $redis->get($resendKey);
+        // if ($resends >= $maxResends) {
+        if (!$actionController->onIpAction($ip, 'resend_otp')) {
+            SessionManager::setRegisterMessage("OTP resend limit reached. Please try again later in 10 minutes.");
             SessionManager::setRegisterMessageType('danger');
             SessionManager::setRegisterStep('otp');
             header("Location: register.php");
@@ -96,11 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $control->resendOtp($email);
-        $redis->del("otp_attempts:" . $email);
-        $redis->incr($resendKey);
-        if ($redis->ttl($resendKey) <= 0) {
-            $redis->expire($resendKey, $resendTTL);
-        }
+        // $redis->del("otp_attempts:" . $email);
+        // $redis->incr($resendKey);
+        // if ($redis->ttl($resendKey) <= 0) {
+        //     $redis->expire($resendKey, $resendTTL);
+        // }
 
         SessionManager::setRegisterMessage("A new OTP has been sent to your email.");
         SessionManager::setRegisterMessageType('success');
@@ -112,13 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['otp'])) {
         $otp = $_POST['otp'] ?? '';
         $email = SessionManager::get('email');
-        $otpKey = "otp_attempts:" . $email;
-        $maxOtpAttempts = 5;
-        $otpLockout = 300;
+        // $otpKey = "otp_attempts:" . $email;
+        // $maxOtpAttempts = 5;
+        // $otpLockout = 300;
 
-        $otpAttempts = (int) $redis->get($otpKey);
-        if ($otpAttempts >= $maxOtpAttempts) {
-            SessionManager::setRegisterMessage("Too many failed OTP attempts. Please try again later in 5 minutes.");
+        // $otpAttempts = (int) $redis->get($otpKey);
+        // if ($otpAttempts >= $maxOtpAttempts) {
+        if (!$actionController->onIpAction($ip, 'incorrect_otp')) {
+            SessionManager::setRegisterMessage("Too many failed OTP attempts. Please try again later in 10 minutes.");
             SessionManager::setRegisterMessageType('danger');
             SessionManager::setRegisterStep('otp');
             header("Location: register.php");
@@ -127,15 +131,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $result = $control->verifyOtp($otp);
         if ($result['success']) {
-            $redis->del($otpKey);
+            // $redis->del($otpKey);
             SessionManager::resetRegisterFlow();
             SessionManager::setRegisterSuccess(true);
 
         } else {
-            $redis->incr($otpKey);
-            if ($redis->ttl($otpKey) <= 0) {
-                $redis->expire($otpKey, $otpLockout);
-            }
+            // $redis->incr($otpKey);
+            // if ($redis->ttl($otpKey) <= 0) {
+            //     $redis->expire($otpKey, $otpLockout);
+            // }
             SessionManager::setRegisterMessage($result['message']);
             SessionManager::setRegisterMessageType('danger');
             SessionManager::setRegisterStep('otp');
