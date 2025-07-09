@@ -127,6 +127,14 @@ CREATE TABLE reply (
   FOREIGN KEY (responderId) REFERENCES students(studentId)
 );
 
+CREATE TABLE userActions (
+    actionId INT AUTO_INCREMENT PRIMARY KEY,
+    studentId INT NOT NULL,
+    actionType VARCHAR(50) NOT NULL,
+    actionTimestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (studentId) REFERENCES students(studentId)
+);
+
 -- Now insert sample data
 INSERT INTO modules (moduleCode, moduleName) VALUES 
 ('ICT2216', 'Secure Software Development'), 

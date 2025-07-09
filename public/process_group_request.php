@@ -5,7 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php'; // Redis
 require_once __DIR__ . '/../src/CsrfManager.php';
 
 
-use Predis\Client as RedisClient;
+// use Predis\Client as RedisClient;
 use App\SessionManager;
 
 // CSRF check before doing anything else
@@ -17,14 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Redis setup
-$redis = new RedisClient([
-    'scheme' => 'tcp',
-    'host' => 'redis',
-    'port' => 6379,
-]);
+// // Redis setup
+// $redis = new RedisClient([
+//     'scheme' => 'tcp',
+//     'host' => 'redis',
+//     'port' => 6379,
+// ]);
 
 $groupMembershipController = $pageControllers['groupMembershipController'];
+$actionsController = $pageControllers['actionsController'];
+$actionType = 'join_request'; 
 
 $groupId = $_POST['groupId'] ?? null;
 $studentId = SessionManager::getUser()['id'] ?? null;
@@ -34,26 +36,29 @@ if (!$groupId || !$studentId) {
     exit;
 }
 
-// Rate limiting
-$rateKey = "join_request:student:$studentId";
-$maxRequests = 5;
-$windowSeconds = 600; // 10 minutes
+// // Rate limiting
+// $rateKey = "join_request:student:$studentId";
+// $maxRequests = 5;
+// $windowSeconds = 600; // 10 minutes
 
-if ((int)$redis->get($rateKey) >= $maxRequests) {
-    SessionManager::setError("You've reached the join request limit. Please try again later.");
-    header("Location: group_info.php?groupId=$groupId");
-    exit;
-}
+// if ((int)$redis->get($rateKey) >= $maxRequests) {
+//     SessionManager::setError("You've reached the join request limit. Please try again later.");
+//     header("Location: group_info.php?groupId=$groupId");
+//     exit;
+// }
+
 
 try {
+    // Rate limit check
+    $actionsController->onUserAction($studentId, $actionType);
     $groupMembershipController->onJoinGroupRequest($groupId, $studentId);
     SessionManager::setSuccess("Join request sent successfully.");
 
     // Increment Redis counter
-    $redis->incr($rateKey);
-    if ($redis->ttl($rateKey) <= 0) {
-        $redis->expire($rateKey, $windowSeconds);
-    }
+    // $redis->incr($rateKey);
+    // if ($redis->ttl($rateKey) <= 0) {
+    //     $redis->expire($rateKey, $windowSeconds);
+    // }
 
 } catch (Exception $e) {
     SessionManager::setError("Error sending join request: " . $e->getMessage());
