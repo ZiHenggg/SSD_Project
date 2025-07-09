@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ]);
 
 $groupMembershipController = $pageControllers['groupMembershipController'];
-$actionsController = $pageControllers['actionsController'];
+$actionController = $pageControllers['actionController'];
 $actionType = 'join_request'; 
 
 $groupId = $_POST['groupId'] ?? null;
@@ -50,7 +50,7 @@ if (!$groupId || !$studentId) {
 
 try {
     // Rate limit check
-    $actionsController->onUserAction($studentId, $actionType);
+    $actionController->onUserAction($studentId, $actionType);
     $groupMembershipController->onJoinGroupRequest($groupId, $studentId);
     SessionManager::setSuccess("Join request sent successfully.");
 

@@ -5,7 +5,8 @@ require_once __DIR__ . '/../src/CsrfManager.php';
 // Set default timezone to Singapore
 date_default_timezone_set('Asia/Singapore');
 
-use App\Mapper\UserActionsMapper;
+use App\Mapper\ActionMapper;
+use App\Mapper\UserActionMapper;
 use App\Mapper\GroupMapper;
 use App\Mapper\GroupJoinRequestsMapper;
 use App\Mapper\GroupMembershipMapper;
@@ -16,7 +17,7 @@ use App\Mapper\ModuleMapper;
 use App\Mapper\LabGroupMapper;
 use App\Mapper\StudentStatsMapper;
 
-use App\Control\ActionsControl;
+use App\Control\ActionControl;
 use App\Control\GroupControl;
 use App\Control\GroupJoinRequestsControl;
 use App\Control\GroupMembershipControl;
@@ -24,7 +25,7 @@ use App\Control\StudentControl;
 use App\Control\ReviewControl;
 use App\Control\ReplyControl;
 
-use App\Boundary\ActionsController;
+use App\Boundary\ActionController;
 use App\Boundary\GroupPageController;
 use App\Boundary\GroupMembershipController;
 use App\Boundary\StudentPageController;
@@ -63,7 +64,8 @@ $dotenv->load();
 require_once __DIR__ . '/db.php';
 
 // Instantiate mappers and controls
-$userActionsRepo = new UserActionsMapper($pdo);
+$actionRepo = new ActionMapper($pdo);
+$userActionRepo = new UserActionMapper($pdo);
 $groupRepo = new GroupMapper($pdo);
 $groupMembershipRepo = new GroupMembershipMapper($pdo);
 $groupJoinRequestsRepo = new GroupJoinRequestsMapper($pdo);
@@ -74,14 +76,14 @@ $moduleRepo = new ModuleMapper($pdo);
 $labGroupRepo = new LabGroupMapper($pdo);
 $studentStatsRepo = new StudentStatsMapper($pdo);
 
-$actionsControl = new ActionsControl($userActionsRepo);
+$actionControl = new ActionControl($userActionRepo, $actionRepo);
 $groupControl = new GroupControl($groupRepo, $groupMembershipRepo, $moduleRepo, $labGroupRepo);
 $groupMembershipControl = new GroupMembershipControl($groupMembershipRepo, $groupRepo, $groupJoinRequestsRepo);
 $studentControl = new StudentControl($studentRepo);
 $reviewControl = new ReviewControl($reviewRepo, $studentStatsRepo);
 $replyControl = new ReplyControl($replyRepo, $reviewRepo, $studentRepo);
 
-$actionsController = new ActionsController($actionsControl, $studentControl);
+$actionController = new ActionController($actionControl, $studentControl);
 $groupPageController = new GroupPageController($groupControl, $groupMembershipControl);
 $groupMembershipController = new GroupMembershipController($groupMembershipControl, $groupControl);
 $studentPageController = new StudentPageController($studentControl, $reviewControl);
@@ -95,6 +97,6 @@ return [
     'studentPageController' => $studentPageController,
     'reviewPageController' => $reviewPageController,
     'replyPageController' => $replyPageController,
-    'actionsController' => $actionsController,
+    'actionController' => $actionController,
 ];
 ?>

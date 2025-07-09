@@ -127,13 +127,22 @@ CREATE TABLE reply (
   FOREIGN KEY (responderId) REFERENCES students(studentId)
 );
 
-CREATE TABLE userActions (
+CREATE TABLE actions (
     actionId INT AUTO_INCREMENT PRIMARY KEY,
-    studentId INT NOT NULL,
     actionType VARCHAR(50) NOT NULL,
-    actionTimestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (studentId) REFERENCES students(studentId)
+    maxActionCount INT NOT NULL DEFAULT 5,
+    windowSeconds INT NOT NULL DEFAULT 600
 );
+
+CREATE TABLE userActions (
+    userActionId INT AUTO_INCREMENT PRIMARY KEY,
+    studentId INT NOT NULL,
+    actionId INT NOT NULL,
+    actionTimestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (studentId) REFERENCES students(studentId),
+    FOREIGN KEY (actionId) REFERENCES `action`(actionId)
+);
+
 
 -- Now insert sample data
 INSERT INTO modules (moduleCode, moduleName) VALUES 
@@ -183,6 +192,12 @@ INSERT INTO reviews (reviewerId, revieweeId, groupMembersId, reviewRating, descr
 INSERT INTO reply (reviewId, responderId, justification) VALUES
 (1, 1000002, 'Thank you! I really appreciated the project.'),
 (4, 1000001, 'Thanks!');
+
+INSERT INTO actions (actionType, maxActionCount, windowSeconds) VALUES 
+('join_request', 5, 30), 
+('create_group', 3, 60),
+('register', 10, 600),
+('login', 10, 600);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
