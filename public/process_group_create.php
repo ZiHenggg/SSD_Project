@@ -1,10 +1,9 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
-require_once __DIR__ . '/../vendor/autoload.php'; // Redis
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/CsrfManager.php';
 
-// use Predis\Client as RedisClient;
 use App\SessionManager;
 
 // CSRF check before doing anything else
@@ -16,24 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// // Redis setup
-// $redis = new RedisClient([
-//     'scheme' => 'tcp',
-//     'host' => 'redis',
-//     'port' => 6379,
-// ]);
-
 $studentId = SessionManager::getUser()['id'] ?? 0;
-// $key = "create_group:student:$studentId";
-// $maxAttempts = 3;
-// $duration = 600; // 10 minutes
-
-// // Check rate limit
-// if ((int)$redis->get($key) >= $maxAttempts) {
-//     SessionManager::setError("Too many group creation attempts. Please wait before trying again.");
-//     header("Location: group_create.php");
-//     exit;
-// }
 
 $groupPageController = $pageControllers['groupPageController'];
 $actionController = $pageControllers['actionController'];
@@ -43,12 +25,6 @@ try {
     // Rate limit check
     $actionController->onUserAction($studentId, $actionType);
     $groupPageController->onCreateGroup($_POST, $studentId);
-
-    // // Success: record the attempt
-    // $redis->incr($key);
-    // if ($redis->ttl($key) <= 0) {
-    //     $redis->expire($key, $duration); // Only set expiration if it's new
-    // }
 
     header("Location: dashboard.php");
     exit;

@@ -71,5 +71,9 @@ class ActionControl
         $this->actionRepo->pruneOldActions();
     }
 
+    public function resetIncorrectOtpCount(mixed $identifier, string $userIdentifierType): void
+    {
+        $this->actionRepo->resetIncorrectOtpCount($identifier, $userIdentifierType);
+    }
 }
 ?>

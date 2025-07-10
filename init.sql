@@ -205,9 +205,10 @@ INSERT INTO actions (actionType, maxActionCount, windowSeconds) VALUES
 ('join_request', 5, 300), 
 ('create_group', 3, 600),
 ('forgot_password', 10, 600),
+('search', 10, 60),
 ('resend_otp', 5, 600),
-('incorrect_otp', 5, 600),
-('register', 10, 600),
+('incorrect_otp', 5, 300),
+('register', 5, 600),
 ('login', 5, 900);
 
 SET FOREIGN_KEY_CHECKS = 1;

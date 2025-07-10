@@ -1,27 +1,17 @@
 <?php
 $pageControllers = require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/auth_check.php';
-require_once __DIR__ . '/../vendor/autoload.php'; // Redis
+require_once __DIR__ . '/../vendor/autoload.php';
 
-use Predis\Client as RedisClient;
 use App\SessionManager;
 
-// Redis rate limit
-$redis = new RedisClient([
-    'scheme' => 'tcp',
-    'host' => 'redis',
-    'port' => 6379,
-]);
-
 $studentId = SessionManager::get('user')['id'] ?? $_SERVER['REMOTE_ADDR'];
-$rateKey = "search:rate:$studentId";
-$maxSearches = 10;
-$timeWindow = 60; // 60 seconds
+$actionController = $pageControllers['actionController'];
 
-// Count and enforce
-if ((int)$redis->get($rateKey) >= $maxSearches) {
+if (!$actionController->onUserAction($studentId, 'search')) {
     $title = "Groups";
-    ob_start(); ?>
+ob_start();
+?>
     <div class="container">
         <div class="alert alert-warning mt-5" role="alert">
             You’ve reached the search limit. Please wait a minute and try again.
@@ -32,15 +22,12 @@ if ((int)$redis->get($rateKey) >= $maxSearches) {
     include '_layout.php';
     exit;
 }
-$redis->incr($rateKey);
-if ($redis->ttl($rateKey) <= 0) {
-    $redis->expire($rateKey, $timeWindow);
-}
 
 $groupController = $pageControllers['groupPageController'];
 $groupMembershipController = $pageControllers['groupMembershipController'];
 
 $query = $_GET['query'] ?? '';
+
 $groups = $query
     ? $groupController->onSearchGroupsByModuleName($query)
     : $groupController->listAllActiveGroups();

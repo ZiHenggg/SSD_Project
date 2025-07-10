@@ -49,5 +49,20 @@ class ActionMapper implements ActionRepository {
         $stmt = $this->dbConnection->prepare("DELETE FROM ipActions WHERE actionTimestamp < NOW() - INTERVAL 1 DAY");
         $stmt->execute();
     }
+
+    public function resetIncorrectOtpCount(mixed $identifier, string $userIdentifierType): void {
+        $actionId = $this->getActionIdByType('incorrect_otp');
+        if ($userIdentifierType === 'ip') {
+            $stmt = $this->dbConnection->prepare("DELETE FROM ipActions WHERE ipAddress = :ipAddress AND actionId = :actionId");
+            $stmt->bindParam(':ipAddress', $identifier);
+            $stmt->bindParam(':actionId', $actionId);
+            $stmt->execute();
+        } elseif ($userIdentifierType === 'user') {
+            $stmt = $this->dbConnection->prepare("DELETE FROM userActions WHERE studentId = :studentId AND actionId = :actionId");
+            $stmt->bindParam(':studentId', $identifier);
+            $stmt->bindParam(':actionId', $actionId);
+            $stmt->execute();
+        }
+    }
 } 
 ?>

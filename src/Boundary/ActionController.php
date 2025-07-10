@@ -78,5 +78,15 @@ class ActionController
             throw new Exception("Failed to prune old actions: " . $e->getMessage());
         }
     }
+
+    public function resetIncorrectOtpCount(mixed $identifier, string $userIdentifierType): void
+    {
+        try {
+            $this->actionControl->resetIncorrectOtpCount($identifier, $userIdentifierType);
+        } catch (Exception $e) {
+            // Handle exception
+            throw new Exception("Failed to reset incorrect OTP count: " . $e->getMessage());
+        }
+    }
 }
 ?>

@@ -11,13 +11,11 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-      - redis                          # Ensure Redis starts before PHP app
     environment:
       DB_HOST: ${DB_HOST}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
-      REDIS_HOST: redis
 
   db:
     image: mysql:8.0
@@ -34,13 +32,6 @@ services:
       - ./mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
-
-  redis:                              # Redis Service for rate-limiting
-    image: redis:alpine
-    container_name: redis
-    restart: always
-    expose:
-      - "6379"
 
   adminer:                            # Optional DB GUI
     image: adminer
