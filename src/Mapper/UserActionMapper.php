@@ -25,7 +25,6 @@ class UserActionMapper implements UserActionRepository {
         $stmt->execute();
     }
 
-    // update interval later
     public function getActionCountByStudentId(int $studentId, int $actionId, int $windowSeconds): int {
         $stmt = $this->dbConnection->prepare("
         SELECT COUNT(*) AS requestCount

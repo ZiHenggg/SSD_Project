@@ -2,7 +2,7 @@ name: Full CI Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, main-rework]
   pull_request:
     branches: [main]
 

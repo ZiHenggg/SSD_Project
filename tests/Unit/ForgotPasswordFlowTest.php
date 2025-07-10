@@ -16,13 +16,13 @@
  * OTP verification
  * - Accepts correct code within time
  * - Fails on wrong or expired code
- * - Simulates Redis-based lockout
+ * - Simulates rate limit lockout
  *
  * Password reset
  * - Updates password and disables 2FA
  * - Fails if session has expired
  *
- * All Redis-related checks are simulated using counters
+ * All rate limit checks are simulated using counters
  * to match the rate-limit behavior from route logic.
  */
 
