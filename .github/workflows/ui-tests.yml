@@ -2,7 +2,7 @@ name: Run Playwright UI Tests
 
 on:
   workflow_call:
-    
+
 jobs:
   playwright:
     runs-on: ubuntu-latest
@@ -23,11 +23,6 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
-      redis:
-        image: redis:alpine
-        ports:
-          - 6379:6379
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -43,7 +38,6 @@ jobs:
           echo "DB_NAME=ssddb" >> .env
           echo "DB_USER=ssduser" >> .env
           echo "DB_PASS=ssdpass" >> .env
-          echo "REDIS_HOST=127.0.0.1" >> .env
 
       - name: Install PHP dependencies (Composer)
         run: composer install --no-interaction --prefer-dist
@@ -117,7 +111,7 @@ jobs:
 
           echo "### 🧪 Technical Details & Environment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- 🐘 MySQL and Redis services started using GitHub Actions containers" >> $GITHUB_STEP_SUMMARY
+          echo "- 🐘 MySQL service started using GitHub Actions containers" >> $GITHUB_STEP_SUMMARY
           echo "- 📦 init.sql is used to pre-seed known test users with hardcoded credentials + secrets" >> $GITHUB_STEP_SUMMARY
           echo "- ⚙️ .env file dynamically generated during workflow" >> $GITHUB_STEP_SUMMARY
           echo "- 🌐 Application served locally using PHP's built-in server (http://localhost:8080)" >> $GITHUB_STEP_SUMMARY
