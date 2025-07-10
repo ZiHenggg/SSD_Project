@@ -25,7 +25,6 @@ class IpActionMapper implements IpActionRepository {
         $stmt->execute();
     }
 
-    // update interval later
     public function getActionCountByIpAddress(string $ipAddress, int $actionId, int $windowSeconds): int {
         $stmt = $this->dbConnection->prepare("
         SELECT COUNT(*) AS requestCount
