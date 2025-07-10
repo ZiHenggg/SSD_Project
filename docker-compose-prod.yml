@@ -33,13 +33,6 @@ services:
     depends_on:
       - web
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    restart: unless-stopped
-    expose:
-      - "6379"
-
   certbot:
     image: certbot/certbot
     container_name: certbot

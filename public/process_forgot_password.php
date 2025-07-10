@@ -5,25 +5,16 @@ require_once __DIR__ . '/../src/CsrfManager.php';
 
 use App\Mapper\StudentMapper;
 use App\SessionManager;
-use Predis\Client as RedisClient;
 
 SessionManager::start();
 
 $repo = new StudentMapper($pdo);
 $control = $pageControllers['studentControl'];
 $pageController = $pageControllers['studentPageController'];
-
-$redis = new RedisClient([
-    'scheme' => 'tcp',
-    'host' => 'redis',
-    'port' => 6379,
-]);
+$actionController = $pageControllers['actionController'];
 
 $email = SessionManager::getForgotPasswordEmail() ?? ($_POST['email'] ?? null);
 $emailKey = $email ? strtolower(trim($email)) : '';
-$ipKey = "forgot:ip:$emailKey";
-$otpKey = "forgot:otp_attempts:$emailKey";
-$resendKey = "forgot:resend:$emailKey";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     SessionManager::resetForgotFlow();
@@ -45,9 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = trim($_POST['email']);
         $emailKey = strtolower($email);
 
-        $ipAttempts = (int) $redis->get($ipKey);
-        if ($ipAttempts >= 10) {
-            logEvent('warn', 'Forgot password blocked: too many IP attempts');
+        if (!$actionController->onIpAction($ip, 'forgot_password')) {
             SessionManager::setForgotMessage("Too many attempts from your IP. Please wait 10 minutes.");
             SessionManager::setForgotStep('form');
             header("Location: forgot_password.php");
@@ -58,10 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logEvent('warn', 'Invalid email format');
             SessionManager::setForgotMessage("Invalid email format.");
             SessionManager::setForgotStep('form');
-            $redis->incr($ipKey);
-            if ($redis->ttl($ipKey) <= 0) {
-                $redis->expire($ipKey, 600);
-            }
             header("Location: forgot_password.php");
             exit;
         }
@@ -70,15 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logEvent('warn', 'Forgot password email not found', ['email' => $email]);
             SessionManager::setForgotMessage("No account found with this email.");
             SessionManager::setForgotStep('form');
-            $redis->incr($ipKey);
-            if ($redis->ttl($ipKey) <= 0) {
-                $redis->expire($ipKey, 120);
-            }
             header("Location: forgot_password.php");
             exit;
         }
 
         try {
+            $actionController->onIpAction($ip, 'resend_otp');
             $control->sendForgotPasswordOtp($email);
             logEvent('info', 'Forgot password OTP sent', ['email' => $email]);
             SessionManager::setForgotStep('otp');
@@ -90,13 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SessionManager::setForgotMessage("Failed to send OTP: " . $e->getMessage());
             SessionManager::setForgotStep('form');
         }
-
-        $redis->incr($ipKey);
-        if ($redis->ttl($ipKey) <= 0) {
-            $redis->expire($ipKey, 120);
-        }
-
-        logEvent('info', 'Forgot password email submitted', ['email' => $email]);
         header("Location: forgot_password.php");
         exit;
     }
@@ -110,9 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        if ((int) $redis->get($resendKey) >= 3) {
-            logEvent('warn', 'OTP resend blocked - limit reached', ['email' => $emailKey]);
-            SessionManager::setForgotMessage("You’ve reached the resend limit. Try again in 15 minutes.");
+        if (!$actionController->onIpAction($ip, 'resend_otp')) {
+            SessionManager::setForgotMessage("You’ve reached the resend limit. Try again in 10 minutes.");
             SessionManager::setForgotStep('otp');
             header("Location: forgot_password.php");
             exit;
@@ -120,11 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $control->sendForgotPasswordOtp($emailKey);
-            $redis->del($otpKey);
-            $redis->incr($resendKey);
-            if ($redis->ttl($resendKey) <= 0) {
-                $redis->expire($resendKey, 900);
-            }
+            $actionController->resetIncorrectOtpCount($ip, 'ip');
 
             logEvent('info', 'OTP resent successfully', ['email' => $emailKey]);
 
@@ -163,28 +133,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($otpData['code'] !== $otpInput) {
-            if ((int) $redis->get($otpKey) >= 5) {
-                logEvent('warn', 'OTP blocked after too many failures', ['email' => $email]);
-                SessionManager::setForgotMessage("Too many incorrect OTPs. Try again in 5 minutes.");
+            if (!$actionController->onIpAction($ip, 'incorrect_otp')) {
+                SessionManager::setForgotMessage("Too many incorrect OTPs. Try again in 10 minutes.");
                 SessionManager::setForgotStep('otp');
                 header("Location: forgot_password.php");
                 exit;
             }
 
-            $redis->incr($otpKey);
-            if ($redis->ttl($otpKey) <= 0) {
-                $redis->expire($otpKey, 300);
-            }
-
-            logEvent('warn', 'OTP invalid', ['email' => $email]);
             SessionManager::setForgotMessage("Invalid OTP.");
             SessionManager::setForgotStep('otp');
             header("Location: forgot_password.php");
             exit;
         }
 
-        logEvent('info', 'OTP verified', ['email' => $email]);
-        $redis->del($otpKey);
         SessionManager::setForgotStep('reset');
         SessionManager::setForgotMessage("OTP verified. Please enter your new password.");
         header("Location: forgot_password.php");
@@ -215,10 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
         $repo->updatePassword($email, $hashed);
         $repo->disable2FA($email); // Require re-setup of 2FA on next login
-
-        $redis->del($resendKey);
-
-        logEvent('info', 'Password reset successfully', ['email' => $email]);
 
         SessionManager::resetForgotFlow();
         SessionManager::setForgotStep('done');

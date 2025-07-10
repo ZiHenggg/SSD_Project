@@ -1,0 +1,92 @@
+<?php
+namespace App\Boundary;
+
+use App\Entity\Action;
+use App\Entity\UserAction;
+use App\Entity\IpAction;
+use App\Control\ActionControl;
+use App\Control\StudentControl;
+use Exception;
+
+class ActionController
+{
+    private ActionControl $actionControl;
+    private StudentControl $studentControl;
+
+    public function __construct(ActionControl $actionControl, StudentControl $studentControl)
+    {
+        $this->actionControl = $actionControl;
+        $this->studentControl = $studentControl;
+    }
+
+    public function onUserAction(int $studentId, string $actionType): void
+    {
+        try {
+            $actionId = $this->actionControl->getActionIdByType($actionType);
+            
+            if ($actionId === null) {
+                throw new Exception("Invalid action type.");
+            }
+
+            if ($this->studentControl->getStudentById($studentId) === null) {
+                throw new Exception("Invalid student ID.");
+            }
+
+            // Check rate limiting
+            $maxActionCount = $this->actionControl->getAction($actionId)->getMaxActionCount();
+
+            if ($this->actionControl->getActionCountByStudentId($studentId, $actionId) >= $maxActionCount) {
+                throw new Exception("Rate limit exceeded. Please try again later.");
+            }
+
+            $this->actionControl->recordUserAction($studentId, $actionId);
+        } catch (Exception $e) {
+            // Handle exception
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function onIpAction(string $ipAddress, string $actionType): bool
+    {
+        try {
+            $actionId = $this->actionControl->getActionIdByType($actionType);
+            
+            if ($actionId === null) {
+                throw new Exception("Invalid action type.");
+            }
+
+            // Check rate limiting
+            $maxActionCount = $this->actionControl->getAction($actionId)->getMaxActionCount();
+
+            if ($this->actionControl->getActionCountByIpAddress($ipAddress, $actionId) >= $maxActionCount) {
+                throw new Exception("Rate limit exceeded. Please try again later.");
+            }
+
+            $this->actionControl->recordIpAction($ipAddress, $actionId);
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
+    }
+
+    public function pruneOldActions(): void
+    {
+        try {
+            $this->actionControl->pruneOldActions();
+        } catch (Exception $e) {
+            // Handle exception
+            throw new Exception("Failed to prune old actions: " . $e->getMessage());
+        }
+    }
+
+    public function resetIncorrectOtpCount(mixed $identifier, string $userIdentifierType): void
+    {
+        try {
+            $this->actionControl->resetIncorrectOtpCount($identifier, $userIdentifierType);
+        } catch (Exception $e) {
+            // Handle exception
+            throw new Exception("Failed to reset incorrect OTP count: " . $e->getMessage());
+        }
+    }
+}
+?>
