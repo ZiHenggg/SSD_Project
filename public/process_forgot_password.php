@@ -13,6 +13,7 @@ $control = $pageControllers['studentControl'];
 $pageController = $pageControllers['studentPageController'];
 $actionController = $pageControllers['actionController'];
 
+$ip = $_SERVER['REMOTE_ADDR'];
 $email = SessionManager::getForgotPasswordEmail() ?? ($_POST['email'] ?? null);
 $emailKey = $email ? strtolower(trim($email)) : '';
 
