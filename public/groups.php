@@ -8,7 +8,10 @@ use App\SessionManager;
 $studentId = SessionManager::get('user')['id'] ?? $_SERVER['REMOTE_ADDR'];
 $actionController = $pageControllers['actionController'];
 
-if (!$actionController->onUserAction($studentId, 'search')) {
+try {
+    $actionController->onUserAction($studentId, 'search');
+
+} catch (Exception $e) {
     $title = "Groups";
 ob_start();
 ?>
