@@ -20,11 +20,6 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,7 +28,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_mysql, redis
+          extensions: pdo_mysql
           coverage: none
 
       - name: Install dependencies
@@ -65,7 +60,7 @@ jobs:
           echo "**🚫 Rate Limiting Protection**" >> $GITHUB_STEP_SUMMARY
           echo "- Blocks excessive registration, OTP verification, and resend attempts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✔️ All registration-related tests passed using GitHub Actions CI with MySQL & Redis" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ All registration-related tests passed using GitHub Actions CI with MySQL" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### ✅ Login Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
@@ -102,27 +97,23 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### ✅ Forgot Password Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "This section covers the complete password recovery process with OTP and Redis limits:" >> $GITHUB_STEP_SUMMARY
+          echo "This section covers the complete password recovery process with OTP:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**📧 Email Submission**" >> $GITHUB_STEP_SUMMARY
           echo "- Validates email format and account existence" >> $GITHUB_STEP_SUMMARY
           echo "- Sends 6-digit OTP and sets session state" >> $GITHUB_STEP_SUMMARY
-          echo "- Blocks excessive attempts by IP address" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🔁 OTP Resend Logic**" >> $GITHUB_STEP_SUMMARY
-          echo "- Resends OTP if under 3-attempt limit" >> $GITHUB_STEP_SUMMARY
-          echo "- Blocks excessive resend attempts per email" >> $GITHUB_STEP_SUMMARY
+          echo "- Resends OTP if under attempt limit" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🔐 OTP Verification**" >> $GITHUB_STEP_SUMMARY
           echo "- Accepts correct OTP and transitions to password reset" >> $GITHUB_STEP_SUMMARY
-          echo "- Blocks incorrect OTP after 5 tries with Redis TTL" >> $GITHUB_STEP_SUMMARY
+          echo "- Blocks incorrect OTP after 5 tries" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🔒 Password Reset**" >> $GITHUB_STEP_SUMMARY
-          echo "- Updates password in database securely" >> $GITHUB_STEP_SUMMARY
-          echo "- Disables 2FA to require re-setup after reset" >> $GITHUB_STEP_SUMMARY
-          echo "- Clears OTP + resend rate limits post-reset" >> $GITHUB_STEP_SUMMARY
+          echo "- Updates password securely and disables 2FA" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✔️ Forgot password flow tested with session and Redis logic simulation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Forgot password flow tested with session logic" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### ✅ Group Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
@@ -133,14 +124,13 @@ jobs:
           echo "- Validates required fields (acad year, trimester, module, size)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**❌ Rate Limiting**" >> $GITHUB_STEP_SUMMARY
-          echo "- Simulates Redis-based limit on group creation" >> $GITHUB_STEP_SUMMARY
           echo "- Blocks creation after threshold is hit" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🗑️ Group Deletion**" >> $GITHUB_STEP_SUMMARY
           echo "- Soft-deletes group and sets session success message" >> $GITHUB_STEP_SUMMARY
           echo "- Handles invalid delete inputs gracefully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✔️ Group create/delete + rate-limit tests passed using mock repositories" >> $GITHUB_STEP_SUMMARY
+          echo "- ✔️ Group create/delete tests passed using mock repositories" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### ✅ Group Join Request Flow Unit Test Summary" >> $GITHUB_STEP_SUMMARY
@@ -149,7 +139,6 @@ jobs:
           echo "**📨 Send Join Request**" >> $GITHUB_STEP_SUMMARY
           echo "- Submits valid join request from student to group" >> $GITHUB_STEP_SUMMARY
           echo "- Blocks duplicate or accepted requests" >> $GITHUB_STEP_SUMMARY
-          echo "- Simulates Redis-based rate limit for requests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**✅ Accept Join Request**" >> $GITHUB_STEP_SUMMARY
           echo "- Approver accepts join request" >> $GITHUB_STEP_SUMMARY
