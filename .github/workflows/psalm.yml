@@ -17,13 +17,16 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'  # adjust as needed
-          extensions: zip     # ensures zip extension is available in CI
+          php-version: '8.2'
+          extensions: zip
 
       - name: Install Composer dependencies
         run: |
           composer install
           composer require --dev vimeo/psalm
+
+      - name: Initialize Psalm
+        run: vendor/bin/psalm --init
 
       - name: Run Psalm
         run: vendor/bin/psalm --output-format=github
