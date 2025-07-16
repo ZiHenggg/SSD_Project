@@ -1,0 +1,29 @@
+name: "Psalm Static Analysis"
+
+on:
+  push:
+    branches: [ production ]
+  pull_request:
+    branches: [ production ]
+
+jobs:
+  psalm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'  # adjust as needed
+          extensions: zip     # ensures zip extension is available in CI
+
+      - name: Install Composer dependencies
+        run: |
+          composer install
+          composer require --dev vimeo/psalm
+
+      - name: Run Psalm
+        run: vendor/bin/psalm --output-format=github
