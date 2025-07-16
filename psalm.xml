@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<psalm
+    totallyTyped="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://getpsalm.org/schema/config.xsd"
+>
+    <projectFiles>
+        <directory name="src" />
+    </projectFiles>
+
+    <issueHandlers>
+        <PossiblyUnusedMethod errorLevel="info" />
+        <UnusedMethod errorLevel="info" />
+        <UnusedVariable errorLevel="info" />
+        <UnusedClass errorLevel="info" />
+        <MissingOverrideAttribute errorLevel="info" />
+    </issueHandlers>
+</psalm>
